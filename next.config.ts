@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+ images: {
+    domains: ["solislaw.com.au"], // <-- thêm dòng này
+  },
 };
 
 export default nextConfig;
