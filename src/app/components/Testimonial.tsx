@@ -1,15 +1,16 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
-import Image from 'next/image'
-import { Star } from 'lucide-react'
-import Autoplay from 'embla-carousel-autoplay'
+import { useCallback, useEffect, useState } from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import Image from 'next/image';
+import { Star } from 'lucide-react';
+import Autoplay from 'embla-carousel-autoplay';
+import { motion, Variants } from 'framer-motion';
 
 const testimonials = [
   {
     name: 'Kourtney Holland',
-    role: 'Real Estate Service',
+    role: 'Real Estate Client',
     avatar: '/images/testinomial/user.jpg',
     content:
       'The entire team, from attorneys to paralegals, was courteous and efficient. Their level of commitment and expertise exceeded my expectations.',
@@ -31,36 +32,75 @@ const testimonials = [
       'Their attention to detail and deep understanding of immigration law made a huge difference in my case. I couldn’t have asked for better support.',
     rating: 5,
   },
-]
+];
 
 export default function Testimonial() {
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()])
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay()]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const scrollTo = useCallback(
     (index: number) => {
-      if (emblaApi) emblaApi.scrollTo(index)
+      if (emblaApi) emblaApi.scrollTo(index);
     },
     [emblaApi]
-  )
+  );
 
   useEffect(() => {
-  if (!emblaApi) return
+    if (!emblaApi) return;
 
-  const onSelect = () => {
-    setSelectedIndex(emblaApi.selectedScrollSnap())
-  }
+    const onSelect = () => {
+      setSelectedIndex(emblaApi.selectedScrollSnap());
+    };
 
-  // Gọi lần đầu để cập nhật chỉ số
-  onSelect()
+    onSelect();
+    emblaApi.on('select', onSelect);
 
-  // Lắng nghe khi slide thay đổi
-  emblaApi.on('select', onSelect)
+    return () => {
+      emblaApi.off('select', onSelect);
+    };
+  }, [emblaApi]);
 
-  return () => {
-    emblaApi.off('select', onSelect)
-  }
-}, [emblaApi])
+  // Animation variants for heading
+  const headingVariants: Variants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.4, ease: 'easeOut' },
+    },
+  };
+
+  // Animation variants for slides
+  const slideVariants: Variants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: 'easeOut',
+        delay: i * 0.2,
+      },
+    }),
+    exit: {
+      opacity: 0,
+      y: 30,
+      transition: {
+        duration: 0.2,
+        ease: 'easeIn',
+      },
+    },
+  };
+
+  // Animation variants for dots
+  const dotVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.4, ease: 'easeOut', delay: 0.6 },
+    },
+  };
 
   return (
     <section
@@ -75,21 +115,40 @@ export default function Testimonial() {
     >
       <div className="container mx-auto px-4">
         <div className="heading-1 flex items-center justify-center flex-col gap-4 mb-10">
-          <h4 className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] bg-clip-text text-transparent tracking-widest uppercase text-lg font-semibold">
+          <motion.h4
+            className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] bg-clip-text text-transparent tracking-widest uppercase text-lg font-semibold"
+            variants={headingVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+          >
             Our Testimonials
-          </h4>
-          <h2 className="font_play text-4xl text-center">
-            What They Are Talking About Igual
-          </h2>
+          </motion.h4>
+          <motion.h2
+            className="font_play text-4xl text-center"
+            variants={headingVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ delay: 0.2 }}
+          >
+            What They Are Saying About Us
+          </motion.h2>
         </div>
 
         {/* Embla carousel */}
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-6">
             {testimonials.map((item, index) => (
-              <div
-                key={index}
+              <motion.div
+                key={item.name}
                 className="flex-[0_0_100%] md:flex-[0_0_100%] lg:flex-[0_0_100%] px-4"
+                variants={slideVariants}
+                initial="hidden"
+                whileInView="visible"
+                exit="exit"
+                viewport={{ once: false, amount: 0.3 }}
+                custom={index}
               >
                 <div className="flex flex-col lg:flex-row items-center gap-6 max-w-4xl mx-auto">
                   {/* Avatar + Stars */}
@@ -97,7 +156,7 @@ export default function Testimonial() {
                     <div className="relative w-36 h-36 rounded-full border border-dotted border-[#d5aa6d] p-1">
                       <Image
                         src={item.avatar}
-                        alt={item.name}
+                        alt={`${item.name}'s avatar`}
                         fill
                         className="rounded-full object-cover"
                       />
@@ -126,13 +185,19 @@ export default function Testimonial() {
                     <p className="text-gray-500 text-sm">{item.role}</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
         {/* Dots */}
-        <div className="flex justify-center gap-2 mt-6">
+        <motion.div
+          className="flex justify-center gap-2 mt-6"
+          variants={dotVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {testimonials.map((_, index) => (
             <button
               key={index}
@@ -142,8 +207,8 @@ export default function Testimonial() {
               }`}
             />
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
-  )
+  );
 }

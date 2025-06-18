@@ -4,15 +4,17 @@ import Services from './Services'
 import About from './About'
 import Team from './Team'
 import Testimonial from './Testimonial'
+import CaseStudy from './CaseStudy'
 
 export default function Home() {
     return (
       <>
       <Banner></Banner>
-      <Services></Services>
       <About></About>
-      <Team></Team>
+      <Services></Services>
       <Testimonial></Testimonial>
+      <Team></Team>
+      <CaseStudy></CaseStudy>
       </>
     )
 }

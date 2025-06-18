@@ -254,4 +254,15 @@
     font-family: 'PlayfairDisplay';
   }
 
+  .custom-title::before {
+    content: "";
+    background: linear-gradient(to right, #b8967e, #b8978000);
+    border-radius: 80px;
+    width: 150px;
+    height: 4px;
+    position: absolute;
+    bottom: -10px;
+    transform: translateY(-50%);
+}
+
 }
