@@ -1,17 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-
+import { Skeleton } from "@/components/ui/skeleton"
 import { AlignRight, ChevronDown, Globe, Mail, MapPinHouse, Search, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { IMenu } from '@/lib/types/imenu';
+import { useLanguage } from "../context/LanguageContext";
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [menus, setMenus] = useState<IMenu[]>([]);
+  const [loadingMenus, setLoadingMenus] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [language, setLanguage] = useState<'EN' | 'VN'>('EN');
+  const { language, setLanguage } = useLanguage();
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
 
   // Scroll detection
@@ -23,25 +28,34 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const menuItems = [
-    { name: language === 'EN' ? 'Home' : 'Trang Chủ', href: '/' },
-    { name: language === 'EN' ? 'About' : 'Giới Thiệu', href: '/about' },
-    {
-      name: language === 'EN' ? 'Services' : 'Dịch Vụ',
-      href: '/services',
-      children: [
-        { name: language === 'EN' ? 'Corporate Law' : 'Luật Doanh Nghiệp', href: '/services/corporate' },
-        { name: language === 'EN' ? 'Family Law' : 'Luật Gia Đình', href: '/services/family' },
-        { name: language === 'EN' ? 'Criminal Law' : 'Luật Hình Sự', href: '/services/criminal' },
-      ],
-    },
-    { name: language === 'EN' ? 'Contact' : 'Liên Hệ', href: '/contact' },
-  ];
+  useEffect(() => {
+  const fetchMenus = async () => {
+    try {
+      const res = await fetch('/api/menus?parentId=null'); // gọi API
+      const json = await res.json(); // parse JSON
+      
+      if(json.success) {
+        setMenus(json.data); // cập nhật state      
+        console.log(json.data);
+        
+      }
 
+    } catch (err) {
+      console.error('Fetch menu failed:', err);
+    } finally {
+      setLoadingMenus(false);
+    }
+  };
+  fetchMenus();
+}, []);
+
+ 
   const languages = [
     { code: 'EN', label: 'English' },
     { code: 'VN', label: 'Tiếng Việt' },
   ];
+
+  
 
   const dropdownVariants: Variants = {
     hidden: { opacity: 0, y: -10 },
@@ -112,60 +126,70 @@ export default function Header() {
           {/* Desktop Menu */}
           <div className="hidden lg:flex items-center gap-6">
             <nav className="flex gap-6">
-              {menuItems.map((item) => (
-                <div
-                  key={item.name}
-                  className="relative"
-                  onMouseEnter={() => item.children && setActiveDropdown(item.name)}
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={item.href}
-                    className={`flex items-center gap-1 font-semibold transition-colors ${
-                      isScrolled ? 'text-gray-800 hover:text-[#d5aa6d]' : 'text-white hover:text-[#d5aa6d]'
-                    }`}
-                  >
-                    {item.name}
-                    {item.children && (
-                      <motion.div
-                        animate={{ rotate: activeDropdown === item.name ? 180 : 0 }}
-                        transition={{ duration: 0.3 }}
+              {loadingMenus ? (
+                <>
+                  <Skeleton className="h-4 w-24 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <Skeleton className="h-4 w-20 bg-gray-300 dark:bg-gray-700 rounded" />
+                  <Skeleton className="h-4 w-28 bg-gray-300 dark:bg-gray-700 rounded" />
+                </>
+              ) : (
+                  <>
+                    {menus.map((item:any) => (
+                      <div
+                        key={item.name.en}
+                        className="relative"
+                        onMouseEnter={() => item.children && setActiveDropdown(item.name.en)}
+                        onMouseLeave={() => setActiveDropdown(null)}
                       >
-                        <ChevronDown
-                          size={17}
-                          strokeWidth={2}
-                          className={isScrolled ? 'text-gray-800' : 'text-white'}
-                        />
-                      </motion.div>
-                    )}
-                  </Link>
-                  {item.children && (
-                    <AnimatePresence>
-                      {activeDropdown === item.name && (
-                        <motion.div
-                          variants={dropdownVariants}
-                          initial="hidden"
-                          animate="visible"
-                          exit="exit"
-                          className={`absolute top-full left-0 mt-2 w-48 rounded-lg border shadow-lg ${
-                            isScrolled ? 'bg-white border-gray-100' : 'bg-white/95 backdrop-blur-sm border-white/20'
-                          } z-50`}
+                        <Link
+                          href={item.link}
+                          className={`flex items-center gap-1 font-semibold transition-colors ${
+                            isScrolled ? 'text-gray-800 hover:text-[#d5aa6d]' : 'text-white hover:text-[#d5aa6d]'
+                          }`}
                         >
-                          {item.children.map((child) => (
-                            <Link
-                              key={child.name}
-                              href={child.href}
-                              className="block px-4 py-2 text-sm text-gray-800 hover:bg-[#d5aa6d] hover:text-white transition-colors"
+                          {language == 'EN' ? item.name.en : item.name.vi}
+                          {item.children?.length > 0 && (
+                            <motion.div
+                              animate={{ rotate: activeDropdown === item.name.en ? 180 : 0 }}
+                              transition={{ duration: 0.3 }}
                             >
-                              {child.name}
-                            </Link>
-                          ))}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  )}
-                </div>
-              ))}
+                              <ChevronDown
+                                size={17}
+                                strokeWidth={2}
+                                className={isScrolled ? 'text-gray-800' : 'text-white'}
+                              />
+                            </motion.div>
+                          )}
+                        </Link>
+                        {item.children?.length > 0 && (
+                          <AnimatePresence>
+                            {activeDropdown === item.name.en && (
+                              <motion.div
+                                variants={dropdownVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className={`absolute top-full left-0 mt-2 w-48 rounded-lg border shadow-lg ${
+                                  isScrolled ? 'bg-white border-gray-100' : 'bg-white/95 backdrop-blur-sm border-white/20'
+                                } z-50`}
+                              >
+                                {item.children.map((child:any) => (
+                                  <Link
+                                    key={child.name.en}
+                                    href={child.link}
+                                    className="block px-4 py-2 text-sm text-gray-800 hover:bg-[#d5aa6d] hover:text-white transition-colors"
+                                  >
+                                    {language == 'EN' ? child.name.en : child.name.vi}
+                                  </Link>
+                                ))}
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        )}
+                      </div>
+                    ))}
+                  </>
+              )}
             </nav>
 
             {/* Desktop Search Button */}
@@ -352,19 +376,19 @@ export default function Header() {
               <X size={32} strokeWidth={2} />
             </motion.button>
             <nav className="flex flex-col items-center gap-6 text-center">
-              {menuItems.map((item) => (
-                <div key={item.name} className="w-full">
+              {menus.map((item:any) => (
+                <div key={item.name.en} className="w-full">
                   <Link
-                    href={item.href}
+                    href={item.link}
                     className="block text-2xl font-semibold text-gray-800 hover:text-[#d5aa6d] transition-colors py-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    {item.name}
+                    {language == 'EN' ? item.name.en : item.name.vi}
                   </Link>
-                  {item.children && (
+                  {item.children.length > 0 && (
                     <motion.button
                       whileTap={{ scale: 0.9 }}
-                      onClick={() => setActiveDropdown(activeDropdown === item.name ? null : item.name)}
+                      onClick={() => setActiveDropdown(activeDropdown === item.name.en ? null : item.name.en)}
                       className="mt-2"
                     >
                       <ChevronDown
@@ -376,7 +400,7 @@ export default function Header() {
                       />
                     </motion.button>
                   )}
-                  {item.children && activeDropdown === item.name && (
+                  {item.children.length > 0 && activeDropdown === item.name.en && (
                     <motion.div
                       variants={dropdownVariants}
                       initial="hidden"
@@ -384,14 +408,14 @@ export default function Header() {
                       exit="exit"
                       className="mt-2"
                     >
-                      {item.children.map((child) => (
+                      {item.children.map((child:any) => (
                         <Link
-                          key={child.name}
-                          href={child.href}
+                          key={child.name.en}
+                          href={child.link}
                           className="block py-2 text-lg text-gray-700 hover:text-[#d5aa6d] transition-colors"
                           onClick={() => setIsMobileMenuOpen(false)}
                         >
-                          {child.name}
+                          {language == 'EN' ? child.name.en : child.name.vi}
                         </Link>
                       ))}
                     </motion.div>
