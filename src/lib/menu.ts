@@ -16,6 +16,18 @@ export const adminMenu = [
         href: '/admin/banner',
       },
       {
+        title: 'Services',
+        href: '/admin/services',
+      },
+      {
+        title: 'Testimonials',
+        href: '/admin/testimonials',
+      },
+      {
+        title: 'Members',
+        href: '/admin/members',
+      },
+      {
         title: 'Danh mục',
         href: '/admin/category',
       },

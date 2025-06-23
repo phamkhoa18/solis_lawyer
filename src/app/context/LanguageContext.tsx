@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-type Lang = 'EN' | 'VN';
+type Lang = 'EN' | 'VI';
 
 interface LanguageContextProps {
   language: Lang;

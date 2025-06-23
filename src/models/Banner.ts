@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import {IBanner} from '@/lib/types/iBanner' ;
+import {IBanner} from '@/lib/types/ibanner' ;
 
 const BannerSchema: Schema<IBanner> = new Schema(
   {

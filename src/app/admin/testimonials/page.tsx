@@ -22,15 +22,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2, Search } from 'lucide-react';
 import { useDebounce } from 'use-debounce';
-import { IBanner } from '@/lib/types/ibanner';
+import { ITestimonial } from '@/lib/types/itestimonial';
 import { ApiResponse } from '@/lib/types/api-response';
 
-interface IBannerWithId extends IBanner {
-  _id: string; // Ensure _id is a string
-}
-
-export default function BannersPage() {
-  const [banners, setBanners] = useState<IBannerWithId[]>([]);
+export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState<ITestimonial[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300); // Debounce search input
   const [loading, setLoading] = useState(true);
@@ -38,20 +34,20 @@ export default function BannersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBanners = async () => {
+  const fetchTestimonials = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/banners');
-      const data: ApiResponse<IBannerWithId[]> = await res.json();
+      const res = await fetch('/api/testimonials');
+      const data: ApiResponse<ITestimonial[]> = await res.json();
       if (data.success && data.data) {
-        setBanners(data.data);
+        setTestimonials(data.data);
       } else {
-        toast.error(data.message || 'Không thể tải banners');
-        setError(data.message || 'Không thể tải banners');
+        toast.error(data.message || 'Không thể tải lời chứng thực');
+        setError(data.message || 'Không thể tải lời chứng thực');
       }
     } catch (error: unknown) {
-      console.error('Fetch banners error:', error);
+      console.error('Fetch testimonials error:', error);
       const message = error instanceof Error ? error.message : 'Lỗi kết nối đến máy chủ';
       toast.error(message);
       setError(message);
@@ -61,32 +57,33 @@ export default function BannersPage() {
   };
 
   useEffect(() => {
-    fetchBanners();
+    fetchTestimonials();
   }, []);
 
-  const filteredBanners = useMemo(() => {
-    return banners.filter(
-      (banner) =>
-        banner.name.vi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        banner.name.en.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        (banner.link || '').toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+  const filteredTestimonials = useMemo(() => {
+    return testimonials.filter(
+      (testimonial) =>
+        testimonial.name.vi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        testimonial.name.en.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        testimonial.content.vi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        testimonial.content.en.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
-  }, [debouncedSearchTerm, banners]);
+  }, [debouncedSearchTerm, testimonials]);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/banners?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/testimonials?id=${id}`, { method: 'DELETE' });
       const data: ApiResponse<null> = await res.json();
       if (data.success) {
-        toast.success(data.message || 'Đã xóa banner thành công');
-        fetchBanners();
+        toast.success(data.message || 'Đã xóa lời chứng thực thành công');
+        fetchTestimonials();
       } else {
         toast.error(data.message || 'Xóa không thành công');
       }
     } catch (error: unknown) {
-      console.error('Delete banner error:', error);
-      toast.error(error instanceof Error ? error.message : 'Lỗi khi xóa banner');
+      console.error('Delete testimonial error:', error);
+      toast.error(error instanceof Error ? error.message : 'Lỗi khi xóa lời chứng thực');
     } finally {
       setDeletingId(null);
       setDeleteId(null);
@@ -96,16 +93,16 @@ export default function BannersPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Banner</h1>
-        <Link href="/admin/banner/create">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Tạo Banner</Button>
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý Lời Chứng Thực</h1>
+        <Link href="/admin/testimonials/create">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Tạo Lời Chứng Thực</Button>
         </Link>
       </div>
 
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Tìm kiếm theo tên hoặc link..."
+          placeholder="Tìm kiếm theo tên hoặc nội dung..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="pl-10"
@@ -126,13 +123,13 @@ export default function BannersPage() {
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={fetchBanners}
+                onClick={fetchTestimonials}
               >
                 Thử lại
               </Button>
             </div>
-          ) : filteredBanners.length === 0 ? (
-            <p className="text-gray-500 text-center">Không có banner nào</p>
+          ) : filteredTestimonials.length === 0 ? (
+            <p className="text-gray-500 text-center">Không có lời chứng thực nào</p>
           ) : (
             <Table>
               <TableHeader>
@@ -140,52 +137,29 @@ export default function BannersPage() {
                   <TableHead className="w-24">Hình ảnh</TableHead>
                   <TableHead>Tên (VI)</TableHead>
                   <TableHead>Tên (EN)</TableHead>
-                  <TableHead>Link</TableHead>
-                  <TableHead>Trạng thái</TableHead>
+                  <TableHead>Nội dung (VI)</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead className="text-center">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredBanners.map((banner) => (
-                  <TableRow key={banner._id} className="hover:bg-gray-50">
+                {filteredTestimonials.map((testimonial) => (
+                  <TableRow key={testimonial._id?.toString()} className="hover:bg-gray-50">
                     <TableCell>
                       <Image
-                        src={banner.image}
-                        alt={banner.name.vi || 'Banner'}
+                        src={testimonial.image}
+                        alt={testimonial.name.vi || 'Testimonial'}
                         width={50}
                         height={50}
-                        className="object-cover rounded"
+                        className="object-cover rounded-full"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{banner.name.vi}</TableCell>
-                    <TableCell>{banner.name.en}</TableCell>
+                    <TableCell className="font-medium">{testimonial.name.vi}</TableCell>
+                    <TableCell>{testimonial.name.en}</TableCell>
+                    <TableCell className="max-w-xs truncate">{testimonial.content.vi}</TableCell>
                     <TableCell>
-                      {banner.link ? (
-                        <a
-                          href={banner.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {banner.link}
-                        </a>
-                      ) : (
-                        'N/A'
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          banner.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                        }`}
-                      >
-                        {banner.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {banner.createdAt
-                        ? new Date(banner.createdAt).toLocaleDateString('vi-VN', {
+                      {testimonial.createdAt
+                        ? new Date(testimonial.createdAt).toLocaleDateString('vi-VN', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -193,44 +167,44 @@ export default function BannersPage() {
                         : 'N/A'}
                     </TableCell>
                     <TableCell className="flex justify-center gap-2">
-                      <Link href={`/admin/banner/edit/${banner._id}`}>
+                      <Link href={`/admin/testimonials/edit/${testimonial._id}`}>
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-blue-600 hover:text-blue-800"
-                          aria-label="Chỉnh sửa banner"
+                          aria-label="Chỉnh sửa lời chứng thực"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
                       </Link>
-                      <AlertDialog open={deleteId === banner._id} onOpenChange={(open) => !open && setDeleteId(null)}>
+                      <AlertDialog open={deleteId === testimonial._id} onOpenChange={(open) => !open && setDeleteId(null)}>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="outline"
                             size="sm"
                             className="text-red-600 hover:text-red-800"
-                            onClick={() => setDeleteId(banner._id)}
-                            aria-label="Xóa banner"
-                            disabled={deletingId === banner._id}
+                            onClick={() => setDeleteId(testimonial._id?.toString() || '')}
+                            aria-label="Xóa lời chứng thực"
+                            disabled={deletingId === testimonial._id}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Bạn chắc chắn muốn xóa banner này?</AlertDialogTitle>
+                            <AlertDialogTitle>Bạn chắc chắn muốn xóa lời chứng thực này?</AlertDialogTitle>
                             <AlertDialogDescription>
                               Hành động này không thể hoàn tác. Vui lòng xác nhận để tiếp tục.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel disabled={deletingId === banner._id}>Hủy</AlertDialogCancel>
+                            <AlertDialogCancel disabled={deletingId === testimonial._id}>Hủy</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(banner._id)}
+                              onClick={() => handleDelete(testimonial._id?.toString() || '')}
                               className="bg-red-600 hover:bg-red-700"
-                              disabled={deletingId === banner._id}
+                              disabled={deletingId === testimonial._id}
                             >
-                              {deletingId === banner._id ? 'Đang xóa...' : 'Xóa'}
+                              {deletingId === testimonial._id ? 'Đang xóa...' : 'Xóa'}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

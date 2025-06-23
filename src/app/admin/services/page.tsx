@@ -22,15 +22,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Pencil, Trash2, Search } from 'lucide-react';
 import { useDebounce } from 'use-debounce';
-import { IBanner } from '@/lib/types/ibanner';
+import { IService } from '@/lib/types/iservice';
 import { ApiResponse } from '@/lib/types/api-response';
 
-interface IBannerWithId extends IBanner {
-  _id: string; // Ensure _id is a string
-}
-
-export default function BannersPage() {
-  const [banners, setBanners] = useState<IBannerWithId[]>([]);
+export default function ServicesPage() {
+  const [services, setServices] = useState<IService[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300); // Debounce search input
   const [loading, setLoading] = useState(true);
@@ -38,20 +34,20 @@ export default function BannersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchBanners = async () => {
+  const fetchServices = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('/api/banners');
-      const data: ApiResponse<IBannerWithId[]> = await res.json();
+      const res = await fetch('/api/services');
+      const data: ApiResponse<IService[]> = await res.json();
       if (data.success && data.data) {
-        setBanners(data.data);
+        setServices(data.data);
       } else {
-        toast.error(data.message || 'Không thể tải banners');
-        setError(data.message || 'Không thể tải banners');
+        toast.error(data.message || 'Không thể tải dịch vụ');
+        setError(data.message || 'Không thể tải dịch vụ');
       }
     } catch (error: unknown) {
-      console.error('Fetch banners error:', error);
+      console.error('Fetch services error:', error);
       const message = error instanceof Error ? error.message : 'Lỗi kết nối đến máy chủ';
       toast.error(message);
       setError(message);
@@ -61,32 +57,32 @@ export default function BannersPage() {
   };
 
   useEffect(() => {
-    fetchBanners();
+    fetchServices();
   }, []);
 
-  const filteredBanners = useMemo(() => {
-    return banners.filter(
-      (banner) =>
-        banner.name.vi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        banner.name.en.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        (banner.link || '').toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+  const filteredServices = useMemo(() => {
+    return services.filter(
+      (service) =>
+        service.name.vi.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        service.name.en.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        (service.link || '').toLowerCase().includes(debouncedSearchTerm.toLowerCase())
     );
-  }, [debouncedSearchTerm, banners]);
+  }, [debouncedSearchTerm, services]);
 
   const handleDelete = async (id: string) => {
     setDeletingId(id);
     try {
-      const res = await fetch(`/api/banners?id=${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/services?id=${id}`, { method: 'DELETE' });
       const data: ApiResponse<null> = await res.json();
       if (data.success) {
-        toast.success(data.message || 'Đã xóa banner thành công');
-        fetchBanners();
+        toast.success(data.message || 'Đã xóa dịch vụ thành công');
+        fetchServices();
       } else {
         toast.error(data.message || 'Xóa không thành công');
       }
     } catch (error: unknown) {
-      console.error('Delete banner error:', error);
-      toast.error(error instanceof Error ? error.message : 'Lỗi khi xóa banner');
+      console.error('Delete service error:', error);
+      toast.error(error instanceof Error ? error.message : 'Lỗi khi xóa dịch vụ');
     } finally {
       setDeletingId(null);
       setDeleteId(null);
@@ -96,9 +92,9 @@ export default function BannersPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý Banner</h1>
-        <Link href="/admin/banner/create">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Tạo Banner</Button>
+        <h1 className="text-2xl font-bold text-gray-800">Quản lý Dịch Vụ</h1>
+        <Link href="/admin/services/create">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white">Tạo Dịch Vụ</Button>
         </Link>
       </div>
 
@@ -126,13 +122,13 @@ export default function BannersPage() {
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={fetchBanners}
+                onClick={fetchServices}
               >
                 Thử lại
               </Button>
             </div>
-          ) : filteredBanners.length === 0 ? (
-            <p className="text-gray-500 text-center">Không có banner nào</p>
+          ) : filteredServices.length === 0 ? (
+            <p className="text-gray-500 text-center">Không có dịch vụ nào</p>
           ) : (
             <Table>
               <TableHeader>
@@ -141,51 +137,41 @@ export default function BannersPage() {
                   <TableHead>Tên (VI)</TableHead>
                   <TableHead>Tên (EN)</TableHead>
                   <TableHead>Link</TableHead>
-                  <TableHead>Trạng thái</TableHead>
                   <TableHead>Ngày tạo</TableHead>
                   <TableHead className="text-center">Hành động</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredBanners.map((banner) => (
-                  <TableRow key={banner._id} className="hover:bg-gray-50">
+                {filteredServices.map((service) => (
+                  <TableRow key={service._id?.toString()} className="hover:bg-gray-50">
                     <TableCell>
                       <Image
-                        src={banner.image}
-                        alt={banner.name.vi || 'Banner'}
+                        src={service.img}
+                        alt={service.name.vi || 'Service'}
                         width={50}
                         height={50}
                         className="object-cover rounded"
                       />
                     </TableCell>
-                    <TableCell className="font-medium">{banner.name.vi}</TableCell>
-                    <TableCell>{banner.name.en}</TableCell>
+                    <TableCell className="font-medium">{service.name.vi}</TableCell>
+                    <TableCell>{service.name.en}</TableCell>
                     <TableCell>
-                      {banner.link ? (
+                      {service.link ? (
                         <a
-                          href={banner.link}
+                          href={service.link}
                           target="_blank"
                           rel="noreferrer"
                           className="text-blue-600 hover:underline"
                         >
-                          {banner.link}
+                          {service.link}
                         </a>
                       ) : (
                         'N/A'
                       )}
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          banner.isActive ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                        }`}
-                      >
-                        {banner.isActive ? 'Hoạt động' : 'Không hoạt động'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {banner.createdAt
-                        ? new Date(banner.createdAt).toLocaleDateString('vi-VN', {
+                      {service.createdAt
+                        ? new Date(service.createdAt).toLocaleDateString('vi-VN', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -193,44 +179,44 @@ export default function BannersPage() {
                         : 'N/A'}
                     </TableCell>
                     <TableCell className="flex justify-center gap-2">
-                      <Link href={`/admin/banner/edit/${banner._id}`}>
+                      <Link href={`/admin/services/edit/${service._id}`}>
                         <Button
                           variant="outline"
                           size="sm"
                           className="text-blue-600 hover:text-blue-800"
-                          aria-label="Chỉnh sửa banner"
+                          aria-label="Chỉnh sửa dịch vụ"
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
                       </Link>
-                      <AlertDialog open={deleteId === banner._id} onOpenChange={(open) => !open && setDeleteId(null)}>
+                      <AlertDialog open={deleteId === service._id} onOpenChange={(open) => !open && setDeleteId(null)}>
                         <AlertDialogTrigger asChild>
                           <Button
                             variant="outline"
                             size="sm"
                             className="text-red-600 hover:text-red-800"
-                            onClick={() => setDeleteId(banner._id)}
-                            aria-label="Xóa banner"
-                            disabled={deletingId === banner._id}
+                            onClick={() => setDeleteId(service._id?.toString() || '')}
+                            aria-label="Xóa dịch vụ"
+                            disabled={deletingId === service._id}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Bạn chắc chắn muốn xóa banner này?</AlertDialogTitle>
+                            <AlertDialogTitle>Bạn chắc chắn muốn xóa dịch vụ này?</AlertDialogTitle>
                             <AlertDialogDescription>
                               Hành động này không thể hoàn tác. Vui lòng xác nhận để tiếp tục.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel disabled={deletingId === banner._id}>Hủy</AlertDialogCancel>
+                            <AlertDialogCancel disabled={deletingId === service._id}>Hủy</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(banner._id)}
+                              onClick={() => handleDelete(service._id?.toString() || '')}
                               className="bg-red-600 hover:bg-red-700"
-                              disabled={deletingId === banner._id}
+                              disabled={deletingId === service._id}
                             >
-                              {deletingId === banner._id ? 'Đang xóa...' : 'Xóa'}
+                              {deletingId === service._id ? 'Đang xóa...' : 'Xóa'}
                             </AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>

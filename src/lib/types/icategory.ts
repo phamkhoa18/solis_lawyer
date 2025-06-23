@@ -1,9 +1,10 @@
+import mongoose from 'mongoose';
+
 export interface ICategory {
-  _id: string ,
-  name: string;
+  _id?: string | mongoose.Types.ObjectId;
+  name: { en: string; vi: string };
   slug: string;
-  description?: string;
-  isActive?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }

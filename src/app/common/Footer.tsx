@@ -92,20 +92,7 @@ export default function Footer() {
                     {/* Bản quyền */}
                     <p className="text-center lg:text-left">
                     © Copyright 2025. All rights reserved.{" "}
-                    <a
-                        href="https://wordpress.zozothemes.com/igual/"
-                        target="_blank"
-                        className="text-[#d5aa6d] hover:underline"
-                    >
-                        Igual
-                    </a>. Designed by{" "}
-                    <a
-                        href="https://zozothemes.com/"
-                        target="_blank"
-                        className="text-[#d5aa6d] hover:underline"
-                    >
-                        Zozothemes
-                    </a>
+                    <span className="text-[#d5aa6d]">Solis Lawyers</span>
                     </p>
 
                     {/* Social (Lucide) Icons */}

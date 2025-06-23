@@ -1,19 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// app/api/banners/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import Banner from '@/models/Banner';
 import connectDB from '@/lib/dbConnect';
-import { IBanner } from '@/lib/types/ibanner';
+import { ICategory } from '@/lib/types/icategory';
 import { ApiResponse } from '@/lib/types/api-response';
+import Category from '@/models/Category';
 
 // Utility function to validate MongoDB ObjectId
 const isValidObjectId = (id: string | null): id is string => {
   return !!id && mongoose.isValidObjectId(id);
 };
 
-// GET: Fetch all banners or a specific banner by ID
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner | IBanner[]>>> {
+// Validate slug format (lowercase letters, numbers, hyphens)
+const isValidSlug = (slug: string): boolean => {
+  return /^[a-z0-9-]+$/.test(slug);
+};
+
+// GET: Fetch all categories or a specific category by ID
+export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<ICategory | ICategory[]>>> {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
@@ -27,26 +31,26 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IB
         );
       }
 
-      const banner = await Banner.findById(id);
-      if (!banner) {
+      const category = await Category.findById(id);
+      if (!category) {
         return NextResponse.json(
-          { success: false, message: 'Banner not found', statusCode: 404 },
+          { success: false, message: 'Category not found', statusCode: 404 },
           { status: 404 }
         );
       }
       return NextResponse.json(
-        { success: true, data: banner, statusCode: 200 },
+        { success: true, data: category, statusCode: 200 },
         { status: 200 }
       );
     }
 
-    const banners = await Banner.find().sort({ createdAt: -1 });
+    const categories = await Category.find({ isActive: true });
     return NextResponse.json(
-      { success: true, data: banners, statusCode: 200 },
+      { success: true, data: categories, statusCode: 200 },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('GET /api/banners error:', error);
+    console.error('GET /api/categories error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -54,40 +58,46 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IB
   }
 }
 
-// POST: Create a new banner
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner>>> {
+// POST: Create a new category
+export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<ICategory>>> {
   try {
     await connectDB();
-    const body: IBanner = await req.json();
+    const body: ICategory = await req.json();
 
     // Validate required fields
-    if (!body.image || !body.name?.en || !body.name?.vi) {
+    if (!body.name?.en || !body.name?.vi || !body.slug) {
       return NextResponse.json(
-        { success: false, message: 'Image and name (en, vi) are required', statusCode: 400 },
+        { success: false, message: 'Name (en, vi) and slug are required', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    // Optional: Validate additional fields (e.g., link as URL)
-    if (body.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.link)) {
+    // Validate slug format
+    if (!isValidSlug(body.slug)) {
       return NextResponse.json(
-        { success: false, message: 'Invalid URL format for link', statusCode: 400 },
+        { success: false, message: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    const banner = await Banner.create(body);
+    const category = await Category.create(body);
     return NextResponse.json(
       {
         success: true,
-        data: banner,
-        message: 'Banner created successfully',
+        data: category,
+        message: 'Category created successfully',
         statusCode: 201,
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('POST /api/banners error:', error);
+    console.error('POST /api/categories error:', error);
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, message: 'Slug already exists', statusCode: 400 },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -95,8 +105,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<I
   }
 }
 
-// PUT: Update a banner by ID
-export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner>>> {
+// PUT: Update a category by ID
+export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<ICategory>>> {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
@@ -109,27 +119,27 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
       );
     }
 
-    const body: Partial<IBanner> = await req.json();
+    const body: Partial<ICategory> = await req.json();
 
-    // Optional: Validate fields if present
+    // Validate fields if present
     if (body.name && (!body.name.en || !body.name.vi)) {
       return NextResponse.json(
         { success: false, message: 'Both English and Vietnamese names are required', statusCode: 400 },
         { status: 400 }
       );
     }
-    if (body.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.link)) {
+    if (body.slug && !isValidSlug(body.slug)) {
       return NextResponse.json(
-        { success: false, message: 'Invalid URL format for link', statusCode: 400 },
+        { success: false, message: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    const banner = await Banner.findByIdAndUpdate(id, { $set: body }, { new: true, runValidators: true });
+    const category = await Category.findByIdAndUpdate(id, { $set: body }, { new: true, runValidators: true });
 
-    if (!banner) {
+    if (!category) {
       return NextResponse.json(
-        { success: false, message: 'Banner not found', statusCode: 404 },
+        { success: false, message: 'Category not found', statusCode: 404 },
         { status: 404 }
       );
     }
@@ -137,14 +147,20 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
     return NextResponse.json(
       {
         success: true,
-        data: banner,
-        message: 'Banner updated successfully',
+        data: category,
+        message: 'Category updated successfully',
         statusCode: 200,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('PUT /api/banners error:', error);
+    console.error('PUT /api/categories error:', error);
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, message: 'Slug already exists', statusCode: 400 },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -152,7 +168,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
   }
 }
 
-// DELETE: Delete a banner by ID
+// DELETE: Delete a category by ID
 export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse<null>>> {
   try {
     await connectDB();
@@ -166,11 +182,11 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
       );
     }
 
-    const banner = await Banner.findByIdAndDelete(id);
+    const category = await Category.findByIdAndDelete(id);
 
-    if (!banner) {
+    if (!category) {
       return NextResponse.json(
-        { success: false, message: 'Banner not found', statusCode: 404 },
+        { success: false, message: 'Category not found', statusCode: 404 },
         { status: 404 }
       );
     }
@@ -179,13 +195,13 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
       {
         success: true,
         data: null,
-        message: 'Banner deleted successfully',
+        message: 'Category deleted successfully',
         statusCode: 200,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('DELETE /api/banners error:', error);
+    console.error('DELETE /api/categories error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }

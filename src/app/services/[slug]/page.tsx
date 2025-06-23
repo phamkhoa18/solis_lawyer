@@ -9,6 +9,7 @@ import Header from '@/app/common/Header';
 import Footer from '@/app/common/Footer';
 import PageTitle from '@/app/components/PageTitle';
 import GetInTouch from '@/app/components/GetInTouch';
+import { useParams } from 'next/navigation';
 
 const serviceData = {
   'criminal-law': {
@@ -89,8 +90,9 @@ const cardVariants: Variants = {
   }),
 };
 
-export default function ServiceDetailPage({ params }: { params: { slug: string } }) {
-  const service = serviceData[params.slug as keyof typeof serviceData] || serviceData['criminal-law'];
+export default function ServiceDetailPage() {
+  const { slug } = useParams() as { slug: string }
+  const service = serviceData[slug as keyof typeof serviceData] || serviceData['criminal-law'];
 
   return (
     <>
@@ -102,7 +104,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
           breadcrumb={[
             { label: 'Home', href: '/' },
             { label: 'Services', href: '/services' },
-            { label: service.title, href: `/services/${params.slug}` },
+            { label: service.title, href: `/services/${slug}` },
           ]}
         />
 
@@ -187,7 +189,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
               <h3 className="text-xl font_play font-semibold text-gray-900 mb-4">Related Services</h3>
               <ul className="space-y-3">
                 {Object.keys(serviceData)
-                  .filter((key) => key !== params.slug)
+                  .filter((key) => key !== slug)
                   .map((key) => (
                     <li key={key}>
                       <Link

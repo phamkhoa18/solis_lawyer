@@ -52,7 +52,7 @@ export default function Header() {
  
   const languages = [
     { code: 'EN', label: 'English' },
-    { code: 'VN', label: 'Tiếng Việt' },
+    { code: 'VI', label: 'Tiếng Việt' },
   ];
 
   
@@ -235,7 +235,7 @@ export default function Header() {
                       <button
                         key={lang.code}
                         onClick={() => {
-                          setLanguage(lang.code as 'EN' | 'VN');
+                          setLanguage(lang.code as 'EN' | 'VI');
                           setIsLanguageDropdownOpen(false);
                         }}
                         className="block w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-[#d5aa6d] hover:text-white transition-colors"
@@ -284,7 +284,7 @@ export default function Header() {
                     <button
                       key={lang.code}
                       onClick={() => {
-                        setLanguage(lang.code as 'EN' | 'VN');
+                        setLanguage(lang.code as 'EN' | 'VI');
                         setIsLanguageDropdownOpen(false);
                       }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-[#d5aa6d] hover:text-white transition-colors"
@@ -378,28 +378,30 @@ export default function Header() {
             <nav className="flex flex-col items-center gap-6 text-center">
               {menus.map((item:any) => (
                 <div key={item.name.en} className="w-full">
-                  <Link
-                    href={item.link}
-                    className="block text-2xl font-semibold text-gray-800 hover:text-[#d5aa6d] transition-colors py-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {language == 'EN' ? item.name.en : item.name.vi}
-                  </Link>
-                  {item.children.length > 0 && (
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setActiveDropdown(activeDropdown === item.name.en ? null : item.name.en)}
-                      className="mt-2"
+                  <div className="flex justify-center gap-2">
+                      <Link
+                      href={item.link}
+                      className="block text-2xl font-semibold text-gray-800 hover:text-[#d5aa6d] transition-colors py-2"
+                      onClick={() => setIsMobileMenuOpen(false)}
                     >
-                      <ChevronDown
-                        size={20}
-                        strokeWidth={2}
-                        className={`transition-transform text-gray-800 ${
-                          activeDropdown === item.name ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </motion.button>
-                  )}
+                      {language == 'EN' ? item.name.en : item.name.vi}
+                    </Link>
+                    {item.children.length > 0 && (
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setActiveDropdown(activeDropdown === item.name.en ? null : item.name.en)}
+                        className="mt-2"
+                      >
+                        <ChevronDown
+                          size={20}
+                          strokeWidth={2}
+                          className={`transition-transform text-gray-800 ${
+                            activeDropdown === item.name ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </motion.button>
+                    )}
+                  </div>
                   {item.children.length > 0 && activeDropdown === item.name.en && (
                     <motion.div
                       variants={dropdownVariants}
@@ -445,7 +447,7 @@ export default function Header() {
                         <button
                           key={lang.code}
                           onClick={() => {
-                            setLanguage(lang.code as 'EN' | 'VN');
+                            setLanguage(lang.code as 'EN' | 'VI');
                             setIsLanguageDropdownOpen(false);
                           }}
                           className="block w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-[#d5aa6d] hover:text-white transition-colors"

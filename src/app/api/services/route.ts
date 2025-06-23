@@ -1,19 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// app/api/banners/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import Banner from '@/models/Banner';
 import connectDB from '@/lib/dbConnect';
-import { IBanner } from '@/lib/types/ibanner';
+import { IService } from '@/lib/types/iservice';
 import { ApiResponse } from '@/lib/types/api-response';
+import Service from '@/models/Service';
 
 // Utility function to validate MongoDB ObjectId
 const isValidObjectId = (id: string | null): id is string => {
   return !!id && mongoose.isValidObjectId(id);
 };
 
-// GET: Fetch all banners or a specific banner by ID
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner | IBanner[]>>> {
+// GET: Fetch all services or a specific service by ID
+export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IService | IService[]>>> {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
@@ -27,26 +26,26 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IB
         );
       }
 
-      const banner = await Banner.findById(id);
-      if (!banner) {
+      const service = await Service.findById(id);
+      if (!service) {
         return NextResponse.json(
-          { success: false, message: 'Banner not found', statusCode: 404 },
+          { success: false, message: 'Service not found', statusCode: 404 },
           { status: 404 }
         );
       }
       return NextResponse.json(
-        { success: true, data: banner, statusCode: 200 },
+        { success: true, data: service, statusCode: 200 },
         { status: 200 }
       );
     }
 
-    const banners = await Banner.find().sort({ createdAt: -1 });
+    const services = await Service.find();
     return NextResponse.json(
-      { success: true, data: banners, statusCode: 200 },
+      { success: true, data: services, statusCode: 200 },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('GET /api/banners error:', error);
+    console.error('GET /api/services error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -54,40 +53,40 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IB
   }
 }
 
-// POST: Create a new banner
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner>>> {
+// POST: Create a new service
+export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<IService>>> {
   try {
     await connectDB();
-    const body: IBanner = await req.json();
+    const body: IService = await req.json();
 
     // Validate required fields
-    if (!body.image || !body.name?.en || !body.name?.vi) {
+    if (!body.name?.en || !body.name?.vi || !body.img || !body.description?.en || !body.description?.vi) {
       return NextResponse.json(
-        { success: false, message: 'Image and name (en, vi) are required', statusCode: 400 },
+        { success: false, message: 'Name (en, vi), image, and description (en, vi) are required', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    // Optional: Validate additional fields (e.g., link as URL)
-    if (body.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.link)) {
+    // Validate URL format for img
+    if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img)) {
       return NextResponse.json(
-        { success: false, message: 'Invalid URL format for link', statusCode: 400 },
+        { success: false, message: 'Invalid URL format for image', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    const banner = await Banner.create(body);
+    const service = await Service.create(body);
     return NextResponse.json(
       {
         success: true,
-        data: banner,
-        message: 'Banner created successfully',
+        data: service,
+        message: 'Service created successfully',
         statusCode: 201,
       },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error('POST /api/banners error:', error);
+    console.error('POST /api/services error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -95,8 +94,8 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<I
   }
 }
 
-// PUT: Update a banner by ID
-export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IBanner>>> {
+// PUT: Update a service by ID
+export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IService>>> {
   try {
     await connectDB();
     const { searchParams } = new URL(req.url);
@@ -109,27 +108,33 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
       );
     }
 
-    const body: Partial<IBanner> = await req.json();
+    const body: Partial<IService> = await req.json();
 
-    // Optional: Validate fields if present
+    // Validate fields if present
     if (body.name && (!body.name.en || !body.name.vi)) {
       return NextResponse.json(
         { success: false, message: 'Both English and Vietnamese names are required', statusCode: 400 },
         { status: 400 }
       );
     }
-    if (body.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.link)) {
+    if (body.description && (!body.description.en || !body.description.vi)) {
       return NextResponse.json(
-        { success: false, message: 'Invalid URL format for link', statusCode: 400 },
+        { success: false, message: 'Both English and Vietnamese descriptions are required', statusCode: 400 },
+        { status: 400 }
+      );
+    }
+    if (body.img && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid URL format for image', statusCode: 400 },
         { status: 400 }
       );
     }
 
-    const banner = await Banner.findByIdAndUpdate(id, { $set: body }, { new: true, runValidators: true });
+    const service = await Service.findByIdAndUpdate(id, { $set: body }, { new: true, runValidators: true });
 
-    if (!banner) {
+    if (!service) {
       return NextResponse.json(
-        { success: false, message: 'Banner not found', statusCode: 404 },
+        { success: false, message: 'Service not found', statusCode: 404 },
         { status: 404 }
       );
     }
@@ -137,14 +142,14 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
     return NextResponse.json(
       {
         success: true,
-        data: banner,
-        message: 'Banner updated successfully',
+        data: service,
+        message: 'Service updated successfully',
         statusCode: 200,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('PUT /api/banners error:', error);
+    console.error('PUT /api/services error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }
@@ -152,7 +157,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IB
   }
 }
 
-// DELETE: Delete a banner by ID
+// DELETE: Delete a service by ID
 export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse<null>>> {
   try {
     await connectDB();
@@ -166,11 +171,11 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
       );
     }
 
-    const banner = await Banner.findByIdAndDelete(id);
+    const service = await Service.findByIdAndDelete(id);
 
-    if (!banner) {
+    if (!service) {
       return NextResponse.json(
-        { success: false, message: 'Banner not found', statusCode: 404 },
+        { success: false, message: 'Service not found', statusCode: 404 },
         { status: 404 }
       );
     }
@@ -179,13 +184,13 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
       {
         success: true,
         data: null,
-        message: 'Banner deleted successfully',
+        message: 'Service deleted successfully',
         statusCode: 200,
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('DELETE /api/banners error:', error);
+    console.error('DELETE /api/services error:', error);
     return NextResponse.json(
       { success: false, message: 'Internal Server Error', statusCode: 500 },
       { status: 500 }

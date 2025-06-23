@@ -2,12 +2,12 @@
 import type { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import UserInfo from "./userInfo";
-import RequireAuth from "./RequireAuth";
+// import RequireAuth from "./RequireAuth";
 import { Sidebar } from "../common/Sidebar";
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <RequireAuth>
+    // <RequireAuth>
       <div className="flex flex-col min-h-screen bg-gray-50 md:flex-row">
         <aside className="w-full md:w-64">
           <Sidebar />
@@ -25,6 +25,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </main>
         </div>
       </div>
-    </RequireAuth>
+    // </RequireAuth>
   );
 }
