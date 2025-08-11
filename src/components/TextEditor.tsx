@@ -110,25 +110,12 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
             'link image media table | code preview fullscreen | help',
           menubar: 'file edit view insert format tools table help',
           font_formats:
-            "Bai Jamjuree=baiJamjuree, sans-serif;" +
             "Arial=arial,helvetica,sans-serif;" +
             "Courier New=courier new,courier,monospace;" +
             "Georgia=georgia,palatino,serif;" +
             "Tahoma=tahoma,arial,helvetica,sans-serif;" +
             "Times New Roman=times new roman,times,serif;" +
             "Verdana=verdana,geneva,sans-serif",
-          content_style: `
-            @font-face {
-              font-family: 'baiJamjuree';
-              src: url('/fonts/bai-jamjuree/BaiJamjuree-Regular.ttf') format('truetype');
-              font-weight: 400;
-              font-style: normal;
-            }
-            body {
-              font-family: 'baiJamjuree', Arial, sans-serif;
-              font-size: 16px;
-            }
-          `,
           height: 500,
           image_uploadtab: true,
           file_picker_types: 'image',

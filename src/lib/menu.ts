@@ -20,6 +20,10 @@ export const adminMenu = [
         href: '/admin/services',
       },
       {
+        title: 'Case Studies',
+        href: '/admin/casestudy',
+      },
+      {
         title: 'Testimonials',
         href: '/admin/testimonials',
       },

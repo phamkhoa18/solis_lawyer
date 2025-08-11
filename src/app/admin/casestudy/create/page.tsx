@@ -226,7 +226,7 @@ export default function CreateCaseStudyPage() {
           <Button
             variant="outline"
             className="text-blue-600 hover:text-blue-800"
-            onClick={() => router.push('/admin/casestudies')}
+            onClick={() => router.push('/admin/casestudy')}
           >
             Quay lại
           </Button>

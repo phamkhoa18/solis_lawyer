@@ -29,8 +29,8 @@ interface FormData {
   content: { en: string; vi: string };
   slug: string;
   image: string;
-  category: string;
-  user: string;
+  category: any ;
+  user: any;
   status: 'draft' | 'published';
 }
 
@@ -52,7 +52,7 @@ export default function EditCaseStudyPage() {
     image: '',
     category: '',
     user: '',
-    status: 'draft',
+    status: 'published',
   });
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -68,8 +68,10 @@ export default function EditCaseStudyPage() {
   async function fetchCaseStudy() {
     if (!id) return;
     try {
-      const res = await fetch(`/api/casestudies/${id}`);
+      const res = await fetch(`/api/casestudies?id=${id}`);
       const data: ApiResponse<FormData> = await res.json();
+      console.log(data.data);
+      
       if (data.success && data.data) {
         setFormData({
           title: { en: data.data.title.en || '', vi: data.data.title.vi || '' },
@@ -77,9 +79,9 @@ export default function EditCaseStudyPage() {
           content: { en: data.data.content.en || '', vi: data.data.content.vi || '' },
           slug: data.data.slug || '',
           image: data.data.image || '',
-          category: data.data.category || '',
-          user: data.data.user || '',
-          status: data.data.status || 'draft',
+          category: data.data.category._id || '',
+          user: data.data.user._id || '',
+          status: data.data.status || 'published',
         });
       } else {
         toast.error(data.message || 'Không thể tải case study');
@@ -188,7 +190,7 @@ export default function EditCaseStudyPage() {
 
     try {
       setSubmitLoading(true);
-      const res = await fetch(`/api/casestudies/${id}`, {
+      const res = await fetch(`/api/casestudies?id=${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -207,7 +209,7 @@ export default function EditCaseStudyPage() {
 
       if (data.success) {
         toast.success('Cập nhật case study thành công!');
-        router.push('/admin/casestudies');
+        router.push('/admin/casestudy');
       } else {
         toast.error(data.message || 'Đã có lỗi xảy ra!');
       }
@@ -267,7 +269,7 @@ export default function EditCaseStudyPage() {
           <Button
             variant="outline"
             className="text-blue-600 hover:text-blue-800"
-            onClick={() => router.push('/admin/casestudies')}
+            onClick={() => router.push('/admin/casestudy')}
           >
             Quay lại
           </Button>
@@ -314,7 +316,7 @@ export default function EditCaseStudyPage() {
                         <motion.div
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="absolute right-2 top-9"
+                          className="absolute right-2 top-[25px]"
                         >
                           <Button
                             type="button"
