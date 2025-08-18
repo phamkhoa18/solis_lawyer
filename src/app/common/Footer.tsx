@@ -34,11 +34,11 @@ interface FooterContent {
       title: string;
       address: string;
     };
-    hcmc: {
+    haiphong: {
       title: string;
       address: string;
     };
-    haiphong: {
+    hcmc: {
       title: string;
       address: string;
     };
@@ -73,13 +73,13 @@ const content: Record<'VI' | 'EN', FooterContent> = {
         title: "Chi Nhánh Queensland",
         address: "Suite 10 / 13 Karp Court, Bundall QLD 4217"
       },
-      hcmc: {
-        title: "VP TP. Hồ Chí Minh",
-        address: "124 Điện Biên Phủ, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh"
-      },
       haiphong: {
         title: "VP Hải Phòng",
         address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hải Phòng"
+      },
+      hcmc: {
+        title: "VP TP. Hồ Chí Minh",
+        address: "124 Điện Biên Phủ, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh"
       }
     }
   },
@@ -109,13 +109,13 @@ const content: Record<'VI' | 'EN', FooterContent> = {
         title: "Queensland Branch",
         address: "Suite 10 / 13 Karp Court, Bundall QLD 4217"
       },
-      hcmc: {
-        title: "Ho Chi Minh City Office",
-        address: "124 Điện Biên Phủ, Đa Kao Ward, District 1, Ho Chi Minh City"
-      },
       haiphong: {
         title: "Hai Phong Office",
         address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hai Phong"
+      },
+      hcmc: {
+        title: "Ho Chi Minh City Office",
+        address: "124 Điện Biên Phủ, Đa Kao Ward, District 1, Ho Chi Minh City"
       }
     }
   }
@@ -217,21 +217,21 @@ export default function Footer() {
             </h2>
             <div className="space-y-4 text-sm">
               
-              {/* HCMC Office */}
+              {/* Hai Phong Office - Đặt trước */}
               <div className="border-l-2 border-[#d5aa6d] pl-4">
-                <h3 className="font-semibold text-[#d5aa6d] mb-2">{currentContent.offices.hcmc.title}</h3>
+                <h3 className="font-semibold text-[#d5aa6d] mb-2">{currentContent.offices.haiphong.title}</h3>
                 <div className="flex items-start gap-2">
                   <MapPinHouse size={16} strokeWidth={1.5} className="shrink-0 text-[#d5aa6d] mt-0.5" />
-                  <span className="text-gray-300 leading-relaxed">{currentContent.offices.hcmc.address}</span>
+                  <span className="text-gray-300 leading-relaxed">{currentContent.offices.haiphong.address}</span>
                 </div>
               </div>
 
-              {/* Hai Phong Office */}
+              {/* HCMC Office - Đặt sau */}
               <div className="border-l-2 border-gray-600 pl-4">
-                <h3 className="font-semibold text-gray-300 mb-2">{currentContent.offices.haiphong.title}</h3>
+                <h3 className="font-semibold text-gray-300 mb-2">{currentContent.offices.hcmc.title}</h3>
                 <div className="flex items-start gap-2">
                   <MapPinHouse size={16} strokeWidth={1.5} className="shrink-0 text-gray-500 mt-0.5" />
-                  <span className="text-gray-400 leading-relaxed text-xs">{currentContent.offices.haiphong.address}</span>
+                  <span className="text-gray-400 leading-relaxed text-xs">{currentContent.offices.hcmc.address}</span>
                 </div>
               </div>
 

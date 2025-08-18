@@ -54,7 +54,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         name: "Ms. Duong Bella Nguyen",
         position: "Giám Đốc Việt Nam & Quản Lý Trưởng Sydney",
         description: "Ms. Duong Bella Nguyen hiện là Giám đốc Solis Lawyers Việt Nam đồng thời đảm nhiệm vai trò Quản lý trưởng tại trụ sở chính Sydney. Với nền tảng chuyên môn vững chắc cùng nhiều năm kinh nghiệm trong lĩnh vực pháp lý và quản lý, bà giữ vai trò trọng yếu trong việc định hướng phát triển chiến lược, kết nối và điều phối hoạt động của hệ thống Solis Lawyers tại Úc và Việt Nam. Bà Bella không chỉ được biết đến với kỹ năng quản lý hiệu quả mà còn nổi bật với chuyên môn pháp lý cao cấp, đặc biệt trong việc giải quyết các vụ việc khó khăn, phức tạp và nhạy cảm.",
-        specialties: ["Quản Lý Chiến Lược", "Luật Quốc Tế", "Tư Vấn Doanh Nghiệp", "Phối Hợp Đa Quốc Gia", "Giải Quyết Vụ Việc Phức Tạp", "Phát Triển Hệ Thống"],
+        specialties: ["Luật Di Trú", "Luật Hình Sự", "Luật Gia Đình", "Quản Lý Chiến Lược", "Tư Vấn Doanh Nghiệp", "Đầu Tư"],
         experience: "Nhiều năm kinh nghiệm quản lý và pháp lý",
         image: "/images/about/bella.jpg",
         email: "bella@solislaw.com.au"
@@ -96,7 +96,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         name: "Ms. Duong Bella Nguyen",
         position: "Director Vietnam & General Manager Sydney",
         description: "Ms. Duong Bella Nguyen is the Director of Solis Lawyers Vietnam and General Manager of the Sydney Head Office. With her strong leadership and advanced professional expertise, she plays a key role in shaping the firm's strategic direction and ensuring seamless coordination across its international network. She is recognized not only for her outstanding management skills but also for her high-level legal expertise, particularly in navigating and resolving difficult and complex cases.",
-        specialties: ["Strategic Management", "International Law", "Corporate Consulting", "Cross-Border Coordination", "Complex Case Resolution", "System Development"],
+        specialties: ["Immigration Law", "Criminal Law", "Family Law", "Strategic Management", "Corporate Consulting", "Investment"],
         experience: "Many years of management and legal experience",
         image: "/images/about/bella.jpg",
         email: "bella@solislaw.com.au"
@@ -266,8 +266,8 @@ export default function Team() {
                 </div>
 
                 {/* Description */}
-                <div className="relative">
-                  <p className="text-[var(--paragraph)] leading-relaxed text-sm lg:text-base mb-6 line-clamp-4">
+                <div className="relative mb-6">
+                  <p className="text-[var(--paragraph)] leading-relaxed text-sm lg:text-base line-clamp-4">
                     {member.description}
                   </p>
                   
@@ -298,7 +298,7 @@ export default function Team() {
                       
                       <div className="pt-4 border-t border-[#d5aa6d]/20">
                         <div className="flex flex-wrap gap-2">
-                          {member.specialties.slice(0, 3).map((specialty, idx) => (
+                          {member.specialties.map((specialty, idx) => (
                             <span
                               key={idx}
                               className="px-3 py-1 bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] text-white text-xs font-medium rounded-full"
@@ -312,7 +312,7 @@ export default function Team() {
                   </div>
                 </div>
 
-                {/* Specialties */}
+                {/* Specialties - Show ALL specialties */}
                 <div className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
                     <Award size={16} className="text-[#d5aa6d]" />
@@ -321,7 +321,7 @@ export default function Team() {
                     </h4>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {member.specialties.slice(0, 3).map((specialty, idx) => (
+                    {member.specialties.map((specialty, idx) => (
                       <span
                         key={idx}
                         className="px-3 py-1 bg-gradient-to-r from-[#d5aa6d]/10 to-[#9b6f45]/10 text-[#9b6f45] text-xs font-medium rounded-full border border-[#d5aa6d]/20"
