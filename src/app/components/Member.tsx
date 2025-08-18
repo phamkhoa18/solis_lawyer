@@ -45,7 +45,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         description: "Luật sư Nguyễn Thành Lê là người sáng lập Solis Lawyers, sở hữu hơn mười năm kinh nghiệm hành nghề cùng uy tín vững chắc trong giới luật tại Úc. Trong suốt sự nghiệp, ông đã trực tiếp tham gia và bảo vệ thành công cho nhiều thân chủ trong các vụ án trọng điểm và phức tạp, từ những vụ án hình sự nghiêm trọng đến các hồ sơ pháp lý đặc thù, nhạy cảm. Bên cạnh lĩnh vực luật hình sự, Luật sư Nguyễn Thành Lê còn có bề dày kinh nghiệm trong việc tham gia các phiên tòa kháng cáo di trú, giúp khách hàng bảo vệ quyền lợi và mở ra cơ hội mới tại Úc.",
         specialties: ["Luật Hình Sự", "Luật Di Trú", "Luật Gia Đình", "Kháng Cáo Tòa Án", "Phân Chia Tài Sản", "Quyền Nuôi Con"],
         experience: "Hơn 10 năm kinh nghiệm hành nghề tại Úc",
-        image: "/images/team/thanh-le.jpg",
+        image: "/images/about/thanhnguyen.jpg",
         email: "thanhle@solislaw.com.au",
         phone: "+61 2 8102 5657"
       },
@@ -56,7 +56,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         description: "Ms. Duong Bella Nguyen hiện là Giám đốc Solis Lawyers Việt Nam đồng thời đảm nhiệm vai trò Quản lý trưởng tại trụ sở chính Sydney. Với nền tảng chuyên môn vững chắc cùng nhiều năm kinh nghiệm trong lĩnh vực pháp lý và quản lý, bà giữ vai trò trọng yếu trong việc định hướng phát triển chiến lược, kết nối và điều phối hoạt động của hệ thống Solis Lawyers tại Úc và Việt Nam. Bà Bella không chỉ được biết đến với kỹ năng quản lý hiệu quả mà còn nổi bật với chuyên môn pháp lý cao cấp, đặc biệt trong việc giải quyết các vụ việc khó khăn, phức tạp và nhạy cảm.",
         specialties: ["Quản Lý Chiến Lược", "Luật Quốc Tế", "Tư Vấn Doanh Nghiệp", "Phối Hợp Đa Quốc Gia", "Giải Quyết Vụ Việc Phức Tạp", "Phát Triển Hệ Thống"],
         experience: "Nhiều năm kinh nghiệm quản lý và pháp lý",
-        image: "/images/team/bella-nguyen.jpg",
+        image: "/images/about/bella.jpg",
         email: "bella@solislaw.com.au"
       },
       {
@@ -67,7 +67,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Luật Hình Sự", "Luật Gia Đình", "Phân Tích Pháp Lý", "Tư Vấn Khách Hàng", "Bảo Vệ Quyền Lợi", "Giải Pháp Thiết Thực"],
         education: "Tiến sĩ Luật - Đại học RMIT, Úc",
         experience: "Nhiều năm kinh nghiệm, cộng tác từ 2023",
-        image: "/images/team/thanh-to.jpg",
+        image: "/images/about/thanhto.jpg",
         email: "thanhto@solislaw.com.au"
       }
     ]
@@ -87,7 +87,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         description: "Mr. Thanh Le Nguyen is the founder of Solis Lawyers, with more than a decade of professional experience and a strong reputation in the Australian legal community. Throughout his career, he has represented and successfully defended numerous clients in serious and complex cases, ranging from major criminal matters to sensitive and highly specialized legal proceedings. Beyond his expertise in criminal law, Lawyer Thanh Le Nguyen has extensive experience in immigration appeal hearings, where he has helped clients safeguard their rights and pursue new opportunities in Australia.",
         specialties: ["Criminal Law", "Immigration Law", "Family Law", "Court Appeals", "Property Settlements", "Child Custody"],
         experience: "Over 10 years of professional experience in Australia",
-        image: "/images/team/thanh-le.jpg",
+        image: "/images/about/thanhnguyen.jpg",
         email: "thanhle@solislaw.com.au",
         phone: "+61 2 8102 5657"
       },
@@ -98,7 +98,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         description: "Ms. Duong Bella Nguyen is the Director of Solis Lawyers Vietnam and General Manager of the Sydney Head Office. With her strong leadership and advanced professional expertise, she plays a key role in shaping the firm's strategic direction and ensuring seamless coordination across its international network. She is recognized not only for her outstanding management skills but also for her high-level legal expertise, particularly in navigating and resolving difficult and complex cases.",
         specialties: ["Strategic Management", "International Law", "Corporate Consulting", "Cross-Border Coordination", "Complex Case Resolution", "System Development"],
         experience: "Many years of management and legal experience",
-        image: "/images/team/bella-nguyen.jpg",
+        image: "/images/about/bella.jpg",
         email: "bella@solislaw.com.au"
       },
       {
@@ -109,14 +109,14 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Criminal Law", "Family Law", "Legal Analysis", "Client Consultation", "Rights Protection", "Practical Solutions"],
         education: "PhD in Law - RMIT University, Australia",
         experience: "Many years of experience, collaborating since 2023",
-        image: "/images/team/thanh-to.jpg",
+        image: "/images/about/thanhto.jpg",
         email: "thanhto@solislaw.com.au"
       }
     ]
   }
 };
 
-export default function Member() {
+export default function Team() {
   const { language } = useLanguage();
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const currentContent = content[language];
@@ -194,7 +194,7 @@ export default function Member() {
           <h4 className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] bg-clip-text text-transparent tracking-widest uppercase text-lg font-semibold mb-4">
             {currentContent.sectionTitle}
           </h4>
-          <h2 className="font_play text-3xl lg:text-4xl leading-tight text-[var(--heading-color)] mb-6">
+          <h2 className="font_play text-4xl lg:text-5xl leading-tight text-[var(--heading-color)] mb-6">
             {currentContent.sectionSubtitle}
           </h2>
           <div className="w-24 h-1 bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] mx-auto rounded-full"></div>
@@ -225,9 +225,21 @@ export default function Member() {
               <div className="relative h-80 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                 <motion.div
                   variants={imageVariants}
-                  className="absolute inset-0 flex items-center justify-center"
+                  className="absolute inset-0"
                 >
-                  <div className="w-full h-full bg-gradient-to-br from-[#d5aa6d]/20 to-[#9b6f45]/20 flex items-center justify-center">
+                  <img 
+                    src={member.image}
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      // Fallback khi ảnh không load được
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling!.classList.remove('hidden');
+                    }}
+                  />
+                  {/* Fallback placeholder */}
+                  <div className="hidden w-full h-full bg-gradient-to-br from-[#d5aa6d]/20 to-[#9b6f45]/20 flex items-center justify-center">
                     <div className="text-center text-gray-400">
                       <Users size={64} className="mx-auto mb-4 opacity-50" />
                       <p className="text-sm font-medium">Photo Placeholder</p>
@@ -419,7 +431,7 @@ export default function Member() {
           <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto relative shadow-2xl">
             {/* Close button */}
             <button 
-              className="absolute top-4 right-4 w-6 h-6 bg-[#d5aa6d] text-white rounded-full flex items-center justify-center hover:bg-[#9b6f45] transition-colors duration-300 text-xl font-bold z-10"
+              className="absolute top-4 right-4 w-10 h-10 bg-[#d5aa6d] text-white rounded-full flex items-center justify-center hover:bg-[#9b6f45] transition-colors duration-300 text-xl font-bold z-10"
               onClick={closeModal}
             >
               ×
@@ -431,7 +443,7 @@ export default function Member() {
               if (!member) return null;
               
               return (
-                <div className="pt-3">
+                <div className="pr-12">
                   <div className="mb-6">
                     <h3 className="text-2xl font-bold text-[#d5aa6d] mb-2">
                       {member.name}

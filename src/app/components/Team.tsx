@@ -262,7 +262,7 @@ export default function Team() {
                         before:transition-all before:duration-700 before:ease-in-out
                         group-hover:before:h-full"
                     >
-                      <img src={member.image} alt={`${member.name}'s profile`} className="w-full h-auto" />
+                      <img src={member.image} alt={`${member.name}'s profile`} className="w-full max-h-[380px] object-cover" />
                       <div
                         className="absolute bottom-[15px] right-[20px] flex flex-col items-center"
                         onMouseEnter={() => setHoveredCard(index)}

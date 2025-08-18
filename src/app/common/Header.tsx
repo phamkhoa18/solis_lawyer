@@ -81,23 +81,23 @@ export default function Header() {
       <div className={`top-header border-b border-white/20 bg-transparent ${isScrolled ? 'hidden' : 'block'}`}>
         <div className="container mx-auto px-4">
           <div className="py-4 justify-between lg:flex hidden text-sm text-white/80">
-            <div className="time">{language === 'EN' ? 'Mon – Sun: 9:00 AM – 8:00 PM' : 'Thứ Hai – Chủ Nhật: 9:00 – 20:00'}</div>
+            <div className="time">{language === 'EN' ? 'Monday - Friday: 9:00 AM - 5:00 PM Saturday: 9:00 AM - 12:00 PM' : 'Thứ Hai - Thứ Sáu: 9:00 - 17:00 Thứ Bảy: 9:00 - 12:00'}</div>
             <div className="info flex gap-6">
               <a
-                href="https://maps.google.com/?q=121+King+Street,+Melbourne"
+                href="https://maps.google.com/?q=Suite 34, Liberty Plaza, 256 Chapel Rd, Bankstown NSW 2200"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex gap-2.5 items-center hover:text-[#d5aa6d] transition-colors"
               >
                 <MapPinHouse color="#d5aa6d" strokeWidth={1.4} size={20} />
-                121 King Street, Melbourne
+                Suite 34, Liberty Plaza, 256 Chapel Rd, Bankstown NSW 2200
               </a>
               <a
-                href="mailto:info@solislaw.com.au"
+                href="mailto:contact@solislaw.com.au"
                 className="flex gap-2.5 items-center hover:text-[#d5aa6d] transition-colors"
               >
                 <Mail color="#d5aa6d" strokeWidth={1.4} size={20} />
-                info@solislaw.com.au
+                contact@solislaw.com.au
               </a>
             </div>
           </div>
