@@ -2,8 +2,9 @@ import React, { } from 'react'
 import PageTitle from '../components/PageTitle'
 import Header from '../common/Header'
 import About from '../components/About'
-import Team from '../components/Team'
+// import Team from '../components/Team'
 import Footer from '../common/Footer'
+import Member from '../components/Member'
 
 export default function AboutPage() {
     return (
@@ -20,7 +21,8 @@ export default function AboutPage() {
         />
 
         <About></About>
-        <Team></Team>
+        {/* <Team></Team> */}
+        <Member></Member>
     </section>
     <Footer></Footer>
     </>
