@@ -46,8 +46,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Luật Hình Sự", "Luật Di Trú", "Luật Gia Đình", "Kháng Cáo Tòa Án", "Phân Chia Tài Sản", "Quyền Nuôi Con"],
         experience: "Hơn 10 năm kinh nghiệm hành nghề tại Úc",
         image: "/images/about/thanhnguyen.jpg",
-        email: "thanhle@solislaw.com.au",
-        phone: "+61 2 8102 5657"
       },
       {
         id: "director",
@@ -57,7 +55,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Luật Di Trú", "Luật Hình Sự", "Luật Gia Đình", "Quản Lý Chiến Lược", "Tư Vấn Doanh Nghiệp", "Đầu Tư"],
         experience: "Nhiều năm kinh nghiệm quản lý và pháp lý",
         image: "/images/about/bella.jpg",
-        email: "bella@solislaw.com.au"
       },
       {
         id: "associate",
@@ -68,7 +65,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         education: "Tiến sĩ Luật - Đại học RMIT, Úc",
         experience: "Nhiều năm kinh nghiệm, cộng tác từ 2023",
         image: "/images/about/thanhto.jpg",
-        email: "thanhto@solislaw.com.au"
       }
     ]
   },
@@ -88,8 +84,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Criminal Law", "Immigration Law", "Family Law", "Court Appeals", "Property Settlements", "Child Custody"],
         experience: "Over 10 years of professional experience in Australia",
         image: "/images/about/thanhnguyen.jpg",
-        email: "thanhle@solislaw.com.au",
-        phone: "+61 2 8102 5657"
       },
       {
         id: "director",
@@ -99,7 +93,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         specialties: ["Immigration Law", "Criminal Law", "Family Law", "Strategic Management", "Corporate Consulting", "Investment"],
         experience: "Many years of management and legal experience",
         image: "/images/about/bella.jpg",
-        email: "bella@solislaw.com.au"
       },
       {
         id: "associate",
@@ -110,7 +103,6 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         education: "PhD in Law - RMIT University, Australia",
         experience: "Many years of experience, collaborating since 2023",
         image: "/images/about/thanhto.jpg",
-        email: "thanhto@solislaw.com.au"
       }
     ]
   }
@@ -361,7 +353,7 @@ export default function Team() {
                 </div>
 
                 {/* Contact Info */}
-                <div className="pt-4 border-t border-gray-100">
+                {/* <div className="pt-4 border-t border-gray-100">
                   <h4 className="font-semibold text-[var(--heading-color)] text-sm mb-3 flex items-center gap-2">
                     <Mail size={14} className="text-[#d5aa6d]" />
                     {currentContent.contactLabel}
@@ -386,7 +378,7 @@ export default function Team() {
                       </a>
                     )}
                   </div>
-                </div>
+                </div> */}
 
               </div>
             </motion.div>

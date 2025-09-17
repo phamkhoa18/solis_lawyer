@@ -1,10 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 // Contact Component
 "use client"
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { Mail, Phone, MapPin, Building2, Clock, Send, CheckCircle } from 'lucide-react';
+import { Mail, Phone, MapPin,Send, CheckCircle } from 'lucide-react';
 
 interface Office {
   id: string;
@@ -13,6 +14,7 @@ interface Office {
   phone: string;
   email: string;
   description: string;
+  country: 'AU' | 'VN';
   isMain?: boolean;
 }
 
@@ -39,6 +41,28 @@ interface ContactContent {
   };
 }
 
+// Flag Components using existing SVG files
+const CountryFlag = ({ country, className }: { country: 'AU' | 'VN'; className?: string }) => {
+  const flagSrc = country === 'AU' ? '/images/contact/aus.svg' : '/images/contact/vn.svg';
+  const altText = country === 'AU' ? 'Australian Flag' : 'Vietnamese Flag';
+  
+  return (
+    <div className={`${className} relative overflow-hidden rounded-xl shadow-lg border-2 border-white/50 bg-gradient-to-br from-white/10 to-transparent group-hover:shadow-xl transition-all duration-500`}>
+      <img 
+        src={flagSrc}
+        alt={altText}
+        className="w-full h-full object-cover object-center"
+        loading="lazy"
+      />
+      {/* Glossy overlay effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none"></div>
+      
+      {/* Optional: Add a subtle inner shadow for depth */}
+      <div className="absolute inset-0 shadow-inner rounded-xl pointer-events-none"></div>
+    </div>
+  );
+};
+
 const content: Record<'VI' | 'EN', ContactContent> = {
   VI: {
     pageTitle: "Liên Hệ Với Chúng Tôi",
@@ -52,39 +76,44 @@ const content: Record<'VI' | 'EN', ContactContent> = {
         phone: "+61 2 8102 5657",
         email: "contact@solislaw.com.au",
         description: "Trụ sở chính tại Bankstown, trung tâm điều phối toàn hệ thống với đội ngũ luật sư dày dạn kinh nghiệm.",
+        country: "AU",
         isMain: true
       },
       {
-        id: "vic",
-        name: "Chi Nhánh Victoria",
-        address: "Suite B03 / 93 Furlong Rd, Cairnlea VIC 3023",
-        phone: "+61 2 8102 5657",
-        email: "melbourne@solislaw.com.au",
-        description: "Phục vụ khách hàng tại Melbourne và các vùng lân cận với dịch vụ pháp lý chuyên nghiệp."
+        id: "haiphong",
+        name: "VP Hải Phòng",
+        address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hải Phòng",
+        phone: "+84 96 9810886",
+        email: "contact@solislaw.com.au",
+        description: "Phục vụ nhu cầu pháp lý ngày càng tăng của khách hàng tại khu vực phía Bắc Việt Nam.",
+        country: "VN"
       },
       {
         id: "qld",
         name: "Chi Nhánh Queensland",
         address: "Suite 10 / 13 Karp Court, Bundall QLD 4217",
         phone: "+61 2 8102 5657",
-        email: "goldcoast@solislaw.com.au",
-        description: "Tại trung tâm Gold Coast, cung cấp dịch vụ pháp lý nhanh chóng và hiệu quả."
+        email: "contact@solislaw.com.au",
+        description: "Tại trung tâm Gold Coast, cung cấp dịch vụ pháp lý nhanh chóng và hiệu quả.",
+        country: "AU"
       },
       {
         id: "hcmc",
         name: "VP TP. Hồ Chí Minh",
         address: "124 Điện Biên Phủ, Phường Đa Kao, Quận 1, TP. Hồ Chí Minh",
-        phone: "+84 28 1234 5678",
-        email: "hcmc@solislaw.com.au",
-        description: "Cầu nối quan trọng giữa Solis Lawyers và khách hàng tại Việt Nam, hỗ trợ các vấn đề pháp lý xuyên biên giới."
+        phone: "+84 96 9810886",
+        email: "contact@solislaw.com.au",
+        description: "Cầu nối quan trọng giữa Solis Lawyers và khách hàng tại Việt Nam, hỗ trợ các vấn đề pháp lý xuyên biên giới.",
+        country: "VN"
       },
       {
-        id: "haiphong",
-        name: "VP Hải Phòng",
-        address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hải Phòng",
-        phone: "+84 225 1234 567",
-        email: "haiphong@solislaw.com.au",
-        description: "Phục vụ nhu cầu pháp lý ngày càng tăng của khách hàng tại khu vực phía Bắc Việt Nam."
+        id: "vic",
+        name: "Chi Nhánh Victoria",
+        address: "Shop 2/1037 Ballarat Rd, Ravenhall VIC 3023",
+        phone: "+61 2 8102 5657",
+        email: "contact@solislaw.com.au",
+        description: "Phục vụ khách hàng tại Melbourne và các vùng lân cận với dịch vụ pháp lý chuyên nghiệp.",
+        country: "AU"
       }
     ],
     form: {
@@ -116,39 +145,44 @@ const content: Record<'VI' | 'EN', ContactContent> = {
         phone: "+61 2 8102 5657",
         email: "contact@solislaw.com.au",
         description: "Our head office in Bankstown, the strategic coordination center with highly experienced legal team.",
+        country: "AU",
         isMain: true
       },
       {
-        id: "vic",
-        name: "Victoria Branch",
-        address: "Suite B03 / 93 Furlong Rd, Cairnlea VIC 3023",
-        phone: "+61 2 8102 5657",
-        email: "melbourne@solislaw.com.au",
-        description: "Serving clients in Melbourne and surrounding areas with professional legal services."
+        id: "haiphong",
+        name: "Hai Phong Office",
+        address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hai Phong",
+        phone: "+84 96 9810886",
+        email: "contact@solislaw.com.au",
+        description: "Meeting the growing legal needs of clients in Northern Vietnam region.",
+        country: "VN"
       },
       {
         id: "qld",
         name: "Queensland Branch",
         address: "Suite 10 / 13 Karp Court, Bundall QLD 4217",
         phone: "+61 2 8102 5657",
-        email: "goldcoast@solislaw.com.au",
-        description: "Located in the heart of Gold Coast, providing timely and effective legal services."
+        email: "contact@solislaw.com.au",
+        description: "Located in the heart of Gold Coast, providing timely and effective legal services.",
+        country: "AU"
       },
       {
         id: "hcmc",
         name: "Ho Chi Minh City Office",
         address: "124 Điện Biên Phủ, Đa Kao Ward, District 1, Ho Chi Minh City",
-        phone: "+84 28 1234 5678",
-        email: "hcmc@solislaw.com.au",
-        description: "Important bridge between Solis Lawyers and clients in Vietnam, supporting cross-border legal issues."
+        phone: "+84 96 9810886",
+        email: "contact@solislaw.com.au",
+        description: "Important bridge between Solis Lawyers and clients in Vietnam, supporting cross-border legal issues.",
+        country: "VN"
       },
       {
-        id: "haiphong",
-        name: "Hai Phong Office",
-        address: "HA1, 62 Vinhomes Marina Cầu Rào, An Biên, Lê Chân, Hai Phong",
-        phone: "+84 225 1234 567",
-        email: "haiphong@solislaw.com.au",
-        description: "Meeting the growing legal needs of clients in Northern Vietnam region."
+        id: "vic",
+        name: "Victoria Branch",
+        address: "Shop 2/1037 Ballarat Rd, Ravenhall VIC 3023",
+        phone: "+61 2 8102 5657",
+        email: "contact@solislaw.com.au",
+        description: "Serving clients in Melbourne and surrounding areas with professional legal services.",
+        country: "AU"
       }
     ],
     form: {
@@ -216,6 +250,10 @@ export default function Contact() {
     }, 3000);
   };
 
+  const renderCountryFlag = (country: 'AU' | 'VN') => {
+    return <CountryFlag country={country} className="w-10 h-8 lg:w-14 lg:h-10 xl:w-18 xl:h-12" />;
+  };
+
   return (
     <section className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative overflow-hidden">
       
@@ -224,7 +262,6 @@ export default function Contact() {
       <div className="absolute bottom-20 left-20 w-64 h-64 bg-gradient-to-tr from-[#d5aa6d]/3 to-[#9b6f45]/3 rounded-full blur-2xl"></div>
 
       <div className="container mx-auto px-4 py-8 lg:py-24 relative z-10">
-
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6 lg:gap-12">
@@ -255,22 +292,23 @@ export default function Contact() {
                   }`}
                 >
                   
-                  {/* Office Header */}
+                  {/* Office Header with Flag replacing Building Icon */}
                   <div className="flex items-start gap-3 lg:gap-4 mb-3 lg:mb-4">
-                    <div className={`p-2 lg:p-3 rounded-lg lg:rounded-xl flex-shrink-0 ${
-                      office.isMain 
-                        ? 'bg-gradient-to-br from-[#d5aa6d] to-[#9b6f45] text-white' 
-                        : 'bg-gradient-to-br from-[#d5aa6d]/10 to-[#9b6f45]/10 text-[#d5aa6d] group-hover:from-[#d5aa6d] group-hover:to-[#9b6f45] group-hover:text-white'
-                    } transition-all duration-300`}>
-                      <Building2 size={20} className="lg:w-6 lg:h-6" />
+                    
+                    {/* Country Flag as main icon with enhanced styling */}
+                    <div className={`flex-shrink-0 relative group-hover:scale-110 transition-all duration-500 `}>
+                      {renderCountryFlag(office.country)}
+                      {/* Flag shine effect on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 group-hover:translate-x-full transition-transform duration-700 opacity-0 group-hover:opacity-100"></div>
                     </div>
+                    
                     <div className="flex-1 min-w-0">
                       <h3 className={`text-base lg:text-lg xl:text-xl font-bold mb-1 ${
                         office.isMain ? 'text-[#d5aa6d]' : 'text-[var(--heading-color)] group-hover:text-[#d5aa6d]'
                       } transition-colors duration-300 leading-tight`}>
                         {office.name}
                         {office.isMain && (
-                          <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0 text-xs bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] text-white px-2 py-1 rounded-full">
+                          <span className="block sm:inline sm:ml-2 mt-1 sm:mt-0 text-xs bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] text-white px-2 py-1 rounded-full shadow-lg">
                             {language === 'VI' ? 'Trụ sở chính' : 'Head Office'}
                           </span>
                         )}
@@ -317,27 +355,6 @@ export default function Contact() {
 
           {/* Contact Form & Working Hours - 1 column, full width on mobile */}
           <div className="lg:col-span-1 space-y-4 lg:space-y-6">
-            
-            {/* Working Hours */}
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="bg-white rounded-xl lg:rounded-2xl p-4 lg:p-6 shadow-lg border border-gray-100"
-            >
-              <div className="flex items-center gap-2 lg:gap-3 mb-3 lg:mb-4">
-                <Clock className="text-[#d5aa6d]" size={20} />
-                <h3 className="text-lg lg:text-xl font-bold text-[var(--heading-color)]">
-                  {currentContent.workingHours.title}
-                </h3>
-              </div>
-              <div className="space-y-1 lg:space-y-2 text-xs lg:text-sm text-[var(--paragraph)]">
-                <p className="font-medium">{currentContent.workingHours.weekdays}</p>
-                <p>{currentContent.workingHours.saturday}</p>
-                <p className="text-gray-400">{currentContent.workingHours.sunday}</p>
-              </div>
-            </motion.div>
-
             {/* Contact Form */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}

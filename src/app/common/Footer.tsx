@@ -67,7 +67,7 @@ const content: Record<'VI' | 'EN', FooterContent> = {
       },
       vic: {
         title: "Chi Nhánh Victoria",
-        address: "Suite B03 / 93 Furlong Rd, Cairnlea VIC 3023"
+        address: "Shop 2/1037 Ballarat Rd, Ravenhall VIC 3023"
       },
       qld: {
         title: "Chi Nhánh Queensland",
@@ -103,7 +103,7 @@ const content: Record<'VI' | 'EN', FooterContent> = {
       },
       vic: {
         title: "Victoria Branch",
-        address: "Suite B03 / 93 Furlong Rd, Cairnlea VIC 3023"
+        address: "Shop 2/1037 Ballarat Rd, Ravenhall VIC 3023"
       },
       qld: {
         title: "Queensland Branch",
@@ -253,18 +253,6 @@ export default function Footer() {
                 <Mail size={18} strokeWidth={1.5} className="shrink-0 text-[#d5aa6d] mt-0.5" />
                 <span className="break-words leading-relaxed">contact@solislaw.com.au</span>
               </a>
-
-              <div className="mt-4">
-                <h4 className="font-semibold text-white mb-3">
-                  {language === 'VI' ? 'Giờ Làm Việc' : 'Office Hours'}
-                </h4>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  {language === 'VI' 
-                    ? 'Thứ Hai - Thứ Sáu: 9:00 - 17:00\nThứ Bảy: 9:00 - 12:00'
-                    : 'Monday - Friday: 9:00 AM - 5:00 PM\nSaturday: 9:00 AM - 12:00 PM'
-                  }
-                </p>
-              </div>
             </div>
           </div>
 
