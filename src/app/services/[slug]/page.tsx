@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React from 'react';
 import Image from 'next/image';
@@ -10,70 +10,124 @@ import Footer from '@/app/common/Footer';
 import PageTitle from '@/app/components/PageTitle';
 import GetInTouch from '@/app/components/GetInTouch';
 import { useParams } from 'next/navigation';
+import { useLanguage } from '@/app/context/LanguageContext';
 
-const serviceData = {
+interface ServiceDetail {
+  title: { en: string; vi: string };
+  icon: string;
+  alt: string;
+  description: { en: string; vi: string };
+  benefits: { en: string[]; vi: string[] };
+  team: { name: string; role: { en: string; vi: string }; image: string }[];
+}
+
+const serviceData: Record<string, ServiceDetail> = {
   'criminal-law': {
-    title: 'Criminal Law',
+    title: { en: 'Criminal Law', vi: 'Luật Hình Sự' },
     icon: '/images/icons/gun.png',
     alt: 'Criminal Law Icon',
-    description: 'Our criminal law experts provide robust defense and representation to protect your rights in all types of criminal cases, from minor offenses to serious felonies.',
-    benefits: [
-      'Expert legal defense tailored to your case',
-      '24/7 availability for emergencies',
-      'Proven track record in court victories',
-      'Confidential and compassionate support',
-    ],
+    description: {
+      en: 'Our criminal law experts provide robust defense and representation to protect your rights in all types of criminal cases, from minor offenses to serious felonies.',
+      vi: 'Các chuyên gia luật hình sự của chúng tôi cung cấp dịch vụ bào chữa và đại diện mạnh mẽ để bảo vệ quyền lợi của bạn trong mọi loại vụ án hình sự.',
+    },
+    benefits: {
+      en: [
+        'Expert legal defense tailored to your case',
+        '24/7 availability for emergencies',
+        'Proven track record in court victories',
+        'Confidential and compassionate support',
+      ],
+      vi: [
+        'Bào chữa pháp lý chuyên nghiệp phù hợp với vụ việc của bạn',
+        'Hỗ trợ 24/7 cho trường hợp khẩn cấp',
+        'Thành tích chiến thắng tại tòa đã được chứng minh',
+        'Hỗ trợ bảo mật và tận tâm',
+      ],
+    },
     team: [
-      { name: 'John Doe', role: 'Lead Criminal Attorney', image: '/images/team/john-doe.jpg' },
-      { name: 'Jane Smith', role: 'Senior Associate', image: '/images/team/jane-smith.jpg' },
+      { name: 'John Doe', role: { en: 'Lead Criminal Attorney', vi: 'Luật sư Hình sự Trưởng' }, image: '/images/team/john-doe.jpg' },
+      { name: 'Jane Smith', role: { en: 'Senior Associate', vi: 'Luật sư Cao cấp' }, image: '/images/team/jane-smith.jpg' },
     ],
   },
   'family-law': {
-    title: 'Family Law',
+    title: { en: 'Family Law', vi: 'Luật Gia Đình' },
     icon: '/images/icons/family.png',
     alt: 'Family Law Icon',
-    description: 'We offer compassionate and strategic legal support for family-related matters, including divorce, child custody, and spousal support.',
-    benefits: [
-      'Personalized family law solutions',
-      'Mediation and litigation expertise',
-      'Child-focused custody arrangements',
-      'Emotional and legal guidance',
-    ],
+    description: {
+      en: 'We offer compassionate and strategic legal support for family-related matters, including divorce, child custody, and spousal support.',
+      vi: 'Chúng tôi cung cấp hỗ trợ pháp lý chiến lược và tận tâm cho các vấn đề gia đình, bao gồm ly hôn, quyền nuôi con và cấp dưỡng.',
+    },
+    benefits: {
+      en: [
+        'Personalized family law solutions',
+        'Mediation and litigation expertise',
+        'Child-focused custody arrangements',
+        'Emotional and legal guidance',
+      ],
+      vi: [
+        'Giải pháp luật gia đình cá nhân hóa',
+        'Chuyên môn hòa giải và tố tụng',
+        'Sắp xếp quyền nuôi con lấy trẻ em làm trung tâm',
+        'Hướng dẫn pháp lý và tinh thần',
+      ],
+    },
     team: [
-      { name: 'Emily Brown', role: 'Family Law Specialist', image: '/images/team/emily-brown.jpg' },
-      { name: 'Michael Lee', role: 'Associate Attorney', image: '/images/team/michael-lee.jpg' },
+      { name: 'Emily Brown', role: { en: 'Family Law Specialist', vi: 'Chuyên gia Luật Gia đình' }, image: '/images/team/emily-brown.jpg' },
+      { name: 'Michael Lee', role: { en: 'Associate Attorney', vi: 'Luật sư Phối hợp' }, image: '/images/team/michael-lee.jpg' },
     ],
   },
   'migration-law': {
-    title: 'Migration Law',
+    title: { en: 'Migration Law', vi: 'Luật Di Trú' },
     icon: '/images/icons/fly.png',
     alt: 'Migration Law Icon',
-    description: 'Our migration law services ensure seamless visa applications, residency processes, and compliance with immigration regulations.',
-    benefits: [
-      'Expert visa and residency guidance',
-      'Tailored immigration strategies',
-      'Appeal support for denied applications',
-      'Up-to-date legal compliance',
-    ],
+    description: {
+      en: 'Our migration law services ensure seamless visa applications, residency processes, and compliance with immigration regulations.',
+      vi: 'Dịch vụ luật di trú của chúng tôi đảm bảo quá trình xin visa, thường trú và tuân thủ quy định nhập cư suôn sẻ.',
+    },
+    benefits: {
+      en: [
+        'Expert visa and residency guidance',
+        'Tailored immigration strategies',
+        'Appeal support for denied applications',
+        'Up-to-date legal compliance',
+      ],
+      vi: [
+        'Hướng dẫn visa và thường trú chuyên nghiệp',
+        'Chiến lược nhập cư phù hợp',
+        'Hỗ trợ kháng cáo cho đơn bị từ chối',
+        'Tuân thủ pháp lý cập nhật',
+      ],
+    },
     team: [
-      { name: 'Sarah Kim', role: 'Migration Law Expert', image: '/images/team/sarah-kim.jpg' },
-      { name: 'David Chen', role: 'Immigration Consultant', image: '/images/team/david-chen.jpg' },
+      { name: 'Sarah Kim', role: { en: 'Migration Law Expert', vi: 'Chuyên gia Luật Di trú' }, image: '/images/team/sarah-kim.jpg' },
+      { name: 'David Chen', role: { en: 'Immigration Consultant', vi: 'Tư vấn Nhập cư' }, image: '/images/team/david-chen.jpg' },
     ],
   },
   'conveyancing': {
-    title: 'Conveyancing',
+    title: { en: 'Conveyancing', vi: 'Chuyển Nhượng Bất Động Sản' },
     icon: '/images/icons/appeal.png',
     alt: 'Conveyancing Icon',
-    description: 'We provide meticulous conveyancing services to ensure smooth and legally sound property transactions.',
-    benefits: [
-      'Thorough property title checks',
-      'Efficient transfer processes',
-      'Legal risk mitigation',
-      'Transparent fee structure',
-    ],
+    description: {
+      en: 'We provide meticulous conveyancing services to ensure smooth and legally sound property transactions.',
+      vi: 'Chúng tôi cung cấp dịch vụ chuyển nhượng tỉ mỉ để đảm bảo các giao dịch bất động sản suôn sẻ và hợp pháp.',
+    },
+    benefits: {
+      en: [
+        'Thorough property title checks',
+        'Efficient transfer processes',
+        'Legal risk mitigation',
+        'Transparent fee structure',
+      ],
+      vi: [
+        'Kiểm tra quyền sở hữu bất động sản kỹ lưỡng',
+        'Quy trình chuyển nhượng hiệu quả',
+        'Giảm thiểu rủi ro pháp lý',
+        'Cấu trúc phí minh bạch',
+      ],
+    },
     team: [
-      { name: 'Robert Taylor', role: 'Conveyancing Specialist', image: '/images/team/robert-taylor.jpg' },
-      { name: 'Lisa Adams', role: 'Property Law Associate', image: '/images/team/lisa-adams.jpg' },
+      { name: 'Robert Taylor', role: { en: 'Conveyancing Specialist', vi: 'Chuyên gia Chuyển nhượng' }, image: '/images/team/robert-taylor.jpg' },
+      { name: 'Lisa Adams', role: { en: 'Property Law Associate', vi: 'Luật sư Bất động sản' }, image: '/images/team/lisa-adams.jpg' },
     ],
   },
 };
@@ -91,20 +145,26 @@ const cardVariants: Variants = {
 };
 
 export default function ServiceDetailPage() {
-  const { slug } = useParams() as { slug: string }
+  const { slug } = useParams() as { slug: string };
+  const { language } = useLanguage();
+  const lang = language.toLowerCase() as 'en' | 'vi';
   const service = serviceData[slug as keyof typeof serviceData] || serviceData['criminal-law'];
+
+  const title = service.title[lang] || service.title.en;
+  const description = service.description[lang] || service.description.en;
+  const benefits = service.benefits[lang] || service.benefits.en;
 
   return (
     <>
       <Header />
       <section className="services bg-gray-50 min-h-screen">
         <PageTitle
-          title={service.title}
+          title={title}
           backgroundImage="/images/bgbanner/page-title-bg.jpg"
           breadcrumb={[
-            { label: 'Home', href: '/' },
-            { label: 'Services', href: '/services' },
-            { label: service.title, href: `/services/${slug}` },
+            { label: lang === 'vi' ? 'Trang chủ' : 'Home', href: '/' },
+            { label: lang === 'vi' ? 'Dịch vụ' : 'Services', href: '/services' },
+            { label: title, href: `/services/${slug}` },
           ]}
         />
 
@@ -125,11 +185,11 @@ export default function ServiceDetailPage() {
                   height={64}
                   className="transition-transform duration-300 hover:scale-110"
                 />
-                <h1 className="text-3xl font_play font-bold text-gray-900">{service.title}</h1>
+                <h1 className="text-3xl font_play font-bold text-gray-900">{title}</h1>
               </div>
-              <p className="text-gray-600 text-lg leading-relaxed mb-6">{service.description}</p>
+              <p className="text-gray-600 text-lg leading-relaxed mb-6">{description}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-                {service.benefits.map((benefit, index) => (
+                {benefits.map((benefit, index) => (
                   <motion.div
                     key={benefit}
                     variants={cardVariants}
@@ -142,10 +202,10 @@ export default function ServiceDetailPage() {
                 ))}
               </div>
               <Link
-                href="#contact"
+                href="/contact"
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#d5aa6d] text-white rounded-lg hover:bg-[#9b6f45] transition-colors duration-300"
               >
-                Request Consultation <ArrowRight size={18} />
+                {lang === 'vi' ? 'Yêu Cầu Tư Vấn' : 'Request Consultation'} <ArrowRight size={18} />
               </Link>
             </motion.div>
 
@@ -157,7 +217,9 @@ export default function ServiceDetailPage() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              <h2 className="text-2xl font_play font-semibold text-gray-900 mb-6">Our Experts</h2>
+              <h2 className="text-2xl font_play font-semibold text-gray-900 mb-6">
+                {lang === 'vi' ? 'Đội Ngũ Chuyên Gia' : 'Our Experts'}
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {service.team.map((member, index) => (
                   <motion.div
@@ -175,7 +237,7 @@ export default function ServiceDetailPage() {
                     />
                     <div>
                       <h3 className="text-lg font_play font-medium text-gray-900">{member.name}</h3>
-                      <p className="text-gray-600 text-sm">{member.role}</p>
+                      <p className="text-gray-600 text-sm">{member.role[lang] || member.role.en}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -183,10 +245,12 @@ export default function ServiceDetailPage() {
             </motion.div>
           </div>
 
-          {/* Sidebar (Filter or Related Services) */}
+          {/* Sidebar */}
           <aside className="lg:w-1/3">
             <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-24">
-              <h3 className="text-xl font_play font-semibold text-gray-900 mb-4">Related Services</h3>
+              <h3 className="text-xl font_play font-semibold text-gray-900 mb-4">
+                {lang === 'vi' ? 'Dịch Vụ Liên Quan' : 'Related Services'}
+              </h3>
               <ul className="space-y-3">
                 {Object.keys(serviceData)
                   .filter((key) => key !== slug)
@@ -197,7 +261,7 @@ export default function ServiceDetailPage() {
                         className="flex items-center gap-2 text-gray-700 text-sm font-medium hover:text-[#B8967E] transition-colors duration-300"
                       >
                         <ArrowRight size={16} className="text-[#d5aa6d]" />
-                        {serviceData[key as keyof typeof serviceData].title}
+                        {serviceData[key as keyof typeof serviceData].title[lang] || serviceData[key as keyof typeof serviceData].title.en}
                       </Link>
                     </li>
                   ))}
@@ -208,8 +272,8 @@ export default function ServiceDetailPage() {
 
         {/* CTA Section */}
         <GetInTouch
-          title="Need Legal Assistance?"
-          description="Contact us today to discuss how we can support your legal needs."
+          title={lang === 'vi' ? 'Cần Hỗ Trợ Pháp Lý?' : 'Need Legal Assistance?'}
+          description={lang === 'vi' ? 'Liên hệ với chúng tôi hôm nay để thảo luận về nhu cầu pháp lý của bạn.' : 'Contact us today to discuss how we can support your legal needs.'}
         />
       </section>
       <Footer />

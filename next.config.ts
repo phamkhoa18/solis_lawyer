@@ -1,8 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
- images: {
-    domains: ["solislaw.com.au", "res.cloudinary.com"], // <-- thêm dòng này
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'solislaw.com.au',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+    ],
   },
 };
 

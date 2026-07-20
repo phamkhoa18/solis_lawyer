@@ -1,73 +1,47 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import toast from 'react-hot-toast';
 import { IMenu } from '@/lib/types/imenu';
+import { Plus, Pencil, Trash2, Menu as MenuIcon, RefreshCw, ChevronRight } from 'lucide-react';
 
-interface MenuItemProps {
-  menu: IMenu;
-  onEdit: (menu: IMenu) => void;
-  onDelete: (id: string) => void;
-  depth?: number;
+interface MenuForm {
+  name: { en: string; vi: string };
+  link: string;
+  slug: string;
+  icon: string;
+  parentId: string | null;
+  isActive: boolean;
 }
-
-const MenuItem: React.FC<MenuItemProps> = ({ menu, onEdit, onDelete, depth = 0 }) => {
-  return (
-    <div
-      className="flex items-center py-2 px-4 border-b hover:bg-gray-50"
-      style={{ marginLeft: `${depth * 20}px` }}
-    >
-      <div className="flex-1 grid grid-cols-5 gap-4">
-        <div>{menu.name.en}</div>
-        <div>{menu.link}</div>
-        <div>{menu.slug}</div>
-        <div className="text-center">
-          {menu.isActive ? (
-            <span className="text-green-600 font-semibold">Active</span>
-          ) : (
-            <span className="text-red-600 font-semibold">Inactive</span>
-          )}
-        </div>
-        <div className="text-center space-x-2">
-          <Button variant="outline" size="sm" onClick={() => onEdit(menu)}>
-            Sửa
-          </Button>
-          <Button variant="destructive" size="sm" onClick={() => onDelete(menu._id.toString())}>
-            Xóa
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function MenuPage() {
   const [menus, setMenus] = useState<IMenu[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editMenu, setEditMenu] = useState<IMenu | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const [form, setForm] = useState<Omit<IMenu, '_id' | 'createdAt' | 'updatedAt' | 'children' | 'order'>>({
+  const [form, setForm] = useState<MenuForm>({
     name: { en: '', vi: '' },
     link: '/',
     slug: '',
@@ -77,262 +51,205 @@ export default function MenuPage() {
   });
 
   const fetchMenus = async () => {
-    setLoading(true);
+    setLoading(true); setError(null);
     try {
       const res = await fetch('/api/menus');
       const data = await res.json();
-      if (data.success) {
-        setMenus(data.data);
-      } else {
-        toast.error('Không tải được danh sách menu');
-      }
+      if (data.success) { setMenus(data.data); }
+      else { setError('Không tải được danh sách menu'); toast.error('Không tải được danh sách menu'); }
     } catch {
-      toast.error('Lỗi khi kết nối server');
-    } finally {
-      setLoading(false);
-    }
+      setError('Lỗi kết nối server'); toast.error('Lỗi kết nối server');
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    fetchMenus();
-  }, []);
+  useEffect(() => { fetchMenus(); }, []);
 
   const handleOpenCreate = () => {
-    setIsEditing(false);
-    setEditMenu(null);
-    setForm({
-      name: { en: '', vi: '' },
-      link: '/',
-      slug: '',
-      icon: '',
-      parentId: null,
-      isActive: true,
-    });
+    setIsEditing(false); setEditMenu(null);
+    setForm({ name: { en: '', vi: '' }, link: '/', slug: '', icon: '', parentId: null, isActive: true });
     setOpen(true);
   };
 
   const handleOpenEdit = (menu: IMenu) => {
-    setIsEditing(true);
-    setEditMenu(menu);
+    setIsEditing(true); setEditMenu(menu);
     setForm({
-      name: menu.name,
-      link: menu.link,
-      slug: menu.slug,
-      icon: menu.icon || '',
-      parentId: menu.parentId,
-      isActive: menu.isActive,
+      name: menu.name, link: menu.link, slug: menu.slug, icon: menu.icon || '', parentId: menu.parentId ? menu.parentId.toString() : null, isActive: menu.isActive,
     });
     setOpen(true);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!form.name.vi.trim() || !form.name.en.trim() || !form.slug.trim() || !form.link.trim()) {
-      toast.error('Vui lòng nhập đầy đủ thông tin bắt buộc');
-      return;
+      toast.error('Vui lòng nhập đầy đủ thông tin bắt buộc'); return;
     }
-
     try {
       let res, data;
-      if (isEditing && editMenu) {
-        res = await fetch(`/api/menus/${editMenu._id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
-        });
+      if (isEditing && editMenu?._id) {
+        res = await fetch(`/api/menus/${editMenu._id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
         data = await res.json();
-        if (data.success) {
-          toast.success('Cập nhật menu thành công');
-          await fetchMenus();
-          setOpen(false);
-        } else {
-          toast.error(data.message || 'Cập nhật thất bại');
-        }
+        if (data.success) { toast.success('Cập nhật thành công'); fetchMenus(); setOpen(false); }
+        else { toast.error(data.message || 'Cập nhật thất bại'); }
       } else {
         const sameParentMenus = menus.filter((m) => (m.parentId || null) === (form.parentId || null));
-        const maxOrder = sameParentMenus.length
-          ? Math.max(...sameParentMenus.map((m) => m.order)) + 1
-          : 0;
-
-        res = await fetch('/api/menus', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, order: maxOrder }),
-        });
+        const maxOrder = sameParentMenus.length ? Math.max(...sameParentMenus.map((m) => m.order)) + 1 : 0;
+        res = await fetch('/api/menus', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, order: maxOrder }) });
         data = await res.json();
-        if (data.success) {
-          toast.success('Tạo menu thành công');
-          await fetchMenus();
-          setOpen(false);
-        } else {
-          toast.error(data.message || 'Tạo thất bại');
-        }
+        if (data.success) { toast.success('Tạo thành công'); fetchMenus(); setOpen(false); }
+        else { toast.error(data.message || 'Tạo thất bại'); }
       }
-    } catch {
-      toast.error('Lỗi server');
-    }
+    } catch { toast.error('Lỗi server'); }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa menu này không?')) return;
-
+    setDeletingId(id);
     try {
-      const res = await fetch(`/api/menus/${id}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`/api/menus/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (data.success) {
-        toast.success('Xóa menu thành công');
-        await fetchMenus();
-      } else {
-        toast.error(data.message || 'Xóa thất bại');
-      }
-    } catch {
-      toast.error('Lỗi server khi xóa');
-    }
+      if (data.success) { toast.success('Xóa thành công'); fetchMenus(); }
+      else { toast.error(data.message || 'Xóa thất bại'); }
+    } catch { toast.error('Lỗi server khi xóa'); }
+    finally { setDeletingId(null); setDeleteId(null); }
   };
 
   const renderMenuTree = (items: IMenu[], parentId: string | null = null, depth: number = 0) => {
-    const filteredItems = items
-      .filter((item) => (item.parentId || null) === parentId)
-      .sort((a, b) => a.order - b.order);
-
+    const filteredItems = items.filter((item) => (item.parentId || null) === parentId).sort((a, b) => a.order - b.order);
     return filteredItems.map((menu) => (
       <React.Fragment key={menu._id.toString()}>
-        <MenuItem
-          menu={menu}
-          onEdit={handleOpenEdit}
-          onDelete={handleDelete}
-          depth={depth}
-        />
+        <div className="flex items-center py-3 px-4 border-b border-slate-100 hover:bg-blue-50/30 transition-colors" style={{ paddingLeft: `${(depth * 24) + 16}px` }}>
+          <div className="flex-1 grid grid-cols-5 gap-4 items-center">
+            <div className="font-medium text-slate-700 flex items-center">
+              {depth > 0 && <ChevronRight className="w-4 h-4 text-slate-300 mr-1" />}
+              {menu.name.vi}
+            </div>
+            <div className="text-sm text-blue-600 truncate">{menu.link}</div>
+            <div className="text-sm text-slate-500 font-mono truncate">{menu.slug}</div>
+            <div className="text-center">
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${menu.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${menu.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {menu.isActive ? 'Hoạt động' : 'Tắt'}
+              </span>
+            </div>
+            <div className="flex justify-center gap-1.5">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg" onClick={() => handleOpenEdit(menu)}><Pencil className="w-3.5 h-3.5" /></Button>
+              <AlertDialog open={deleteId === menu._id?.toString()} onOpenChange={(open) => !open && setDeleteId(null)}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg" onClick={() => setDeleteId(menu._id!.toString())} disabled={deletingId === menu._id?.toString()}><Trash2 className="w-3.5 h-3.5" /></Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl">
+                  <AlertDialogHeader><AlertDialogTitle>Xóa menu này?</AlertDialogTitle><AlertDialogDescription>Hành động này không thể hoàn tác.</AlertDialogDescription></AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="rounded-xl">Hủy</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(menu._id!.toString())} className="bg-red-600 hover:bg-red-700 rounded-xl">{deletingId === menu._id?.toString() ? 'Đang xóa...' : 'Xóa'}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        </div>
         {renderMenuTree(items, menu._id.toString(), depth + 1)}
       </React.Fragment>
     ));
   };
 
+  const v = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.05 } } };
+  const iv = { hidden: { opacity: 0, y: 15 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
+
   return (
-    <Card className="shadow-xl border-0">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <CardTitle className="text-2xl font-bold text-gray-900">Quản lý Menu</CardTitle>
-          <Button onClick={handleOpenCreate}>+ Tạo mới</Button>
+    <motion.div className="space-y-6" variants={v} initial="hidden" animate="visible">
+      <motion.div variants={iv} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Quản lý Menu</h1>
+          <p className="text-sm text-slate-500 mt-1">{!loading && `${menus.length} mục menu`}</p>
         </div>
-      </CardHeader>
-      <CardContent className="p-0 sm:p-6">
-        {loading ? (
-          <div className="p-6">Đang tải...</div>
-        ) : menus.length === 0 ? (
-          <div className="p-6">Chưa có menu nào.</div>
-        ) : (
-          <div className="border rounded-md">
-            <div className="grid grid-cols-5 gap-4 font-semibold bg-gray-100 py-3 px-4">
-              <div>Tên (EN)</div>
-              <div>Link</div>
-              <div>Slug</div>
-              <div className="text-center">Trạng thái</div>
-              <div className="text-center">Hành động</div>
+        <Button onClick={handleOpenCreate} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-600/20 rounded-xl">
+          <Plus className="w-4 h-4 mr-2" />Tạo mới
+        </Button>
+      </motion.div>
+
+      <motion.div variants={iv}>
+        <Card className="shadow-sm border-slate-200/60 rounded-xl overflow-hidden">
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="p-6 space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
+            ) : error ? (
+              <div className="p-12 text-center">
+                <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mx-auto mb-3"><RefreshCw className="w-5 h-5 text-red-500" /></div>
+                <p className="text-red-500 font-medium">{error}</p>
+                <Button variant="outline" className="mt-4 rounded-xl" onClick={fetchMenus}>Thử lại</Button>
+              </div>
+            ) : menus.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3"><MenuIcon className="w-5 h-5 text-slate-400" /></div>
+                <p className="text-slate-500 font-medium">Chưa có menu nào</p>
+                <p className="text-sm text-slate-400 mt-1">Tạo menu mới để bắt đầu</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-5 gap-4 bg-slate-50/80 py-3 px-4 border-b border-slate-200 font-semibold text-sm text-slate-600">
+                    <div>Tên (VI)</div>
+                    <div>Link</div>
+                    <div>Slug</div>
+                    <div className="text-center">Trạng thái</div>
+                    <div className="text-center">Hành động</div>
+                  </div>
+                  {renderMenuTree(menus)}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-800">{isEditing ? 'Cập nhật Menu' : 'Tạo mới Menu'}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="nameEn" className="text-sm font-medium text-slate-700">Tên (EN)</Label>
+                <Input id="nameEn" value={form.name.en} onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })} required className="mt-1.5 rounded-xl" />
+              </div>
+              <div>
+                <Label htmlFor="nameVi" className="text-sm font-medium text-slate-700">Tên (VI)</Label>
+                <Input id="nameVi" value={form.name.vi} onChange={(e) => setForm({ ...form, name: { ...form.name, vi: e.target.value } })} required className="mt-1.5 rounded-xl" />
+              </div>
             </div>
-            {renderMenuTree(menus)}
-          </div>
-        )}
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="sm:max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{isEditing ? 'Cập nhật Menu' : 'Tạo mới Menu'}</DialogTitle>
-            </DialogHeader>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSubmit();
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <Label htmlFor="nameEn" className="mb-2">Tên (Tiếng Anh)</Label>
-                <Input
-                  id="nameEn"
-                  value={form.name.en}
-                  onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })}
-                  required
-                  placeholder="Nhập tên menu (EN)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="nameVi" className="mb-2">Tên (Tiếng Việt)</Label>
-                <Input
-                  id="nameVi"
-                  value={form.name.vi}
-                  onChange={(e) => setForm({ ...form, name: { ...form.name, vi: e.target.value } })}
-                  required
-                  placeholder="Nhập tên menu (VI)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="link" className="mb-2">Link</Label>
-                <Input
-                  id="link"
-                  value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
-                  required
-                  placeholder="Nhập link"
-                />
-              </div>
-              <div>
-                <Label htmlFor="slug" className="mb-2">Slug</Label>
-                <Input
-                  id="slug"
-                  value={form.slug}
-                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  required
-                  placeholder="Nhập slug"
-                />
-              </div>
-              <div>
-                <Label htmlFor="icon" className="mb-2">Icon</Label>
-                <Input
-                  id="icon"
-                  value={form.icon}
-                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
-                  placeholder="Nhập tên icon (tùy chọn)"
-                />
-              </div>
-              <div>
-                <Label htmlFor="parentId" className="mb-2">Menu cha</Label>
-                <Select
-                  value={form.parentId ? form.parentId.toString() : 'none'}
-                  onValueChange={(value) =>
-                    setForm({ ...form, parentId: value === 'none' ? null : value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Chọn menu cha" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Không có</SelectItem>
-                    {menus
-                      .filter((menu) => !editMenu || menu._id !== editMenu._id)
-                      .map((menu) => (
-                        <SelectItem key={menu._id.toString()} value={menu._id.toString()}>
-                          {menu.name.en}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="isActive"
-                  checked={form.isActive}
-                  onCheckedChange={(checked) => setForm({ ...form, isActive: checked })}
-                />
-                <Label htmlFor="isActive">Kích hoạt</Label>
-              </div>
-              <DialogFooter>
-                <Button type="submit">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </CardContent>
-    </Card>
+            <div>
+              <Label htmlFor="link" className="text-sm font-medium text-slate-700">Link</Label>
+              <Input id="link" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} required className="mt-1.5 rounded-xl text-blue-600" />
+            </div>
+            <div>
+              <Label htmlFor="slug" className="text-sm font-medium text-slate-700">Slug</Label>
+              <Input id="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="mt-1.5 rounded-xl font-mono text-sm" />
+            </div>
+            <div>
+              <Label htmlFor="parentId" className="text-sm font-medium text-slate-700">Menu cha</Label>
+              <Select value={form.parentId ? form.parentId.toString() : 'none'} onValueChange={(value) => setForm({ ...form, parentId: value === 'none' ? null : value })}>
+                <SelectTrigger className="mt-1.5 rounded-xl">
+                  <SelectValue placeholder="Chọn menu cha (nếu có)" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value="none">-- Không có --</SelectItem>
+                  {menus.filter((menu) => !editMenu || menu._id !== editMenu._id).map((menu) => (
+                    <SelectItem key={menu._id.toString()} value={menu._id.toString()}>{menu.name.vi}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-3 py-1">
+              <Switch id="isActive" checked={form.isActive} onCheckedChange={(checked) => setForm({ ...form, isActive: checked })} />
+              <Label htmlFor="isActive" className="cursor-pointer text-sm text-slate-700">Hoạt động</Label>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </motion.div>
   );
 }
