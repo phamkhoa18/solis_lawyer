@@ -41,6 +41,7 @@ async function getCategories(): Promise<{ name: string; link: string }[]> {
   try {
     await connectDB();
     const categories = await Category.find({ isActive: true }).sort({ name: 1 }).lean();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return categories.map((cat: any) => ({
       name: cat.name?.en || cat.name?.vi || 'Untitled',
       link: `/case-studies?category=${cat.slug}`,

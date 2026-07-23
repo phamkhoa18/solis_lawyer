@@ -62,6 +62,7 @@ export default function EditCaseStudyPage() {
     fetchCaseStudy();
     getCategories();
     getUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   async function fetchCaseStudy() {

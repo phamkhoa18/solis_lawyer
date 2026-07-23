@@ -31,6 +31,7 @@ export default function CaseStudyCarousel() {
         const res = await fetch('/api/casestudies');
         const data = await res.json();
         if (data.success && data.data) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mapped = data.data.slice(0, 6).map((cs: any) => ({
             title: cs.title?.[lang] || cs.title?.en || 'Untitled',
             image: cs.image || '/images/casestudy/1.jpg',

@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import toast from 'react-hot-toast';
 import {
-  Plus, Pencil, Trash2, Search, UserPlus, Shield, ShieldCheck, ShieldAlert,
+  Pencil, Trash2, Search, UserPlus, Shield, ShieldCheck, ShieldAlert,
   Mail, Eye, EyeOff, RefreshCw, Users,
 } from 'lucide-react';
 import { useDebounce } from 'use-debounce';

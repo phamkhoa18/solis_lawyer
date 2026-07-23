@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -84,7 +83,8 @@ export default function EditBannerPage() {
     } finally { setFetching(false); }
   };
 
-  useEffect(() => { if (id) fetchBanner(); }, [id]);
+  useEffect(() => { if (id) fetchBanner();   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleSubmit = async () => {
     if (!validateForm()) { toast.error('Vui lòng kiểm tra các trường bắt buộc.'); return; }

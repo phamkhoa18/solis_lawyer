@@ -1,5 +1,4 @@
 'use client';
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -9,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import ImageUploader from '@/components/cloudinaryUpload';
 import { Switch } from '@/components/ui/switch';
-import { Loader2, Globe, ImageIcon, ArrowLeft, Link as LinkIcon, Type } from 'lucide-react';
+import { Loader2, Globe, ImageIcon, ArrowLeft, Link as LinkIcon } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { IBanner } from '@/lib/types/ibanner';
 import { ApiResponse } from '@/lib/types/api-response';

@@ -128,6 +128,7 @@ export default function Team() {
 
   useEffect(() => {
     fetchMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Map members to card data using normalized language
