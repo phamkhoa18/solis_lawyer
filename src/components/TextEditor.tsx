@@ -54,16 +54,22 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
             body: formData,
           });
 
-          const data = await response.json();
+          let data;
+          try {
+            data = await response.json();
+          } catch (e) {
+            // Handle non-JSON response (like Nginx 413 HTML or 502 Bad Gateway)
+            throw new Error(`Server trả về lỗi HTTP ${response.status}: ${response.statusText}`);
+          }
 
-          if (!response.ok || !data.success || !data.url) {
-            throw new Error(data.message || 'Không nhận được URL ảnh');
+          if (!response.ok || !data?.success || !data?.url) {
+            throw new Error(data?.message || `Lỗi tải lên: HTTP ${response.status}`);
           }
 
           callback(data.url, { alt: file.name });
-        } catch (error) {
+        } catch (error: any) {
           console.error('Lỗi khi upload:', error);
-          alert('Không thể upload hình ảnh. Vui lòng thử lại.');
+          alert(`Không thể upload hình ảnh: ${error.message || 'Vui lòng thử lại.'}`);
         } finally {
           setUploading(false);
         }
