@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Plus, ChevronLeft, ChevronRight, SearchX, X } from 'lucide-react';
@@ -68,7 +68,7 @@ export default function CaseStudyList({ caseStudies }: { caseStudies: ICaseStudy
   const paginatedCards = filteredCards.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   // Reset to page 1 when search changes
-  useMemo(() => { setCurrentPage(1); }, [searchQuery]);
+  useEffect(() => { setCurrentPage(1); }, [searchQuery]);
 
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = [];

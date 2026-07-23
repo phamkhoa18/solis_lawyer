@@ -57,7 +57,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
           let data;
           try {
             data = await response.json();
-          } catch (e) {
+          } catch {
             // Handle non-JSON response (like Nginx 413 HTML or 502 Bad Gateway)
             throw new Error(`Server trả về lỗi HTTP ${response.status}: ${response.statusText}`);
           }
@@ -67,9 +67,9 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
           }
 
           callback(data.url, { alt: file.name });
-        } catch (error: any) {
+        } catch (error) {
           console.error('Lỗi khi upload:', error);
-          alert(`Không thể upload hình ảnh: ${error.message || 'Vui lòng thử lại.'}`);
+          alert(`Không thể upload hình ảnh: ${(error as Error).message || 'Vui lòng thử lại.'}`);
         } finally {
           setUploading(false);
         }
