@@ -75,6 +75,16 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         education: "Luật và Kinh doanh - Đại học Western Sydney, Úc",
         experience: "Luật sư của Tòa án Tối cao bang New South Wales",
         image: "/images/about/nick_le.jpeg",
+      },
+      {
+        id: "camvan_york",
+        name: "Luật sư Cẩm Vân (CamVan York)",
+        position: "Luật sư Điều hành (Managing Lawyer)",
+        description: "Luật sư Cẩm Vân (CamVan York) tốt nghiệp cử nhân Luật tại Đại học Western Sydney (Western Sydney University) – một nền tảng học thuật vững chắc tạo tiền đề cho sự nghiệp pháp lý thành công của bà. Hiện nay, bà đảm nhiệm vị trí Luật sư Điều hành (Managing Lawyer) tại văn phòng Bankstown của Solis Lawyers. Tại Solis Lawyers, Luật sư Cẩm Vân là chuyên gia tư vấn và tranh tụng trong các lĩnh vực trọng tâm bao gồm: Luật Hình sự, Luật Gia đình, Di chúc & Thừa kế, cùng dịch vụ Tư vấn Pháp lý chuyên sâu cho khách hàng. Trong mảng Luật Gia đình, bà dành nhiều tâm huyết hỗ trợ khách hàng giải quyết các vấn đề phức tạp về quyền nuôi con (child custody) và thỏa thuận phân chia tài sản (property settlements). Bà đặc biệt có bề dày kinh nghiệm thực chiến trong việc bảo vệ quyền lợi khách hàng ở các vụ án bạo lực gia đình và thủ tục lệnh cấm bạo lực (AVO proceedings). Bên cạnh đó, bà cũng là người cố vấn tin cậy giúp khách hàng hoạch định tài sản, lập di chúc và xử lý các thủ tục thừa kế một cách chặt chẽ, rõ ràng. Bám sát phương châm làm việc cốt lõi của Solis Lawyers, Luật sư Cẩm Vân luôn tiếp cận từng vụ việc với tư duy phân tích nhạy bén, chiến lược tranh tụng tỉ mỉ và sự tận tụy trong từng buổi tư vấn. Khả năng lắng nghe, thấu hiểu tâm lý kết hợp với bản lĩnh tại tòa án giúp bà khéo léo chuyển hóa những áp lực mệt mỏi về mặt cảm xúc thành những giải pháp pháp lý vững chắc, bảo vệ tối đa quyền và lợi ích hợp pháp cho khách hàng.",
+        specialties: ["Luật Hình Sự", "Luật Gia Đình", "Di Chúc & Thừa Kế", "Quyền Nuôi Con", "Phân Chia Tài Sản", "Lệnh Cấm Bạo Lực (AVO)"],
+        education: "Cử nhân Luật - Đại học Western Sydney, Úc",
+        experience: "Luật sư Điều hành tại văn phòng Bankstown, Solis Lawyers",
+        image: "/images/about/van.jpg",
       }
     ]
   },
@@ -123,6 +133,16 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         education: "Law and Business - Western Sydney University, Australia",
         experience: "Admitted as a Solicitor of the Supreme Court of New South Wales",
         image: "/images/about/nick_le.jpeg",
+      },
+      {
+        id: "camvan_york",
+        name: "CamVan York (Cẩm Vân)",
+        position: "Managing Lawyer",
+        description: "CamVan York (Cẩm Vân) completed her Bachelor of Laws at Western Sydney University, establishing a formidable academic foundation for her legal career. She currently serves as the Managing Lawyer at Solis Lawyers' Bankstown office. At Solis Lawyers, CamVan focuses her practice on Criminal Law, Family Law, Wills & Estates, and Strategic Client Consultation. Within Family Law, she is deeply committed to guiding clients through the intricacies of child custody arrangements and property settlements. She brings extensive hands-on experience in court representation, with particular expertise in defending clients in domestic violence matters and Apprehended Violence Order (AVO) proceedings. Additionally, she acts as a trusted advisor in estate planning, helping clients structure secure wills and navigate complex estate administration. Anchoring her practice in the core strategic approach of Solis Lawyers, CamVan combines sharp analytical foresight with a personalized, empathetic consultation style. Whether negotiating out-of-court solutions or advocating in front of a judge, she protects her clients' paramount interests with meticulous precision, smoothly transforming complex emotional challenges into structured, legally sound resolutions.",
+        specialties: ["Criminal Law", "Family Law", "Wills & Estates", "Child Custody", "Property Settlements", "AVO Proceedings"],
+        education: "Bachelor of Laws - Western Sydney University, Australia",
+        experience: "Managing Lawyer at Solis Lawyers' Bankstown office",
+        image: "/images/about/van.jpg",
       }
     ]
   }

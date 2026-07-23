@@ -9,42 +9,23 @@ async function uploadImage(file: File): Promise<string> {
   if (file.size > 5 * 1024 * 1024) throw new Error('File quá lớn (max 5MB)');
   if (!file.type.startsWith('image/')) throw new Error('Chỉ hỗ trợ file ảnh');
 
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  // Upload lên server local qua /api/upload
+  const formData = new FormData();
+  formData.append('file', file);
 
-  if (cloudName && uploadPreset) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', uploadPreset);
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
 
-    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData,
-    });
-    
-    if (!res.ok) {
-      throw new Error('Upload ảnh lên Cloudinary thất bại');
-    }
-    const data = await res.json();
-    return data.secure_url;
-  } else {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || `Upload lỗi: ${res.status}`);
-    }
-
-    const data = await res.json();
-    if (!data.success || !data.url) throw new Error('Không nhận được URL ảnh');
-    return data.url;
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.message || `Upload lỗi: ${res.status}`);
   }
+
+  const data = await res.json();
+  if (!data.success || !data.url) throw new Error('Không nhận được URL ảnh');
+  return data.url;
 }
 
 async function deleteImageLocal(url: string): Promise<void> {

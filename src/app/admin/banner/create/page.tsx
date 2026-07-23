@@ -2,63 +2,39 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import ImageUploader from '@/components/cloudinaryUpload';
 import { Switch } from '@/components/ui/switch';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Languages } from 'lucide-react';
+import { Loader2, Globe, ImageIcon, ArrowLeft, Link as LinkIcon, Type } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { IBanner } from '@/lib/types/ibanner';
 import { ApiResponse } from '@/lib/types/api-response';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type FormData = Omit<IBanner, '_id' | 'createdAt' | 'updatedAt'>;
 
 export default function CreateBannerPage() {
   const router = useRouter();
-
+  const [language, setLanguage] = useState<'vi' | 'en'>('vi');
   const [formData, setFormData] = useState<FormData>({
-    image: '',
-    name: { en: '', vi: '' },
-    description: { en: '', vi: '' },
-    buttonText: { en: '', vi: '' },
-    link: '',
-    isActive: true,
+    image: '', name: { en: '', vi: '' }, description: { en: '', vi: '' }, buttonText: { en: '', vi: '' }, link: '', isActive: true,
   });
-
   const [loading, setLoading] = useState(false);
-  const [languageDisplay, setLanguageDisplay] = useState<'both' | 'en' | 'vi'>('both');
-  const [errors, setErrors] = useState<{
-    image?: string;
-    nameEn?: string;
-    nameVi?: string;
-    link?: string;
-  }>({});
+  const [errors, setErrors] = useState<{ image?: string; nameEn?: string; nameVi?: string; link?: string }>({});
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-    field: keyof FormData,
-    lang?: 'en' | 'vi'
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, field: keyof FormData, lang?: 'en' | 'vi') => {
     const value = e.target.value;
     setFormData((prev) => {
       if (lang && (field === 'name' || field === 'description' || field === 'buttonText')) {
-        return {
-          ...prev,
-          [field]: {
-            ...prev[field] as { en?: string; vi?: string },
-            [lang]: value,
-          },
-        };
+        return { ...prev, [field]: { ...prev[field] as { en?: string; vi?: string }, [lang]: value } };
       }
       return { ...prev, [field]: value };
     });
-    // Clear errors for the changed field
     setErrors((prev) => ({
       ...prev,
       ...(field === 'image' && { image: undefined }),
@@ -78,311 +54,156 @@ export default function CreateBannerPage() {
     if (!formData.image) newErrors.image = 'Vui lòng tải lên ảnh banner.';
     if (!formData.name.en) newErrors.nameEn = 'Tên tiếng Anh là bắt buộc.';
     if (!formData.name.vi) newErrors.nameVi = 'Tên tiếng Việt là bắt buộc.';
-    if (formData.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(formData.link)) {
-      newErrors.link = 'Link không hợp lệ.';
-    }
+    if (formData.link && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(formData.link)) newErrors.link = 'Link không hợp lệ.';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      toast.error('Vui lòng kiểm tra các trường bắt buộc.');
-      return;
-    }
-
+    if (!validateForm()) { toast.error('Vui lòng kiểm tra các trường bắt buộc.'); return; }
     try {
       setLoading(true);
-      const res = await fetch('/api/banners', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
+      const res = await fetch('/api/banners', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
       const data: ApiResponse<IBanner> = await res.json();
-
-      if (data.success && data.data) {
-        toast.success(data.message || 'Tạo banner thành công!');
-        router.push('/admin/banner');
-      } else {
-        // Handle field-specific errors from backend
-        if (data.statusCode === 400 && data.message) {
-          if (data.message.includes('Image and name')) {
-            setErrors({
-              image: 'Vui lòng tải lên ảnh banner.',
-              nameEn: 'Tên tiếng Anh là bắt buộc.',
-              nameVi: 'Tên tiếng Việt là bắt buộc.',
-            });
-          } else if (data.message.includes('Invalid URL')) {
-            setErrors({ link: 'Link không hợp lệ.' });
-          } else {
-            toast.error(data.message || 'Đã có lỗi xảy ra!');
-          }
-        } else {
-          toast.error(data.message || 'Đã có lỗi xảy ra!');
-        }
-      }
+      if (data.success && data.data) { toast.success(data.message || 'Tạo banner thành công!'); router.push('/admin/banner'); }
+      else toast.error(data.message || 'Đã có lỗi xảy ra!');
     } catch (error: unknown) {
-      console.error('Create banner error:', error);
       toast.error(error instanceof Error ? error.message : 'Không thể kết nối tới server!');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Tạo Banner Mới</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link href="/admin/banner">
+            <Button variant="ghost" size="sm" className="text-slate-500 hover:text-[#9b6f45]"><ArrowLeft className="w-4 h-4 mr-1" />Quay lại</Button>
+          </Link>
+          <div className="w-px h-6 bg-slate-200" />
+          <h1 className="text-xl font-bold text-slate-800">Tạo Banner mới</h1>
+        </div>
+      </div>
 
-      <Card>
-        <CardContent className="flex flex-col gap-6 py-6">
-          {/* Multilingual Fields with Tooltip Toggle */}
-          <div className="flex items-center gap-2 mb-2">
-            <Label className="text-lg font-medium">Nội dung đa ngôn ngữ</Label>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`p-1 ${
-                      languageDisplay === 'both'
-                        ? 'bg-blue-100'
-                        : languageDisplay === 'en'
-                        ? 'bg-green-100'
-                        : 'bg-yellow-100'
-                    }`}
-                    onClick={() =>
-                      setLanguageDisplay(
-                        languageDisplay === 'both'
-                          ? 'en'
-                          : languageDisplay === 'en'
-                          ? 'vi'
-                          : 'both'
-                      )
-                    }
-                    aria-label={`Chuyển đổi hiển thị ngôn ngữ: ${
-                      languageDisplay === 'both' ? 'Cả EN và VI' : languageDisplay === 'en' ? 'Chỉ EN' : 'Chỉ VI'
-                    }`}
-                  >
-                    <Languages className="w-5 h-5 text-gray-600" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    Chuyển đổi hiển thị:{' '}
-                    {languageDisplay === 'both' ? 'Chỉ EN hoặc VI' : languageDisplay === 'en' ? 'Chỉ VI' : 'Cả EN và VI'}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+      {/* Language Toggle */}
+      <div className="flex gap-1 bg-slate-100 rounded-md p-0.5 w-fit">
+        {(['vi', 'en'] as const).map((lang) => (
+          <button
+            key={lang}
+            onClick={() => setLanguage(lang)}
+            className={`px-3 py-1.5 text-xs font-medium rounded transition-all ${language === lang ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            {lang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English'}
+          </button>
+        ))}
+      </div>
+
+      {/* 2-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Name & Description */}
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Globe className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-700">Nội dung — {language === 'vi' ? 'Tiếng Việt' : 'English'}</h2>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div key={language} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.15 }} className="space-y-4">
+                <div>
+                  <Label className="text-sm text-slate-600">Tên Banner ({language.toUpperCase()}) <span className="text-red-500">*</span></Label>
+                  <Input
+                    value={language === 'vi' ? formData.name.vi : formData.name.en}
+                    onChange={(e) => handleChange(e, 'name', language)}
+                    placeholder={`Nhập tên banner (${language.toUpperCase()})`}
+                    className={`mt-1.5 ${(language === 'en' ? errors.nameEn : errors.nameVi) ? 'border-red-400' : ''}`}
+                  />
+                  {(language === 'en' ? errors.nameEn : errors.nameVi) && <p className="text-red-500 text-xs mt-1">{language === 'en' ? errors.nameEn : errors.nameVi}</p>}
+                </div>
+
+                <div>
+                  <Label className="text-sm text-slate-600">Mô tả ({language.toUpperCase()})</Label>
+                  <Textarea
+                    value={language === 'vi' ? (formData.description?.vi || '') : (formData.description?.en || '')}
+                    onChange={(e) => handleChange(e, 'description', language)}
+                    rows={3}
+                    placeholder={`Nhập mô tả (${language.toUpperCase()})`}
+                    className="mt-1.5"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm text-slate-600">Nút ({language.toUpperCase()})</Label>
+                  <Input
+                    value={language === 'vi' ? (formData.buttonText?.vi || '') : (formData.buttonText?.en || '')}
+                    onChange={(e) => handleChange(e, 'buttonText', language)}
+                    placeholder={`Nhập văn bản nút (${language.toUpperCase()})`}
+                    className="mt-1.5"
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={languageDisplay}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {(languageDisplay === 'both' || languageDisplay === 'en') && (
-                <div>
-                  <Label htmlFor="nameEn" className="mb-2.5 flex items-center gap-2">
-                    Tên (EN)
-                    {errors.nameEn && <span className="text-red-500 text-sm">{errors.nameEn}</span>}
-                  </Label>
-                  <Input
-                    id="nameEn"
-                    value={formData.name.en}
-                    onChange={(e) => handleChange(e, 'name', 'en')}
-                    placeholder="Nhập tên banner (EN)"
-                    className={errors.nameEn ? 'border-red-500' : ''}
-                    aria-describedby={errors.nameEn ? 'nameEn-error' : undefined}
-                  />
-                  {errors.nameEn && (
-                    <p id="nameEn-error" className="text-red-500 text-sm mt-1">
-                      {errors.nameEn}
-                    </p>
-                  )}
-                </div>
-              )}
-              {(languageDisplay === 'both' || languageDisplay === 'vi') && (
-                <div>
-                  <Label htmlFor="nameVi" className="mb-2.5 flex items-center gap-2">
-                    Tên (VI)
-                    {errors.nameVi && <span className="text-red-500 text-sm">{errors.nameVi}</span>}
-                  </Label>
-                  <Input
-                    id="nameVi"
-                    value={formData.name.vi}
-                    onChange={(e) => handleChange(e, 'name', 'vi')}
-                    placeholder="Nhập tên banner (VI)"
-                    className={errors.nameVi ? 'border-red-500' : ''}
-                    aria-describedby={errors.nameVi ? 'nameVi-error' : undefined}
-                  />
-                  {errors.nameVi && (
-                    <p id="nameVi-error" className="text-red-500 text-sm mt-1">
-                      {errors.nameVi}
-                    </p>
-                  )}
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+          {/* Link */}
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <LinkIcon className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-700">Liên kết</h2>
+            </div>
+            <div>
+              <Label className="text-sm text-slate-600">URL Link</Label>
+              <Input
+                value={formData.link || ''}
+                onChange={(e) => handleChange(e, 'link')}
+                placeholder="https://example.com"
+                className={`mt-1.5 ${errors.link ? 'border-red-400' : ''}`}
+              />
+              {errors.link && <p className="text-red-500 text-xs mt-1">{errors.link}</p>}
+            </div>
+          </div>
+        </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`desc-${languageDisplay}`}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {(languageDisplay === 'both' || languageDisplay === 'en') && (
-                <div>
-                  <Label htmlFor="descriptionEn" className="mb-2.5">
-                    Mô tả (EN)
-                  </Label>
-                  <Textarea
-                    id="descriptionEn"
-                    value={formData.description?.en || ''}
-                    onChange={(e) => handleChange(e, 'description', 'en')}
-                    rows={3}
-                    placeholder="Nhập mô tả (EN)"
-                  />
-                </div>
-              )}
-              {(languageDisplay === 'both' || languageDisplay === 'vi') && (
-                <div>
-                  <Label htmlFor="descriptionVi" className="mb-2.5">
-                    Mô tả (VI)
-                  </Label>
-                  <Textarea
-                    id="descriptionVi"
-                    value={formData.description?.vi || ''}
-                    onChange={(e) => handleChange(e, 'description', 'vi')}
-                    rows={3}
-                    placeholder="Nhập mô tả (VI)"
-                  />
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Publish Settings */}
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-slate-700">Cài đặt</h2>
+            <div className="flex items-center justify-between py-2">
+              <Label htmlFor="isActive" className="text-sm text-slate-600 cursor-pointer">Trạng thái</Label>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-medium ${formData.isActive ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  {formData.isActive ? 'Hoạt động' : 'Tắt'}
+                </span>
+                <Switch id="isActive" checked={formData.isActive} onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))} />
+              </div>
+            </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`btn-${languageDisplay}`}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {(languageDisplay === 'both' || languageDisplay === 'en') && (
-                <div>
-                  <Label htmlFor="buttonTextEn" className="mb-2.5">
-                    Nút (EN)
-                  </Label>
-                  <Input
-                    id="buttonTextEn"
-                    value={formData.buttonText?.en || ''}
-                    onChange={(e) => handleChange(e, 'buttonText', 'en')}
-                    placeholder="Nhập văn bản nút (EN)"
-                  />
-                </div>
-              )}
-              {(languageDisplay === 'both' || languageDisplay === 'vi') && (
-                <div>
-                  <Label htmlFor="buttonTextVi" className="mb-2.5">
-                    Nút (VI)
-                  </Label>
-                  <Input
-                    id="buttonTextVi"
-                    value={formData.buttonText?.vi || ''}
-                    onChange={(e) => handleChange(e, 'buttonText', 'vi')}
-                    placeholder="Nhập văn bản nút (VI)"
-                  />
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Common Fields */}
-          <div>
-            <Label htmlFor="link" className="mb-2.5 flex items-center gap-2">
-              Link
-              {errors.link && <span className="text-red-500 text-sm">{errors.link}</span>}
-            </Label>
-            <Input
-              id="link"
-              name="link"
-              value={formData.link || ''}
-              onChange={(e) => handleChange(e, 'link')}
-              placeholder="https://example.com"
-              className={errors.link ? 'border-red-500' : ''}
-              aria-describedby={errors.link ? 'link-error' : undefined}
-            />
-            {errors.link && (
-              <p id="link-error" className="text-red-500 text-sm mt-1">
-                {errors.link}
-              </p>
-            )}
+            <div className="pt-2">
+              <Button onClick={handleSubmit} disabled={loading} className="w-full bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340] text-white">
+                {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {loading ? 'Đang lưu...' : 'Tạo Banner'}
+              </Button>
+            </div>
           </div>
 
-          <div>
-            <Label htmlFor="image" className="mb-2.5 flex items-center gap-2">
-              Ảnh Banner
-              {errors.image && <span className="text-red-500 text-sm">{errors.image}</span>}
-            </Label>
-            <ImageUploader
-              onUploadSuccess={handleImageUploadSuccess}
-            />
+          {/* Image Upload */}
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-700">Ảnh Banner <span className="text-red-500">*</span></h2>
+            </div>
+            {errors.image && <p className="text-red-500 text-xs">{errors.image}</p>}
+            <ImageUploader onUploadSuccess={handleImageUploadSuccess} />
             {formData.image && (
-              <div className="mt-2">
-                <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
-                <Image
-                  src={formData.image}
-                  alt="Banner preview"
-                  width={200}
-                  height={100}
-                  className="object-cover rounded"
-                />
+              <div className="mt-3 relative w-full aspect-video rounded-md overflow-hidden border border-slate-100">
+                <Image src={formData.image} alt="Preview" fill className="object-cover" />
               </div>
             )}
           </div>
-
-          <div className="flex items-center gap-4">
-            <Label htmlFor="isActive">Trạng thái</Label>
-            <Switch
-              id="isActive"
-              checked={formData.isActive}
-              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, isActive: checked }))}
-            />
-            <span>{formData.isActive ? 'Hoạt động' : 'Không hoạt động'}</span>
-          </div>
-
-          <div className="flex justify-end gap-4">
-            <Button
-              variant="outline"
-              onClick={() => router.push('/admin/banner')}
-              disabled={loading}
-            >
-              Hủy
-            </Button>
-            <Button onClick={handleSubmit} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Đang lưu...
-                </>
-              ) : (
-                'Tạo Banner'
-              )}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ const isValidObjectId = (id: string | null): id is string => {
 
 // Validate URL format
 const isValidUrl = (url: string): boolean => {
-  return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url);
+  return url.startsWith('/') || /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url);
 };
 
 // Validate slug format
@@ -54,7 +54,10 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IC
       );
     }
 
-    const caseStudies = await CaseStudy.find({ isActive: true }).populate('category user');
+    // If ?all=true, return all case studies (admin); otherwise only active ones (public)
+    const showAll = searchParams.get('all') === 'true';
+    const filter = showAll ? {} : { isActive: true };
+    const caseStudies = await CaseStudy.find(filter).populate('category user').sort({ createdAt: -1 });
     return NextResponse.json(
       { success: true, data: caseStudies, statusCode: 200 },
       { status: 200 }

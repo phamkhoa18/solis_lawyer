@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from "next";
 import Header from '../common/Header';
 import Footer from '../common/Footer';
@@ -6,6 +7,7 @@ import FilterSidebar from '../components/FilterSidebar';
 import CaseStudyList from './CaseStudyList';
 import connectDB from '@/lib/dbConnect';
 import CaseStudy from '@/models/Casestudy';
+import Category from '@/models/Category';
 import { ICaseStudy } from '@/lib/types/icasestudy';
 
 export const metadata: Metadata = {
@@ -24,7 +26,7 @@ async function getCaseStudies(): Promise<ICaseStudy[]> {
   try {
     await connectDB();
     const caseStudies = await CaseStudy.find({ isActive: true })
-      .populate('category', 'name')
+      .populate('category', 'name slug')
       .populate('user', 'name')
       .sort({ createdAt: -1 })
       .lean();
@@ -35,20 +37,40 @@ async function getCaseStudies(): Promise<ICaseStudy[]> {
   }
 }
 
-const categories = [
-  { name: 'Corporate Migration', link: '/categories/corporate-migration' },
-  { name: 'Legal Strategy', link: '/categories/legal-strategy' },
-  { name: 'Immigration Solutions', link: '/categories/immigration-solutions' },
-  { name: 'Compliance & Restructuring', link: '/categories/compliance-restructuring' },
-];
+async function getCategories(): Promise<{ name: string; link: string }[]> {
+  try {
+    await connectDB();
+    const categories = await Category.find({ isActive: true }).sort({ name: 1 }).lean();
+    return categories.map((cat: any) => ({
+      name: cat.name?.en || cat.name?.vi || 'Untitled',
+      link: `/case-studies?category=${cat.slug}`,
+    }));
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+}
 
-const featuredCaseStudies = [
-  { title: 'Global Expansion Success', link: '/case-studies/global-expansion', date: '20 Nov 2024' },
-  { title: 'Startup Compliance Framework', link: '/case-studies/compliance-framework', date: '15 Aug 2024' },
-];
+function getFeaturedCaseStudies(caseStudies: ICaseStudy[]): { title: string; link: string; date: string }[] {
+  // Get the 5 most recent case studies as featured
+  return caseStudies.slice(0, 5).map((cs) => ({
+    title: cs.title?.en || cs.title?.vi || 'Untitled',
+    link: `/case-studies/${cs.slug}`,
+    date: cs.publishedAt
+      ? new Date(cs.publishedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+      : cs.createdAt
+        ? new Date(cs.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+        : '',
+  }));
+}
 
 export default async function CaseStudiesPage() {
-  const caseStudies = await getCaseStudies();
+  const [caseStudies, categories] = await Promise.all([
+    getCaseStudies(),
+    getCategories(),
+  ]);
+
+  const featuredCaseStudies = getFeaturedCaseStudies(caseStudies);
 
   return (
     <>
@@ -66,7 +88,9 @@ export default async function CaseStudiesPage() {
         <div className="container mx-auto px-4 py-12 lg:flex lg:gap-8">
           {/* Main Content */}
           <div className="lg:w-2/3">
-            <CaseStudyList caseStudies={caseStudies} />
+            <Suspense fallback={<div className="grid grid-cols-1 md:grid-cols-2 gap-6">{[1,2,3,4].map(i => <div key={i} className="rounded-xl bg-gray-200 animate-pulse aspect-[4/3]" />)}</div>}>
+              <CaseStudyList caseStudies={caseStudies} />
+            </Suspense>
           </div>
 
           {/* Sidebar */}
@@ -75,7 +99,7 @@ export default async function CaseStudiesPage() {
               title="Service Insights"
               categories={categories}
               featuredItems={featuredCaseStudies}
-              searchPlaceholder="Find services..."
+              searchPlaceholder="Find case studies..."
             />
           </aside>
         </div>

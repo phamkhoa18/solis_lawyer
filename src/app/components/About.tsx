@@ -39,7 +39,7 @@ export default function About() {
   const { language } = useLanguage();
   
   // Lấy nội dung theo ngôn ngữ hiện tại
-  const currentContent = content[language];
+  const currentContent = content[language as 'VI' | 'EN'] || content.EN;
 
   // Hàm để render text với bold formatting
   const renderTextWithBold = (text: string) => {
@@ -119,7 +119,7 @@ export default function About() {
             </div>
             <div className="flex flex-wrap items-center gap-2 md:flex-row">
               <Link
-                href=""
+                href="/contact"
                 className="mt-7 inline-block bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] text-white font-semibold py-2 px-6 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 ease-out"
               >
                 {currentContent.learnMore}

@@ -74,7 +74,7 @@ export default function ServicesPage() {
           <p className="text-sm text-slate-500 mt-1">{!loading && `${filteredServices.length} dịch vụ`}</p>
         </div>
         <Link href="/admin/services/create">
-          <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-600/20 rounded-xl">
+          <Button className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340] text-white shadow-sm">
             <Plus className="w-4 h-4 mr-2" />Tạo Dịch Vụ
           </Button>
         </Link>
@@ -82,11 +82,11 @@ export default function ServicesPage() {
 
       <motion.div variants={iv} className="relative max-w-md">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <Input placeholder="Tìm kiếm theo tên hoặc link..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-400" />
+        <Input placeholder="Tìm kiếm theo tên hoặc link..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10 h-10 border-slate-200 focus:border-amber-300 focus:ring-amber-200/30" />
       </motion.div>
 
       <motion.div variants={iv}>
-        <Card className="shadow-sm border-slate-200/60 rounded-xl overflow-hidden">
+        <Card className="shadow-sm border-0 rounded-lg overflow-hidden">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-6 space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
@@ -117,7 +117,7 @@ export default function ServicesPage() {
                   </TableHeader>
                   <TableBody>
                     {filteredServices.map((service) => (
-                      <TableRow key={service._id?.toString()} className="hover:bg-blue-50/30 transition-colors">
+                      <TableRow key={service._id?.toString()} className="transition-colors">
                         <TableCell>
                           <Image src={service.img} alt={service.name.vi || 'Service'} width={50} height={50} className="object-cover rounded-lg" />
                         </TableCell>

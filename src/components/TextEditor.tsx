@@ -42,28 +42,25 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
           return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append(
-          'upload_preset',
-          process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'uploads-saigon247-api'
-        );
-
         setUploading(true);
 
         try {
-          const response = await fetch(
-            `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-            {
-              method: 'POST',
-              body: formData,
-            }
-          );
+          // Upload lên server local qua /api/upload
+          const formData = new FormData();
+          formData.append('file', file);
+
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData,
+          });
 
           const data = await response.json();
-          if (!data.secure_url) throw new Error('Không nhận được URL ảnh');
 
-          callback(data.secure_url, { alt: file.name });
+          if (!response.ok || !data.success || !data.url) {
+            throw new Error(data.message || 'Không nhận được URL ảnh');
+          }
+
+          callback(data.url, { alt: file.name });
         } catch (error) {
           console.error('Lỗi khi upload:', error);
           alert('Không thể upload hình ảnh. Vui lòng thử lại.');
@@ -126,8 +123,8 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
       <Dialog open={uploading}>
         <DialogContent className="bg-white z-[9999] text-center">
           <div className="flex flex-col items-center justify-center gap-4">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full" />
-            <p className="text-sm font-medium">Đang upload ảnh lên Cloudinary...</p>
+            <div className="animate-spin h-8 w-8 border-4 border-[#d5aa6d] border-t-transparent rounded-full" />
+            <p className="text-sm font-medium">Đang upload ảnh lên server...</p>
           </div>
         </DialogContent>
       </Dialog>

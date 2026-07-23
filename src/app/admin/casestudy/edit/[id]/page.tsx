@@ -3,11 +3,11 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import ImageUploader from '@/components/cloudinaryUpload';
 import slugify from 'slugify';
 import {
@@ -19,9 +19,7 @@ import {
 } from '@/components/ui/select';
 import TextEditor from '@/components/TextEditor';
 import { toast } from 'react-hot-toast';
-import { Sparkles, Languages, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Sparkles, Loader2, ArrowLeft, Globe, ImageIcon } from 'lucide-react';
 
 interface FormData {
   title: { en: string; vi: string };
@@ -29,9 +27,10 @@ interface FormData {
   content: { en: string; vi: string };
   slug: string;
   image: string;
-  category: any ;
+  category: any;
   user: any;
   status: 'draft' | 'published';
+  publishedAt?: Date;
 }
 
 interface ApiResponse<T> {
@@ -43,7 +42,7 @@ interface ApiResponse<T> {
 export default function EditCaseStudyPage() {
   const router = useRouter();
   const { id } = useParams();
-  const [language, setLanguage] = useState<'en' | 'vi'>('en');
+  const [language, setLanguage] = useState<'en' | 'vi'>('vi');
   const [formData, setFormData] = useState<FormData>({
     title: { en: '', vi: '' },
     description: { en: '', vi: '' },
@@ -70,8 +69,7 @@ export default function EditCaseStudyPage() {
     try {
       const res = await fetch(`/api/casestudies?id=${id}`);
       const data: ApiResponse<FormData> = await res.json();
-      console.log(data.data);
-      
+
       if (data.success && data.data) {
         setFormData({
           title: { en: data.data.title.en || '', vi: data.data.title.vi || '' },
@@ -81,7 +79,8 @@ export default function EditCaseStudyPage() {
           image: data.data.image || '',
           category: data.data.category._id || '',
           user: data.data.user._id || '',
-          status: data.data.status || 'published',
+          status: (data.data as any).isActive ? 'published' : 'draft',
+          publishedAt: data.data.publishedAt,
         });
       } else {
         toast.error(data.message || 'Không thể tải case study');
@@ -98,11 +97,8 @@ export default function EditCaseStudyPage() {
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
-      if (data.success) {
-        setCategories(data.data);
-      } else {
-        toast.error(data.message || 'Không thể tải danh mục');
-      }
+      if (data.success) setCategories(data.data);
+      else toast.error(data.message || 'Không thể tải danh mục');
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast.error('Lỗi khi tải danh mục');
@@ -113,11 +109,8 @@ export default function EditCaseStudyPage() {
     try {
       const res = await fetch('/api/users');
       const data = await res.json();
-      if (data.success) {
-        setUsers(data.data);
-      } else {
-        toast.error(data.message || 'Không thể tải người dùng');
-      }
+      if (data.success) setUsers(data.data);
+      else toast.error(data.message || 'Không thể tải người dùng');
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Lỗi khi tải người dùng');
@@ -159,10 +152,6 @@ export default function EditCaseStudyPage() {
     setFormData((prev) => ({ ...prev, slug: newSlug }));
   };
 
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === 'en' ? 'vi' : 'en'));
-  };
-
   const handleSubmit = async () => {
     const requiredFields = [
       { field: formData.title.en, name: 'Tiêu đề (EN)' },
@@ -202,6 +191,7 @@ export default function EditCaseStudyPage() {
           category: formData.category,
           user: formData.user,
           isActive: formData.status === 'published',
+          publishedAt: formData.status === 'published' ? (formData.publishedAt || new Date()) : undefined,
         }),
       });
 
@@ -221,244 +211,229 @@ export default function EditCaseStudyPage() {
     }
   };
 
-  // Animation variants cho Framer Motion
-  const formVariants:any = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeIn' } },
-  };
-
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="flex justify-center items-center h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
       </div>
     );
   }
 
   return (
-    <TooltipProvider>
-      <div className="flex flex-col gap-3 p-3 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="flex justify-between items-center"
-        >
-          <h1 className="text-2xl font-bold text-gray-900 flex gap-3">
-            Chỉnh sửa Case Study
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={toggleLanguage}
-                    className="flex items-center gap-2 text-blue-600 border-blue-600 hover:bg-blue-50"
-                  >
-                    <Languages className="h-4 w-4" />
-                    {language === 'en' ? 'Tiếng Việt' : 'English'}
-                  </Button>
-                </motion.div>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Chuyển đổi ngôn ngữ nhập liệu</p>
-              </TooltipContent>
-            </Tooltip>
-          </h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <Button
-            variant="outline"
-            className="text-blue-600 hover:text-blue-800"
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0 text-slate-500"
             onClick={() => router.push('/admin/casestudy')}
           >
-            Quay lại
+            <ArrowLeft className="w-4 h-4" />
           </Button>
-        </motion.div>
-
-        <Card className="shadow-md border border-gray-100">
-          <CardContent className="p-4">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={language}
-                variants={formVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                className="space-y-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="title" className="text-sm font-medium text-gray-700">
-                      Tiêu đề ({language.toUpperCase()})
-                    </Label>
-                    <Input
-                      id="title"
-                      value={formData.title[language] || ''}
-                      onChange={(e) => handleChange(e, 'title')}
-                      className="mt-1"
-                      placeholder={`Nhập tiêu đề bằng ${language === 'en' ? 'tiếng Anh' : 'tiếng Việt'}`}
-                    />
-                  </div>
-
-                  <div className="relative">
-                    <Label htmlFor="slug" className="text-sm font-medium text-gray-700">
-                      Slug (URL)
-                    </Label>
-                    <Input
-                      id="slug"
-                      value={formData.slug || ''}
-                      onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                      placeholder="slug-tu-dong-se-o-day"
-                      className="mt-1 pr-10"
-                    />
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <motion.div
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="absolute right-2 top-[25px]"
-                        >
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={generateSlug}
-                            disabled={!formData.title.vi}
-                            className="text-gray-500 hover:text-blue-600"
-                          >
-                            <Sparkles className="h-4 w-4" />
-                            <span className="sr-only">Tạo slug tự động</span>
-                          </Button>
-                        </motion.div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Tạo slug từ tiêu đề tiếng Việt</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Danh mục</Label>
-                    <Select
-                      value={formData.category || ''}
-                      onValueChange={(value) => setFormData({ ...formData, category: value })}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Chọn danh mục" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((cat) => (
-                          <SelectItem key={cat._id} value={cat._id}>
-                            {cat.name.en}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Tác giả</Label>
-                    <Select
-                      value={formData.user || ''}
-                      onValueChange={(value) => setFormData({ ...formData, user: value })}
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Chọn tác giả" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {users.map((user) => (
-                          <SelectItem key={user._id} value={user._id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Trạng thái</Label>
-                    <Select
-                      value={formData.status || ''}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, status: value as 'draft' | 'published' })
-                      }
-                    >
-                      <SelectTrigger className="mt-1">
-                        <SelectValue placeholder="Chọn trạng thái" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="draft">Bản nháp</SelectItem>
-                        <SelectItem value="published">Công khai</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="description" className="text-sm font-medium text-gray-700">
-                    Mô tả ngắn ({language.toUpperCase()})
-                  </Label>
-                  <Textarea
-                    id="description"
-                    rows={3}
-                    value={formData.description[language] || ''}
-                    onChange={(e) => handleChange(e, 'description')}
-                    className="mt-1"
-                    placeholder={`Nhập mô tả ngắn bằng ${language === 'en' ? 'tiếng Anh' : 'tiếng Việt'}`}
-                  />
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Hình ảnh nổi bật</Label>
-                    <ImageUploader onUploadSuccess={handleImageUploadSuccess} />
-                    {formData.image && (
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="mt-2 text-sm text-gray-600"
-                      >
-                        Ảnh đã chọn:{' '}
-                        <a
-                          href={formData.image}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          {formData.image}
-                        </a>
-                      </motion.p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">
-                    Nội dung ({language.toUpperCase()})
-                  </Label>
-                  <TextEditor
-                    value={formData.content[language] || ''}
-                    onChange={handleEditorChange}
-                  />
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            <div className="flex justify-end mt-10">
-              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                <Button
-                  onClick={handleSubmit}
-                  disabled={submitLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
-                >
-                  {submitLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                  {submitLoading ? 'Đang lưu...' : 'Cập nhật Case Study'}
-                </Button>
-              </motion.div>
-            </div>
-          </CardContent>
-        </Card>
+          <div>
+            <h1 className="text-xl font-semibold text-slate-900">Chỉnh sửa Case Study</h1>
+            <p className="text-sm text-slate-500">Cập nhật thông tin bên dưới</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center bg-slate-100 rounded-md p-0.5">
+            <button
+              type="button"
+              onClick={() => setLanguage('vi')}
+              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                language === 'vi'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              🇻🇳 Tiếng Việt
+            </button>
+            <button
+              type="button"
+              onClick={() => setLanguage('en')}
+              className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+                language === 'en'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              🇬🇧 English
+            </button>
+          </div>
+        </div>
       </div>
-    </TooltipProvider>
+
+      {/* Form */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content — Left 2/3 */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Globe className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-700">Thông tin cơ bản — {language === 'vi' ? 'Tiếng Việt' : 'English'}</h2>
+            </div>
+
+            <div>
+              <Label htmlFor="title" className="text-sm text-slate-600">Tiêu đề ({language.toUpperCase()})</Label>
+              <Input
+                id="title"
+                value={formData.title[language] || ''}
+                onChange={(e) => handleChange(e, 'title')}
+                className="mt-1.5"
+                placeholder={`Nhập tiêu đề bằng ${language === 'en' ? 'tiếng Anh' : 'tiếng Việt'}`}
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="slug" className="text-sm text-slate-600">Slug (URL)</Label>
+              <div className="relative mt-1.5">
+                <Input
+                  id="slug"
+                  value={formData.slug || ''}
+                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  placeholder="slug-tu-dong-se-o-day"
+                  className="pr-10 font-mono text-sm"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={generateSlug}
+                  disabled={!formData.title.vi}
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 text-slate-400 hover:text-[#9b6f45]"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="description" className="text-sm text-slate-600">
+                Mô tả ngắn ({language.toUpperCase()})
+                <span className="text-slate-400 ml-1">— tối đa 200 ký tự</span>
+              </Label>
+              <Textarea
+                id="description"
+                rows={3}
+                value={formData.description[language] || ''}
+                onChange={(e) => handleChange(e, 'description')}
+                className="mt-1.5 resize-none"
+                placeholder={`Nhập mô tả ngắn bằng ${language === 'en' ? 'tiếng Anh' : 'tiếng Việt'}`}
+              />
+              <p className="text-xs text-slate-400 mt-1 text-right">
+                {(formData.description[language] || '').length}/200
+              </p>
+            </div>
+          </div>
+
+          {/* Content Editor */}
+          <div className="bg-white rounded-lg shadow-sm p-5">
+            <Label className="text-sm text-slate-600 mb-3 block">
+              Nội dung ({language.toUpperCase()})
+            </Label>
+            <TextEditor
+              value={formData.content[language] || ''}
+              onChange={handleEditorChange}
+            />
+          </div>
+        </div>
+
+        {/* Sidebar — Right 1/3 */}
+        <div className="space-y-6">
+          {/* Publish Settings */}
+          <div className="bg-white rounded-lg shadow-sm p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-slate-700">Cài đặt đăng bài</h2>
+
+            <div>
+              <Label className="text-sm text-slate-600">Trạng thái</Label>
+              <Select
+                value={formData.status || ''}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value as 'draft' | 'published' })
+                }
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Chọn trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Bản nháp</SelectItem>
+                  <SelectItem value="published">Công khai</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm text-slate-600">Danh mục</Label>
+              <Select
+                value={formData.category || ''}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Chọn danh mục" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat._id} value={cat._id}>
+                      {cat.name.en}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm text-slate-600">Tác giả</Label>
+              <Select
+                value={formData.user || ''}
+                onValueChange={(value) => setFormData({ ...formData, user: value })}
+              >
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Chọn tác giả" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user._id} value={user._id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitLoading}
+                className="w-full bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340] text-white"
+              >
+                {submitLoading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {submitLoading ? 'Đang lưu...' : 'Cập nhật Case Study'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Featured Image */}
+          <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-700">Hình ảnh nổi bật</h2>
+            </div>
+            <ImageUploader onUploadSuccess={handleImageUploadSuccess} />
+            {formData.image && (
+              <div className="mt-3 relative w-full aspect-video rounded-md overflow-hidden border border-slate-200">
+                <Image
+                  src={formData.image}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Header from '@/app/common/Header';
@@ -7,30 +8,54 @@ import FilterSidebar from '@/app/components/FilterSidebar';
 import CaseStudyContent from './CaseStudyContent';
 import connectDB from '@/lib/dbConnect';
 import CaseStudyModel from '@/models/Casestudy';
-
-const categories = [
-  { name: 'Corporate Migration', link: '/categories/corporate-migration' },
-  { name: 'Legal Strategy', link: '/categories/legal-strategy' },
-  { name: 'Immigration Solutions', link: '/categories/immigration-solutions' },
-  { name: 'Compliance & Restructuring', link: '/categories/compliance-restructuring' },
-];
-
-const featuredCaseStudies = [
-  { title: 'Global Expansion Success', link: '/case-studies/global-expansion', date: '20 Nov 2024' },
-  { title: 'Startup Compliance Framework', link: '/case-studies/compliance-framework', date: '15 Aug 2024' },
-];
+import Category from '@/models/Category';
 
 async function getCaseStudyBySlug(slug: string) {
   try {
     await connectDB();
     const caseStudy = await CaseStudyModel.findOne({ slug, isActive: true })
-      .populate('category', 'name')
+      .populate('category', 'name slug')
       .populate('user', 'name')
       .lean();
     return caseStudy ? JSON.parse(JSON.stringify(caseStudy)) : null;
   } catch (error) {
     console.error('Error fetching case study:', error);
     return null;
+  }
+}
+
+async function getCategories(): Promise<{ name: string; link: string }[]> {
+  try {
+    await connectDB();
+    const categories = await Category.find({ isActive: true }).sort({ name: 1 }).lean();
+    return categories.map((cat: any) => ({
+      name: cat.name?.en || cat.name?.vi || 'Untitled',
+      link: `/case-studies?category=${cat.slug}`,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function getRecentCaseStudies(excludeSlug: string): Promise<{ title: string; link: string; date: string }[]> {
+  try {
+    await connectDB();
+    const recent = await CaseStudyModel.find({ isActive: true, slug: { $ne: excludeSlug } })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('title slug publishedAt createdAt')
+      .lean();
+    return (recent as any[]).map((cs) => ({
+      title: cs.title?.en || cs.title?.vi || 'Untitled',
+      link: `/case-studies/${cs.slug}`,
+      date: cs.publishedAt
+        ? new Date(cs.publishedAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+        : cs.createdAt
+          ? new Date(cs.createdAt).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })
+          : '',
+    }));
+  } catch {
+    return [];
   }
 }
 
@@ -44,9 +69,7 @@ export async function generateMetadata({
   const caseStudy = await getCaseStudyBySlug(slug);
 
   if (!caseStudy) {
-    return {
-      title: 'Case Study Not Found',
-    };
+    return { title: 'Case Study Not Found' };
   }
 
   return {
@@ -82,7 +105,11 @@ export default async function DetailCaseStudies({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const caseStudy = await getCaseStudyBySlug(slug);
+  const [caseStudy, categories, recentCaseStudies] = await Promise.all([
+    getCaseStudyBySlug(slug),
+    getCategories(),
+    getRecentCaseStudies(slug),
+  ]);
 
   if (!caseStudy) {
     notFound();
@@ -103,7 +130,7 @@ export default async function DetailCaseStudies({
         />
 
         <div className="container mx-auto px-4 lg:py-16 py-8 lg:flex lg:gap-8">
-          {/* Main Content - Client component for interactivity */}
+          {/* Main Content */}
           <CaseStudyContent caseStudy={caseStudy} />
 
           {/* Sidebar */}
@@ -111,8 +138,8 @@ export default async function DetailCaseStudies({
             <FilterSidebar
               title="Service Insights"
               categories={categories}
-              featuredItems={featuredCaseStudies}
-              searchPlaceholder="Find services..."
+              featuredItems={recentCaseStudies}
+              searchPlaceholder="Find case studies..."
             />
           </aside>
         </div>

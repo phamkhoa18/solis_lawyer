@@ -115,13 +115,13 @@ export default function CategoryPage() {
           <h1 className="text-2xl font-bold text-slate-800">Quản lý Danh mục</h1>
           <p className="text-sm text-slate-500 mt-1">{!loading && `${categories.length} danh mục`}</p>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-600/20 rounded-xl">
+        <Button onClick={handleOpenCreate} className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340] text-white shadow-sm">
           <Plus className="w-4 h-4 mr-2" />Tạo mới
         </Button>
       </motion.div>
 
       <motion.div variants={iv}>
-        <Card className="shadow-sm border-slate-200/60 rounded-xl overflow-hidden">
+        <Card className="shadow-sm border-0 rounded-lg overflow-hidden">
           <CardContent className="p-0">
             {loading ? (
               <div className="p-6 space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
@@ -151,7 +151,7 @@ export default function CategoryPage() {
                   </TableHeader>
                   <TableBody>
                     {categories.map((cat) => (
-                      <TableRow key={cat._id?.toString()} className="hover:bg-blue-50/30 transition-colors">
+                      <TableRow key={cat._id?.toString()} className="transition-colors">
                         <TableCell className="font-medium text-slate-700">{cat.name.en}</TableCell>
                         <TableCell className="text-slate-600">{cat.name.vi}</TableCell>
                         <TableCell className="text-sm text-slate-500 font-mono">{cat.slug}</TableCell>
@@ -216,7 +216,7 @@ export default function CategoryPage() {
               <Label htmlFor="isActive" className="cursor-pointer text-sm text-slate-700">Kích hoạt</Label>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
+              <Button type="submit" className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340]">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>

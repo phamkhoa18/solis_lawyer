@@ -1,4 +1,3 @@
-// lib/menu.ts
 import {
   LayoutDashboard,
   Menu,
@@ -8,9 +7,7 @@ import {
   MessageSquare,
   Users,
   FolderTree,
-  BookOpen,
-  Tag,
-  Package,
+  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -36,56 +33,19 @@ export const adminMenu: AdminMenuGroup[] = [
   {
     title: 'Quản lý nội dung',
     children: [
-      {
-        title: 'Menu',
-        href: '/admin/menu',
-        icon: Menu,
-      },
-      {
-        title: 'Banner',
-        href: '/admin/banner',
-        icon: ImageIcon,
-      },
-      {
-        title: 'Dịch vụ',
-        href: '/admin/services',
-        icon: Briefcase,
-      },
-      {
-        title: 'Case Studies',
-        href: '/admin/casestudy',
-        icon: FileText,
-      },
-      {
-        title: 'Lời chứng thực',
-        href: '/admin/testimonials',
-        icon: MessageSquare,
-      },
-      {
-        title: 'Thành viên',
-        href: '/admin/members',
-        icon: Users,
-      },
-      {
-        title: 'Danh mục',
-        href: '/admin/category',
-        icon: FolderTree,
-      },
-      {
-        title: 'Bài viết',
-        href: '/admin/blogs',
-        icon: BookOpen,
-      },
-      {
-        title: 'Chủ đề',
-        href: '/admin/type',
-        icon: Tag,
-      },
-      {
-        title: 'Sản phẩm',
-        href: '/admin/products',
-        icon: Package,
-      },
+      { title: 'Menu', href: '/admin/menu', icon: Menu },
+      { title: 'Banner', href: '/admin/banner', icon: ImageIcon },
+      { title: 'Dịch vụ', href: '/admin/services', icon: Briefcase },
+      { title: 'Case Studies', href: '/admin/casestudy', icon: FileText },
+      { title: 'Lời chứng thực', href: '/admin/testimonials', icon: MessageSquare },
+      { title: 'Thành viên', href: '/admin/members', icon: Users },
+      { title: 'Danh mục', href: '/admin/category', icon: FolderTree },
+    ],
+  },
+  {
+    title: 'Hệ thống',
+    children: [
+      { title: 'Tài khoản', href: '/admin/accounts', icon: ShieldCheck },
     ],
   },
 ];

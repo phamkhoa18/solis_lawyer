@@ -51,9 +51,9 @@ export default function UserInfo() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-slate-100 transition-colors duration-200"
+        className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-slate-50 transition-colors duration-200"
       >
-        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d5aa6d] to-[#9b6f45] flex items-center justify-center text-white text-xs font-bold shadow-sm">
           {initials}
         </div>
         <div className="hidden sm:block text-left">
@@ -64,7 +64,7 @@ export default function UserInfo() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-200/50 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl shadow-slate-900/10 py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User info header */}
           <div className="px-4 py-3 border-b border-slate-100">
             <p className="text-sm font-semibold text-slate-800">{user.name}</p>

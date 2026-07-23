@@ -116,31 +116,38 @@ export default function MenuPage() {
     const filteredItems = items.filter((item) => (item.parentId || null) === parentId).sort((a, b) => a.order - b.order);
     return filteredItems.map((menu) => (
       <React.Fragment key={menu._id.toString()}>
-        <div className="flex items-center py-3 px-4 border-b border-slate-100 hover:bg-blue-50/30 transition-colors" style={{ paddingLeft: `${(depth * 24) + 16}px` }}>
+        <div
+          className="flex items-center py-3 px-4 hover:bg-slate-50/80 transition-colors"
+          style={{ paddingLeft: `${(depth * 24) + 16}px` }}
+        >
           <div className="flex-1 grid grid-cols-5 gap-4 items-center">
-            <div className="font-medium text-slate-700 flex items-center">
-              {depth > 0 && <ChevronRight className="w-4 h-4 text-slate-300 mr-1" />}
+            <div className="font-medium text-slate-700 flex items-center text-sm">
+              {depth > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300 mr-1.5" />}
               {menu.name.vi}
             </div>
-            <div className="text-sm text-blue-600 truncate">{menu.link}</div>
+            <div className="text-sm text-[#9b6f45] truncate">{menu.link}</div>
             <div className="text-sm text-slate-500 font-mono truncate">{menu.slug}</div>
             <div className="text-center">
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${menu.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'}`}>
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                menu.isActive
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-slate-100 text-slate-500'
+              }`}>
                 <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${menu.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`} />
                 {menu.isActive ? 'Hoạt động' : 'Tắt'}
               </span>
             </div>
-            <div className="flex justify-center gap-1.5">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg" onClick={() => handleOpenEdit(menu)}><Pencil className="w-3.5 h-3.5" /></Button>
+            <div className="flex justify-center gap-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-[#9b6f45] hover:bg-amber-50" onClick={() => handleOpenEdit(menu)}><Pencil className="w-3.5 h-3.5" /></Button>
               <AlertDialog open={deleteId === menu._id?.toString()} onOpenChange={(open) => !open && setDeleteId(null)}>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg" onClick={() => setDeleteId(menu._id!.toString())} disabled={deletingId === menu._id?.toString()}><Trash2 className="w-3.5 h-3.5" /></Button>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50" onClick={() => setDeleteId(menu._id!.toString())} disabled={deletingId === menu._id?.toString()}><Trash2 className="w-3.5 h-3.5" /></Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-2xl">
+                <AlertDialogContent>
                   <AlertDialogHeader><AlertDialogTitle>Xóa menu này?</AlertDialogTitle><AlertDialogDescription>Hành động này không thể hoàn tác.</AlertDialogDescription></AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel className="rounded-xl">Hủy</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDelete(menu._id!.toString())} className="bg-red-600 hover:bg-red-700 rounded-xl">{deletingId === menu._id?.toString() ? 'Đang xóa...' : 'Xóa'}</AlertDialogAction>
+                    <AlertDialogCancel>Hủy</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(menu._id!.toString())} className="bg-red-600 hover:bg-red-700">{deletingId === menu._id?.toString() ? 'Đang xóa...' : 'Xóa'}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
@@ -162,39 +169,43 @@ export default function MenuPage() {
           <h1 className="text-2xl font-bold text-slate-800">Quản lý Menu</h1>
           <p className="text-sm text-slate-500 mt-1">{!loading && `${menus.length} mục menu`}</p>
         </div>
-        <Button onClick={handleOpenCreate} className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-600/20 rounded-xl">
+        <Button onClick={handleOpenCreate} className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340] text-white shadow-sm">
           <Plus className="w-4 h-4 mr-2" />Tạo mới
         </Button>
       </motion.div>
 
       <motion.div variants={iv}>
-        <Card className="shadow-sm border-slate-200/60 rounded-xl overflow-hidden">
+        <Card className="shadow-sm border-0 rounded-lg overflow-hidden">
           <CardContent className="p-0">
             {loading ? (
-              <div className="p-6 space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
+              <div className="p-6 space-y-4">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
             ) : error ? (
               <div className="p-12 text-center">
-                <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center mx-auto mb-3"><RefreshCw className="w-5 h-5 text-red-500" /></div>
+                <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3"><RefreshCw className="w-5 h-5 text-red-500" /></div>
                 <p className="text-red-500 font-medium">{error}</p>
-                <Button variant="outline" className="mt-4 rounded-xl" onClick={fetchMenus}>Thử lại</Button>
+                <Button variant="outline" className="mt-4" onClick={fetchMenus}>Thử lại</Button>
               </div>
             ) : menus.length === 0 ? (
               <div className="p-12 text-center">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-3"><MenuIcon className="w-5 h-5 text-slate-400" /></div>
+                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3"><MenuIcon className="w-5 h-5 text-slate-400" /></div>
                 <p className="text-slate-500 font-medium">Chưa có menu nào</p>
                 <p className="text-sm text-slate-400 mt-1">Tạo menu mới để bắt đầu</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <div className="min-w-[800px]">
-                  <div className="grid grid-cols-5 gap-4 bg-slate-50/80 py-3 px-4 border-b border-slate-200 font-semibold text-sm text-slate-600">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-5 gap-4 bg-slate-50/80 py-3 px-4 text-xs font-medium text-slate-500 uppercase tracking-wide">
                     <div>Tên (VI)</div>
                     <div>Link</div>
                     <div>Slug</div>
                     <div className="text-center">Trạng thái</div>
                     <div className="text-center">Hành động</div>
                   </div>
-                  {renderMenuTree(menus)}
+                  {/* Table Body */}
+                  <div className="divide-y divide-slate-50">
+                    {renderMenuTree(menus)}
+                  </div>
                 </div>
               </div>
             )}
@@ -202,37 +213,38 @@ export default function MenuPage() {
         </Card>
       </motion.div>
 
+      {/* Dialog Create/Edit */}
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg rounded-2xl">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold text-slate-800">{isEditing ? 'Cập nhật Menu' : 'Tạo mới Menu'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="nameEn" className="text-sm font-medium text-slate-700">Tên (EN)</Label>
-                <Input id="nameEn" value={form.name.en} onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })} required className="mt-1.5 rounded-xl" />
+                <Label htmlFor="nameEn" className="text-sm text-slate-600">Tên (EN)</Label>
+                <Input id="nameEn" value={form.name.en} onChange={(e) => setForm({ ...form, name: { ...form.name, en: e.target.value } })} required className="mt-1.5" />
               </div>
               <div>
-                <Label htmlFor="nameVi" className="text-sm font-medium text-slate-700">Tên (VI)</Label>
-                <Input id="nameVi" value={form.name.vi} onChange={(e) => setForm({ ...form, name: { ...form.name, vi: e.target.value } })} required className="mt-1.5 rounded-xl" />
+                <Label htmlFor="nameVi" className="text-sm text-slate-600">Tên (VI)</Label>
+                <Input id="nameVi" value={form.name.vi} onChange={(e) => setForm({ ...form, name: { ...form.name, vi: e.target.value } })} required className="mt-1.5" />
               </div>
             </div>
             <div>
-              <Label htmlFor="link" className="text-sm font-medium text-slate-700">Link</Label>
-              <Input id="link" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} required className="mt-1.5 rounded-xl text-blue-600" />
+              <Label htmlFor="link" className="text-sm text-slate-600">Link</Label>
+              <Input id="link" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} required className="mt-1.5" />
             </div>
             <div>
-              <Label htmlFor="slug" className="text-sm font-medium text-slate-700">Slug</Label>
-              <Input id="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="mt-1.5 rounded-xl font-mono text-sm" />
+              <Label htmlFor="slug" className="text-sm text-slate-600">Slug</Label>
+              <Input id="slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required className="mt-1.5 font-mono text-sm" />
             </div>
             <div>
-              <Label htmlFor="parentId" className="text-sm font-medium text-slate-700">Menu cha</Label>
+              <Label className="text-sm text-slate-600">Menu cha</Label>
               <Select value={form.parentId ? form.parentId.toString() : 'none'} onValueChange={(value) => setForm({ ...form, parentId: value === 'none' ? null : value })}>
-                <SelectTrigger className="mt-1.5 rounded-xl">
+                <SelectTrigger className="mt-1.5">
                   <SelectValue placeholder="Chọn menu cha (nếu có)" />
                 </SelectTrigger>
-                <SelectContent className="rounded-xl">
+                <SelectContent>
                   <SelectItem value="none">-- Không có --</SelectItem>
                   {menus.filter((menu) => !editMenu || menu._id !== editMenu._id).map((menu) => (
                     <SelectItem key={menu._id.toString()} value={menu._id.toString()}>{menu.name.vi}</SelectItem>
@@ -245,7 +257,7 @@ export default function MenuPage() {
               <Label htmlFor="isActive" className="cursor-pointer text-sm text-slate-700">Hoạt động</Label>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 rounded-xl">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
+              <Button type="submit" className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] hover:from-[#c9a060] hover:to-[#8a6340]">{isEditing ? 'Cập nhật' : 'Tạo mới'}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
