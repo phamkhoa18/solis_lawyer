@@ -41,7 +41,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
       {
         id: "founder",
         name: "Luật sư Nguyễn Thành Lê",
-        position: "Luật Sư",
+        position: "Nhà sáng lập và Luật sư trưởng",
         description: "Luật sư Nguyễn Thành Lê là người sáng lập Solis Lawyers, sở hữu hơn mười năm kinh nghiệm hành nghề cùng uy tín vững chắc trong giới luật tại Úc. Trong suốt sự nghiệp, ông đã trực tiếp tham gia và bảo vệ thành công cho nhiều thân chủ trong các vụ án trọng điểm và phức tạp, từ những vụ án hình sự nghiêm trọng đến các hồ sơ pháp lý đặc thù, nhạy cảm. Bên cạnh lĩnh vực luật hình sự, Luật sư Nguyễn Thành Lê còn có bề dày kinh nghiệm trong việc tham gia các phiên tòa kháng cáo di trú, giúp khách hàng bảo vệ quyền lợi và mở ra cơ hội mới tại Úc.",
         specialties: ["Luật Hình Sự", "Luật Di Trú", "Luật Gia Đình", "Kháng Cáo Tòa Án", "Phân Chia Tài Sản", "Quyền Nuôi Con"],
         experience: "Hơn 10 năm kinh nghiệm hành nghề tại Úc",
@@ -59,7 +59,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
       {
         id: "associate",
         name: "Luật sư Nguyễn Thành Tô",
-        position: "Luật Sư",
+        position: "Luật sư cộng sự và Tiến sĩ Luật",
         description: "Luật sư Nguyễn Thành Tô là Tiến sĩ Luật tốt nghiệp tại Đại học RMIT, Úc, với nhiều năm kinh nghiệm hành nghề trong lĩnh vực pháp lý. Ông có chuyên môn sâu rộng trong luật hình sự và luật gia đình, từng tham gia giải quyết nhiều vụ việc phức tạp, đòi hỏi sự phân tích chặt chẽ và khả năng bảo vệ quyền lợi khách hàng ở mức cao nhất. Từ năm 2023, Luật sư Nguyễn Thành Tô chính thức cộng tác cùng Solis Lawyers, dưới sự dẫn dắt của Luật sư trưởng Nguyễn Thành Lê.",
         specialties: ["Luật Hình Sự", "Luật Gia Đình", "Phân Tích Pháp Lý", "Tư Vấn Khách Hàng", "Bảo Vệ Quyền Lợi", "Giải Pháp Thiết Thực"],
         education: "Tiến sĩ Luật - Đại học RMIT, Úc",
@@ -70,7 +70,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         id: "nick_le",
         name: "Luật sư Nghĩa Lê",
         position: "Luật Sư",
-        description: "Nghĩa (Nick) Lê sinh ra tại Việt Nam và sang Úc với một quyết tâm lớn là phải thành công. Chính sự thấu hiểu sâu sắc về các giá trị gia đình, sự khác biệt văn hóa cũng như những khó khăn khi hòa nhập với môi trường mới đã nuôi dưỡng trong anh niềm đam mê gắn bó với mảng luật gia đình. Nick tốt nghiệp ngành Luật và Kinh doanh tại Đại học Western Sydney, tạo một nền tảng vững chắc cho sự nghiệp. Anh từng có thời gian rèn luyện tay nghề thực tế tại Solis Lawyers dưới sự hướng dẫn tận tình của Luật sư Trưởng Lyndon Nguyen. Sau khi chính thức được công nhận là Luật sư của Tòa án Tối cao bang New South Wales, Nick tiếp tục đồng hành và hợp tác chiến lược cùng Solis Lawyers. Với mục tiêu trở thành một luật sư gia đình giỏi, Nick luôn áp dụng phương châm làm việc cốt lõi của Solis Lawyers vào thực tế: bảo vệ khách hàng một cách tỉ mỉ, hiệu quả và sát với thực tế của các gia đình hiện đại ngày nay. Anh luôn hết lòng đồng hành cùng khách hàng vượt qua những giai đoạn khó khăn như ly thân, ly hôn hay tổ chức lại cuộc sống gia đình. Nick tập trung vào việc tìm kiếm những giải pháp công bằng nhất khi phân chia tài sản, dàn xếp các thỏa thuận tài chính và xây dựng kế hoạch nuôi dạy con cái ổn định cho tương lai. Bằng tư duy phân tích nhạy bén cùng sự chuẩn bị kỹ lưỡng, anh bảo vệ tối đa lợi ích của khách hàng cả trong lẫn ngoài tòa án, khéo léo chuyển hóa những áp lực mệt mỏi về mặt cảm xúc thành những giải pháp pháp lý rõ ràng, nhẹ nhàng và vững chắc. Một lợi thế rất lớn của Nick là khả năng nói lưu loát cả tiếng Anh lẫn tiếng Việt. Sự nhạy bén về ngôn ngữ này giúp anh dễ dàng thấu hiểu những khác biệt về văn hóa, xóa bỏ các rào cản pháp lý phức tạp và không để xảy ra bất kỳ khoảng cách nào trong giao tiếp. Nhờ có thể tư vấn một cách trực tiếp, rõ ràng và thông suốt, Nick luôn tự tin là chỗ dựa pháp lý vững chắc và bảo vệ quyền lợi tốt nhất cho cộng đồng người Việt.",
+        description: "Nghĩa Lê sinh ra tại Việt Nam và sang Úc với một quyết tâm lớn là phải thành công. Chính sự thấu hiểu sâu sắc về các giá trị gia đình, sự khác biệt văn hóa cũng như những khó khăn khi hòa nhập với môi trường mới đã nuôi dưỡng trong anh niềm đam mê gắn bó với mảng luật gia đình. Nick tốt nghiệp ngành Luật và Kinh doanh tại Đại học Western Sydney, tạo một nền tảng vững chắc cho sự nghiệp. Anh từng có thời gian rèn luyện tay nghề thực tế tại Solis Lawyers dưới sự hướng dẫn tận tình của Luật sư Trưởng Lyndon Nguyen. Sau khi chính thức được công nhận là Luật sư của Tòa án Tối cao bang New South Wales, Nick tiếp tục đồng hành và hợp tác chiến lược cùng Solis Lawyers. Với mục tiêu trở thành một luật sư gia đình giỏi, Nick luôn áp dụng phương châm làm việc cốt lõi của Solis Lawyers vào thực tế: bảo vệ khách hàng một cách tỉ mỉ, hiệu quả và sát với thực tế của các gia đình hiện đại ngày nay. Anh luôn hết lòng đồng hành cùng khách hàng vượt qua những giai đoạn khó khăn như ly thân, ly hôn hay tổ chức lại cuộc sống gia đình. Nick tập trung vào việc tìm kiếm những giải pháp công bằng nhất khi phân chia tài sản, dàn xếp các thỏa thuận tài chính và xây dựng kế hoạch nuôi dạy con cái ổn định cho tương lai. Bằng tư duy phân tích nhạy bén cùng sự chuẩn bị kỹ lưỡng, anh bảo vệ tối đa lợi ích của khách hàng cả trong lẫn ngoài tòa án, khéo léo chuyển hóa những áp lực mệt mỏi về mặt cảm xúc thành những giải pháp pháp lý rõ ràng, nhẹ nhàng và vững chắc. Một lợi thế rất lớn của Nick là khả năng nói lưu loát cả tiếng Anh lẫn tiếng Việt. Sự nhạy bén về ngôn ngữ này giúp anh dễ dàng thấu hiểu những khác biệt về văn hóa, xóa bỏ các rào cản pháp lý phức tạp và không để xảy ra bất kỳ khoảng cách nào trong giao tiếp. Nhờ có thể tư vấn một cách trực tiếp, rõ ràng và thông suốt, Nick luôn tự tin là chỗ dựa pháp lý vững chắc và bảo vệ quyền lợi tốt nhất cho cộng đồng người Việt.",
         specialties: ["Luật Gia Đình", "Ly Thân & Ly Hôn", "Phân Chia Tài Sản", "Quyền Nuôi Con"],
         education: "Luật và Kinh doanh - Đại học Western Sydney, Úc",
         experience: "Luật sư của Tòa án Tối cao bang New South Wales",
@@ -98,8 +98,8 @@ const content: Record<'VI' | 'EN', TeamContent> = {
     teamMembers: [
       {
         id: "founder",
-        name: "Lawyer Thanh Le Nguyen",
-        position: "Solicitor",
+        name: "Solicitor Thanh Le Nguyen",
+        position: "Founder & Principal Lawyer",
         description: "Mr. Thanh Le Nguyen is the founder of Solis Lawyers, with more than a decade of professional experience and a strong reputation in the Australian legal community. Throughout his career, he has represented and successfully defended numerous clients in serious and complex cases, ranging from major criminal matters to sensitive and highly specialized legal proceedings. Beyond his expertise in criminal law, Lawyer Thanh Le Nguyen has extensive experience in immigration appeal hearings, where he has helped clients safeguard their rights and pursue new opportunities in Australia.",
         specialties: ["Criminal Law", "Immigration Law", "Family Law", "Court Appeals", "Property Settlements", "Child Custody"],
         experience: "Over 10 years of professional experience in Australia",
@@ -116,8 +116,8 @@ const content: Record<'VI' | 'EN', TeamContent> = {
       },
       {
         id: "associate",
-        name: "Lawyer Thanh To Nguyen",
-        position: "Solicitor",
+        name: "Solicitor Thanh To Nguyen",
+        position: "Associate & PhD in Law",
         description: "Thanh To Nguyen, PhD in Law from RMIT University, Australia, brings many years of legal practice and a wealth of expertise in criminal law and family law. Throughout his career, he has been involved in handling complex cases that demand both rigorous legal analysis and a strong commitment to protecting clients' rights. Since 2023, Lawyer Thanh To Nguyen has been a valued member of Solis Lawyers, working under the leadership of Principal Lawyer Thanh Le Nguyen.",
         specialties: ["Criminal Law", "Family Law", "Legal Analysis", "Client Consultation", "Rights Protection", "Practical Solutions"],
         education: "PhD in Law - RMIT University, Australia",
@@ -126,7 +126,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
       },
       {
         id: "nick_le",
-        name: "Lawyer Nick Le",
+        name: "Solicitor Nick Le",
         position: "Solicitor",
         description: "Nick Le was born in Vietnam and came to Australia with a relentless drive to succeed. His deep understanding of diverse cultural dynamics, family values, and the challenges of adapting to new environments has led to his unwavering interest in family law. Nick completed his legal and business education at Western Sydney University, laying a formidable foundation for his career. He honed his practical skills at Solis Lawyers, working closely under the firm's Principal Solicitor, Lyndon Nguyen. Now admitted as a Solicitor of the Supreme Court of New South Wales, Nick continues to collaborate strategically with Solis Lawyers. Driven to excel in family law, Nick anchors his practice in the core strategic approach of Solis Lawyers: delivering meticulous, results-driven advocacy tailored to modern family dynamics. He is deeply committed to guiding clients through the complexities of separations, divorce, and domestic relationship restructuring. Nick focuses on securing equitable outcomes in property matters, financial settlements, and forward-looking parenting arrangements. By combining a sharp analytical framework with strong tactical foresight, he protects client interests both inside and outside the courtroom, smoothly transforming complex emotional challenges into structured, legally sound resolutions. Nick can speak both English and Vietnamese fluently. This dual-language capability serves as a powerful strategic asset, allowing him to bridge cultural nuances, dismantle complex legal barriers, and eliminate communication gaps. By offering direct, clear, and unhindered legal counsel, Nick confidently advocates for the Vietnamese community.",
         specialties: ["Family Law", "Separations & Divorce", "Property Settlements", "Parenting Arrangements"],
@@ -136,7 +136,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
       },
       {
         id: "camvan_york",
-        name: "Lawyer Cam Van York",
+        name: "Solicitor Cam Van York",
         position: "Solicitor",
         description: "Cam Van York completed her Bachelor of Laws at Western Sydney University, establishing a formidable academic foundation for her legal career. She currently serves as the Managing Lawyer at Solis Lawyers' Bankstown office. At Solis Lawyers, CamVan focuses her practice on Criminal Law, Family Law, Wills & Estates, and Strategic Client Consultation. Within Family Law, she is deeply committed to guiding clients through the intricacies of child custody arrangements and property settlements. She brings extensive hands-on experience in court representation, with particular expertise in defending clients in domestic violence matters and Apprehended Violence Order (AVO) proceedings. Additionally, she acts as a trusted advisor in estate planning, helping clients structure secure wills and navigate complex estate administration. Anchoring her practice in the core strategic approach of Solis Lawyers, CamVan combines sharp analytical foresight with a personalized, empathetic consultation style. Whether negotiating out-of-court solutions or advocating in front of a judge, she protects her clients' paramount interests with meticulous precision, smoothly transforming complex emotional challenges into structured, legally sound resolutions.",
         specialties: ["Criminal Law", "Family Law", "Wills & Estates", "Child Custody", "Property Settlements", "AVO Proceedings"],
