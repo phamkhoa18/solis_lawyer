@@ -80,7 +80,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         id: "camvan_york",
         name: "Luật sư Cẩm Vân",
         position: "Luật Sư",
-        description: "Luật sư Cẩm Vân (CamVan York) tốt nghiệp cử nhân Luật tại Đại học Western Sydney (Western Sydney University) – một nền tảng học thuật vững chắc tạo tiền đề cho sự nghiệp pháp lý thành công của bà. Hiện nay, bà đảm nhiệm vị trí Luật sư Điều hành (Managing Lawyer) tại văn phòng Bankstown của Solis Lawyers. Tại Solis Lawyers, Luật sư Cẩm Vân là chuyên gia tư vấn và tranh tụng trong các lĩnh vực trọng tâm bao gồm: Luật Hình sự, Luật Gia đình, Di chúc & Thừa kế, cùng dịch vụ Tư vấn Pháp lý chuyên sâu cho khách hàng. Trong mảng Luật Gia đình, bà dành nhiều tâm huyết hỗ trợ khách hàng giải quyết các vấn đề phức tạp về quyền nuôi con (child custody) và thỏa thuận phân chia tài sản (property settlements). Bà đặc biệt có bề dày kinh nghiệm thực chiến trong việc bảo vệ quyền lợi khách hàng ở các vụ án bạo lực gia đình và thủ tục lệnh cấm bạo lực (AVO proceedings). Bên cạnh đó, bà cũng là người cố vấn tin cậy giúp khách hàng hoạch định tài sản, lập di chúc và xử lý các thủ tục thừa kế một cách chặt chẽ, rõ ràng. Bám sát phương châm làm việc cốt lõi của Solis Lawyers, Luật sư Cẩm Vân luôn tiếp cận từng vụ việc với tư duy phân tích nhạy bén, chiến lược tranh tụng tỉ mỉ và sự tận tụy trong từng buổi tư vấn. Khả năng lắng nghe, thấu hiểu tâm lý kết hợp với bản lĩnh tại tòa án giúp bà khéo léo chuyển hóa những áp lực mệt mỏi về mặt cảm xúc thành những giải pháp pháp lý vững chắc, bảo vệ tối đa quyền và lợi ích hợp pháp cho khách hàng.",
+        description: "Luật sư Cẩm Vân tốt nghiệp cử nhân Luật tại Đại học Western Sydney (Western Sydney University) – một nền tảng học thuật vững chắc tạo tiền đề cho sự nghiệp pháp lý thành công của bà. Hiện nay, bà đảm nhiệm vị trí Luật sư Điều hành (Managing Lawyer) tại văn phòng Bankstown của Solis Lawyers. Tại Solis Lawyers, Luật sư Cẩm Vân là chuyên gia tư vấn và tranh tụng trong các lĩnh vực trọng tâm bao gồm: Luật Hình sự, Luật Gia đình, Di chúc & Thừa kế, cùng dịch vụ Tư vấn Pháp lý chuyên sâu cho khách hàng. Trong mảng Luật Gia đình, bà dành nhiều tâm huyết hỗ trợ khách hàng giải quyết các vấn đề phức tạp về quyền nuôi con (child custody) và thỏa thuận phân chia tài sản (property settlements). Bà đặc biệt có bề dày kinh nghiệm thực chiến trong việc bảo vệ quyền lợi khách hàng ở các vụ án bạo lực gia đình và thủ tục lệnh cấm bạo lực (AVO proceedings). Bên cạnh đó, bà cũng là người cố vấn tin cậy giúp khách hàng hoạch định tài sản, lập di chúc và xử lý các thủ tục thừa kế một cách chặt chẽ, rõ ràng. Bám sát phương châm làm việc cốt lõi của Solis Lawyers, Luật sư Cẩm Vân luôn tiếp cận từng vụ việc với tư duy phân tích nhạy bén, chiến lược tranh tụng tỉ mỉ và sự tận tụy trong từng buổi tư vấn. Khả năng lắng nghe, thấu hiểu tâm lý kết hợp với bản lĩnh tại tòa án giúp bà khéo léo chuyển hóa những áp lực mệt mỏi về mặt cảm xúc thành những giải pháp pháp lý vững chắc, bảo vệ tối đa quyền và lợi ích hợp pháp cho khách hàng.",
         specialties: ["Luật Hình Sự", "Luật Gia Đình", "Di Chúc & Thừa Kế", "Quyền Nuôi Con", "Phân Chia Tài Sản", "Lệnh Cấm Bạo Lực (AVO)"],
         education: "Cử nhân Luật - Đại học Western Sydney, Úc",
         experience: "Luật sư Điều hành tại văn phòng Bankstown, Solis Lawyers",
@@ -128,7 +128,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         id: "nick_le",
         name: "Lawyer Nick Le",
         position: "Solicitor",
-        description: "Nghia (Nick) Le was born in Vietnam and came to Australia with a relentless drive to succeed. His deep understanding of diverse cultural dynamics, family values, and the challenges of adapting to new environments has led to his unwavering interest in family law. Nick completed his legal and business education at Western Sydney University, laying a formidable foundation for his career. He honed his practical skills at Solis Lawyers, working closely under the firm's Principal Solicitor, Lyndon Nguyen. Now admitted as a Solicitor of the Supreme Court of New South Wales, Nick continues to collaborate strategically with Solis Lawyers. Driven to excel in family law, Nick anchors his practice in the core strategic approach of Solis Lawyers: delivering meticulous, results-driven advocacy tailored to modern family dynamics. He is deeply committed to guiding clients through the complexities of separations, divorce, and domestic relationship restructuring. Nick focuses on securing equitable outcomes in property matters, financial settlements, and forward-looking parenting arrangements. By combining a sharp analytical framework with strong tactical foresight, he protects client interests both inside and outside the courtroom, smoothly transforming complex emotional challenges into structured, legally sound resolutions. Nick can speak both English and Vietnamese fluently. This dual-language capability serves as a powerful strategic asset, allowing him to bridge cultural nuances, dismantle complex legal barriers, and eliminate communication gaps. By offering direct, clear, and unhindered legal counsel, Nick confidently advocates for the Vietnamese community.",
+        description: "Nick Le was born in Vietnam and came to Australia with a relentless drive to succeed. His deep understanding of diverse cultural dynamics, family values, and the challenges of adapting to new environments has led to his unwavering interest in family law. Nick completed his legal and business education at Western Sydney University, laying a formidable foundation for his career. He honed his practical skills at Solis Lawyers, working closely under the firm's Principal Solicitor, Lyndon Nguyen. Now admitted as a Solicitor of the Supreme Court of New South Wales, Nick continues to collaborate strategically with Solis Lawyers. Driven to excel in family law, Nick anchors his practice in the core strategic approach of Solis Lawyers: delivering meticulous, results-driven advocacy tailored to modern family dynamics. He is deeply committed to guiding clients through the complexities of separations, divorce, and domestic relationship restructuring. Nick focuses on securing equitable outcomes in property matters, financial settlements, and forward-looking parenting arrangements. By combining a sharp analytical framework with strong tactical foresight, he protects client interests both inside and outside the courtroom, smoothly transforming complex emotional challenges into structured, legally sound resolutions. Nick can speak both English and Vietnamese fluently. This dual-language capability serves as a powerful strategic asset, allowing him to bridge cultural nuances, dismantle complex legal barriers, and eliminate communication gaps. By offering direct, clear, and unhindered legal counsel, Nick confidently advocates for the Vietnamese community.",
         specialties: ["Family Law", "Separations & Divorce", "Property Settlements", "Parenting Arrangements"],
         education: "Law and Business - Western Sydney University, Australia",
         experience: "Admitted as a Solicitor of the Supreme Court of New South Wales",
@@ -138,7 +138,7 @@ const content: Record<'VI' | 'EN', TeamContent> = {
         id: "camvan_york",
         name: "Lawyer Cam Van York",
         position: "Solicitor",
-        description: "CamVan York (Cẩm Vân) completed her Bachelor of Laws at Western Sydney University, establishing a formidable academic foundation for her legal career. She currently serves as the Managing Lawyer at Solis Lawyers' Bankstown office. At Solis Lawyers, CamVan focuses her practice on Criminal Law, Family Law, Wills & Estates, and Strategic Client Consultation. Within Family Law, she is deeply committed to guiding clients through the intricacies of child custody arrangements and property settlements. She brings extensive hands-on experience in court representation, with particular expertise in defending clients in domestic violence matters and Apprehended Violence Order (AVO) proceedings. Additionally, she acts as a trusted advisor in estate planning, helping clients structure secure wills and navigate complex estate administration. Anchoring her practice in the core strategic approach of Solis Lawyers, CamVan combines sharp analytical foresight with a personalized, empathetic consultation style. Whether negotiating out-of-court solutions or advocating in front of a judge, she protects her clients' paramount interests with meticulous precision, smoothly transforming complex emotional challenges into structured, legally sound resolutions.",
+        description: "Cam Van York completed her Bachelor of Laws at Western Sydney University, establishing a formidable academic foundation for her legal career. She currently serves as the Managing Lawyer at Solis Lawyers' Bankstown office. At Solis Lawyers, CamVan focuses her practice on Criminal Law, Family Law, Wills & Estates, and Strategic Client Consultation. Within Family Law, she is deeply committed to guiding clients through the intricacies of child custody arrangements and property settlements. She brings extensive hands-on experience in court representation, with particular expertise in defending clients in domestic violence matters and Apprehended Violence Order (AVO) proceedings. Additionally, she acts as a trusted advisor in estate planning, helping clients structure secure wills and navigate complex estate administration. Anchoring her practice in the core strategic approach of Solis Lawyers, CamVan combines sharp analytical foresight with a personalized, empathetic consultation style. Whether negotiating out-of-court solutions or advocating in front of a judge, she protects her clients' paramount interests with meticulous precision, smoothly transforming complex emotional challenges into structured, legally sound resolutions.",
         specialties: ["Criminal Law", "Family Law", "Wills & Estates", "Child Custody", "Property Settlements", "AVO Proceedings"],
         education: "Bachelor of Laws - Western Sydney University, Australia",
         experience: "Managing Lawyer at Solis Lawyers' Bankstown office",
@@ -181,8 +181,8 @@ export default function Team() {
   };
 
   const cardVariants: Variants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 50,
       scale: 0.9
     },
@@ -199,8 +199,8 @@ export default function Team() {
 
   const imageVariants: Variants = {
     hidden: { scale: 1.2, opacity: 0 },
-    visible: { 
-      scale: 1, 
+    visible: {
+      scale: 1,
       opacity: 1,
       transition: { duration: 0.8, ease: "easeOut" }
     }
@@ -208,13 +208,13 @@ export default function Team() {
 
   return (
     <section className="team py-20 lg:py-24 bg-gradient-to-br from-gray-50 to-white relative overflow-hidden">
-      
+
       {/* Background decorative elements */}
       <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-[#d5aa6d]/10 to-[#9b6f45]/10 rounded-full blur-3xl"></div>
       <div className="absolute bottom-20 left-20 w-48 h-48 bg-gradient-to-tr from-[#d5aa6d]/5 to-[#9b6f45]/5 rounded-full blur-2xl"></div>
 
       <div className="container mx-auto px-3.5 relative z-10">
-        
+
         {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -246,20 +246,20 @@ export default function Team() {
               variants={cardVariants}
               className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#d5aa6d]/30 relative"
             >
-              
+
               {/* Mobile Click Handler */}
-              <div 
+              <div
                 className="lg:hidden absolute inset-0 z-10 cursor-pointer"
                 onClick={() => openModal(member.id)}
               />
-              
+
               {/* Image Section */}
               <div className="relative h-80 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                 <motion.div
                   variants={imageVariants}
                   className="absolute inset-0"
                 >
-                  <img 
+                  <img
                     src={member.image}
                     alt={member.name}
                     className="w-full h-full object-cover object-top"
@@ -279,14 +279,14 @@ export default function Team() {
                     </div>
                   </div>
                 </motion.div>
-                
+
                 {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
 
               {/* Content Section */}
               <div className="p-6 lg:p-8 relative">
-                
+
                 {/* Name & Position */}
                 <div className="mb-6">
                   <h3 className="text-xl lg:text-2xl font-bold text-[var(--heading-color)] mb-2 group-hover:text-[#d5aa6d] transition-colors duration-300">
@@ -302,7 +302,7 @@ export default function Team() {
                   <p className="text-[var(--paragraph)] leading-relaxed text-sm lg:text-base line-clamp-4">
                     {member.description}
                   </p>
-                  
+
                   {/* Mobile Tap Indicator */}
                   <div className="lg:hidden absolute bottom-0 right-0 bg-gradient-to-l from-white via-white to-transparent pl-8 pr-2 py-1">
                     <span className="text-xs text-[#d5aa6d] font-medium">
@@ -322,12 +322,12 @@ export default function Team() {
                         {member.position}
                       </p>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <p className="text-[var(--heading-color)] leading-relaxed text-base lg:text-lg font-medium">
                         {member.description}
                       </p>
-                      
+
                       <div className="pt-4 border-t border-[#d5aa6d]/20">
                         <div className="flex flex-wrap gap-2">
                           {member.specialties.map((specialty, idx) => (
@@ -435,8 +435,8 @@ export default function Team() {
         >
           <div className="bg-gradient-to-r from-[#d5aa6d]/5 to-[#9b6f45]/5 rounded-2xl p-8 lg:p-12 border border-[#d5aa6d]/10">
             <h3 className="text-2xl lg:text-3xl font_play text-[var(--heading-color)] mb-4">
-              {language === 'VI' 
-                ? 'Cần hỗ trợ pháp lý chuyên nghiệp?' 
+              {language === 'VI'
+                ? 'Cần hỗ trợ pháp lý chuyên nghiệp?'
                 : 'Need Professional Legal Support?'
               }
             </h3>
@@ -462,18 +462,18 @@ export default function Team() {
         <div className="lg:hidden fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[85vh] overflow-y-auto relative shadow-2xl">
             {/* Close button */}
-            <button 
+            <button
               className="absolute top-4 right-4 w-10 h-10 bg-[#d5aa6d] text-white rounded-full flex items-center justify-center hover:bg-[#9b6f45] transition-colors duration-300 text-xl font-bold z-10"
               onClick={closeModal}
             >
               ×
             </button>
-            
+
             {/* Modal Content */}
             {(() => {
               const member = currentContent.teamMembers.find(m => m.id === expandedCard);
               if (!member) return null;
-              
+
               return (
                 <div className="pr-12">
                   <div className="mb-6">
@@ -484,12 +484,12 @@ export default function Team() {
                       {member.position}
                     </p>
                   </div>
-                  
+
                   <div className="space-y-6">
                     <p className="text-[var(--heading-color)] leading-relaxed text-base font-medium">
                       {member.description}
                     </p>
-                    
+
                     {/* Specialties */}
                     <div>
                       <h4 className="font-semibold text-[var(--heading-color)] mb-3 flex items-center gap-2">

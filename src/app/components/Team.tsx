@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { Facebook, Instagram, Linkedin, Share2, Twitter } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Share2, Twitter, ChevronDown, ChevronUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { IMember } from '@/lib/types/imember';
@@ -55,6 +55,7 @@ export default function Team() {
   const [isLoading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Log normalized language for debugging
   console.log('Normalized Language:', normalizedLanguage);
@@ -239,8 +240,9 @@ export default function Team() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
-                {memberCards.map((member:any, index) => (
+              <div className="flex flex-col gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                  {(isExpanded ? memberCards : memberCards.slice(0, 2)).map((member:any, index) => (
                   <motion.div
                     key={member.name}
                     className={`user cursor-pointer group overflow-hidden rounded-3xl bg-white border border-[rgb(0_0_0_/_10%)] ${
@@ -302,6 +304,22 @@ export default function Team() {
                     </div>
                   </motion.div>
                 ))}
+                </div>
+                {memberCards.length > 2 && (
+                  <div className="flex justify-end mt-4">
+                    <button
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="flex items-center justify-center w-12 h-12 bg-white rounded-full shadow-lg border border-[rgb(0_0_0_/_10%)] hover:bg-[#d5aa6d] hover:text-white transition-colors duration-300 group"
+                      aria-label={isExpanded ? 'Show less' : 'Show more'}
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="w-6 h-6 text-[#9b6f45] group-hover:text-white" />
+                      ) : (
+                        <ChevronDown className="w-6 h-6 text-[#9b6f45] group-hover:text-white" />
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
