@@ -14,9 +14,9 @@ const isValidObjectId = (id: string | null): id is string => {
   return !!id && mongoose.isValidObjectId(id);
 };
 
-// Validate URL format
+// Validate URL format or local path
 const isValidUrl = (url: string): boolean => {
-  return url.startsWith('/') || /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url);
+  return /^https?:\/\/[^\s/$.?#].[^\s]*$/.test(url) || url.startsWith('/');
 };
 
 // Validate slug format
