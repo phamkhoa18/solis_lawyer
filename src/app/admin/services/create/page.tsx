@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
@@ -9,9 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ImageUploader from '@/components/cloudinaryUpload';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Loader2, Languages } from 'lucide-react';
+import { Loader2, Languages, Check } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { IService } from '@/lib/types/iservice';
+import { IMember } from '@/lib/types/imember';
 import { ApiResponse } from '@/lib/types/api-response';
 import Image from 'next/image';
 
@@ -23,12 +24,21 @@ export default function CreateServicePage() {
   const [formData, setFormData] = useState<FormData>({
     name: { en: '', vi: '' },
     img: '',
+    icon: '',
     link: '',
     description: { en: '', vi: '' },
+    benefits: { en: [], vi: [] },
+    team: [],
   });
 
   const [loading, setLoading] = useState(false);
+  const [members, setMembers] = useState<IMember[]>([]);
   const [languageDisplay, setLanguageDisplay] = useState<'both' | 'en' | 'vi'>('both');
+  
+  // States for benefits textareas (newline separated)
+  const [benefitsTextEn, setBenefitsTextEn] = useState('');
+  const [benefitsTextVi, setBenefitsTextVi] = useState('');
+
   const [errors, setErrors] = useState<{
     img?: string;
     nameEn?: string;
@@ -37,6 +47,22 @@ export default function CreateServicePage() {
     descriptionEn?: string;
     descriptionVi?: string;
   }>({});
+
+  useEffect(() => {
+    // Fetch members for team selection
+    const fetchMembers = async () => {
+      try {
+        const res = await fetch('/api/members');
+        const data = await res.json();
+        if (data.success) {
+          setMembers(data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching members', error);
+      }
+    };
+    fetchMembers();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -73,6 +99,20 @@ export default function CreateServicePage() {
     setErrors((prev) => ({ ...prev, img: undefined }));
   };
 
+  const handleIconUploadSuccess = (url: string) => {
+    setFormData((prev) => ({ ...prev, icon: url }));
+  };
+
+  const toggleTeamMember = (id: string) => {
+    setFormData((prev) => {
+      const team = (prev.team || []) as string[];
+      if (team.includes(id)) {
+        return { ...prev, team: team.filter((mId) => mId !== id) };
+      }
+      return { ...prev, team: [...team, id] };
+    });
+  };
+
   const validateForm = () => {
     const newErrors: {
       img?: string;
@@ -97,12 +137,21 @@ export default function CreateServicePage() {
       return;
     }
 
+    // Process benefits before submitting
+    const finalFormData = {
+      ...formData,
+      benefits: {
+        en: benefitsTextEn.split('\n').filter((b) => b.trim() !== ''),
+        vi: benefitsTextVi.split('\n').filter((b) => b.trim() !== ''),
+      },
+    };
+
     try {
       setLoading(true);
       const res = await fetch('/api/services', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(finalFormData),
       });
 
       const data: ApiResponse<IService> = await res.json();
@@ -111,7 +160,6 @@ export default function CreateServicePage() {
         toast.success(data.message || 'Tạo dịch vụ thành công!');
         router.push('/admin/services');
       } else {
-        // Handle field-specific errors from backend
         if (data.statusCode === 400 && data.message) {
           if (data.message.includes('Name (en, vi), image, and description')) {
             setErrors({
@@ -207,7 +255,6 @@ export default function CreateServicePage() {
                     onChange={(e) => handleChange(e, 'name', 'en')}
                     placeholder="Nhập tên dịch vụ (EN)"
                     className={errors.nameEn ? 'border-red-500' : ''}
-                    aria-describedby={errors.nameEn ? 'nameEn-error' : undefined}
                   />
                   {errors.nameEn && (
                     <p id="nameEn-error" className="text-red-500 text-sm mt-1">
@@ -228,7 +275,6 @@ export default function CreateServicePage() {
                     onChange={(e) => handleChange(e, 'name', 'vi')}
                     placeholder="Nhập tên dịch vụ (VI)"
                     className={errors.nameVi ? 'border-red-500' : ''}
-                    aria-describedby={errors.nameVi ? 'nameVi-error' : undefined}
                   />
                   {errors.nameVi && (
                     <p id="nameVi-error" className="text-red-500 text-sm mt-1">
@@ -263,7 +309,6 @@ export default function CreateServicePage() {
                     rows={3}
                     placeholder="Nhập mô tả dịch vụ (EN)"
                     className={errors.descriptionEn ? 'border-red-500' : ''}
-                    aria-describedby={errors.descriptionEn ? 'descriptionEn-error' : undefined}
                   />
                   {errors.descriptionEn && (
                     <p id="descriptionEn-error" className="text-red-500 text-sm mt-1">
@@ -287,7 +332,6 @@ export default function CreateServicePage() {
                     rows={3}
                     placeholder="Nhập mô tả dịch vụ (VI)"
                     className={errors.descriptionVi ? 'border-red-500' : ''}
-                    aria-describedby={errors.descriptionVi ? 'descriptionVi-error' : undefined}
                   />
                   {errors.descriptionVi && (
                     <p id="descriptionVi-error" className="text-red-500 text-sm mt-1">
@@ -299,10 +343,90 @@ export default function CreateServicePage() {
             </motion.div>
           </AnimatePresence>
 
+          {/* Benefits Section */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`bene-${languageDisplay}`}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.2 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
+              {(languageDisplay === 'both' || languageDisplay === 'en') && (
+                <div>
+                  <Label className="mb-2.5 flex items-center gap-2">
+                    Lợi ích (EN) - Mỗi dòng 1 lợi ích
+                  </Label>
+                  <Textarea
+                    value={benefitsTextEn}
+                    onChange={(e) => setBenefitsTextEn(e.target.value)}
+                    rows={4}
+                    placeholder="Benefit 1&#10;Benefit 2"
+                  />
+                </div>
+              )}
+              {(languageDisplay === 'both' || languageDisplay === 'vi') && (
+                <div>
+                  <Label className="mb-2.5 flex items-center gap-2">
+                    Lợi ích (VI) - Mỗi dòng 1 lợi ích
+                  </Label>
+                  <Textarea
+                    value={benefitsTextVi}
+                    onChange={(e) => setBenefitsTextVi(e.target.value)}
+                    rows={4}
+                    placeholder="Lợi ích 1&#10;Lợi ích 2"
+                  />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Team Assignment */}
+          <div>
+            <Label className="mb-2.5 block text-lg font-medium">Đội ngũ phụ trách (Members)</Label>
+            {members.length === 0 ? (
+              <p className="text-gray-500 text-sm">Chưa có thành viên nào. Hãy tạo thành viên trước.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {members.map((member) => {
+                  const isSelected = (formData.team as string[])?.includes(member._id as string);
+                  return (
+                    <div
+                      key={member._id as string}
+                      onClick={() => toggleTeamMember(member._id as string)}
+                      className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                        isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div
+                        className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 ${
+                          isSelected ? 'bg-blue-500 text-white' : 'border border-gray-300'
+                        }`}
+                      >
+                        {isSelected && <Check size={14} />}
+                      </div>
+                      <Image
+                        src={member.image}
+                        alt="avatar"
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover w-10 h-10"
+                      />
+                      <div className="overflow-hidden">
+                        <p className="font-semibold text-sm truncate">{member.name.vi}</p>
+                        <p className="text-xs text-gray-500 truncate">{member.position.vi}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Common Fields */}
           <div>
             <Label htmlFor="link" className="mb-2.5 flex items-center gap-2">
-              Link (Tùy chọn)
+              Link URL Dịch Vụ
               {errors.link && <span className="text-red-500 text-sm">{errors.link}</span>}
             </Label>
             <Input
@@ -310,9 +434,8 @@ export default function CreateServicePage() {
               name="link"
               value={formData.link || ''}
               onChange={(e) => handleChange(e, 'link')}
-              placeholder="/service/... hoặc bất kỳ liên kết nào (không bắt buộc)"
+              placeholder="/services/..."
               className={errors.link ? 'border-red-500' : ''}
-              aria-describedby={errors.link ? 'link-error' : undefined}
             />
             {errors.link && (
               <p id="link-error" className="text-red-500 text-sm mt-1">
@@ -321,29 +444,50 @@ export default function CreateServicePage() {
             )}
           </div>
 
-          <div>
-            <Label htmlFor="img" className="mb-2.5 flex items-center gap-2">
-              Ảnh Dịch Vụ
-              {errors.img && <span className="text-red-500 text-sm">{errors.img}</span>}
-            </Label>
-            <ImageUploader
-              onUploadSuccess={handleImageUploadSuccess}
-            />
-            {formData.img && (
-              <div className="mt-2">
-                <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
-                <Image
-                  src={formData.img}
-                  alt="Service preview"
-                  width={200}
-                  height={100}
-                  className="object-cover rounded"
-                />
-              </div>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <Label className="mb-2.5 flex items-center gap-2">
+                Ảnh Dịch Vụ (Thumbnail)
+                {errors.img && <span className="text-red-500 text-sm">{errors.img}</span>}
+              </Label>
+              <ImageUploader onUploadSuccess={handleImageUploadSuccess} />
+              {formData.img && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
+                  <Image
+                    src={formData.img}
+                    alt="Service preview"
+                    width={200}
+                    height={100}
+                    className="object-cover rounded"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label className="mb-2.5 flex items-center gap-2">
+                Icon Dịch Vụ (Tùy chọn)
+              </Label>
+              <ImageUploader onUploadSuccess={handleIconUploadSuccess} />
+              {formData.icon && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-600 mb-2">Icon đã chọn:</p>
+                  <div className="bg-gray-100 w-16 h-16 flex items-center justify-center rounded">
+                    <Image
+                      src={formData.icon}
+                      alt="Service icon"
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 mt-4">
             <Button
               variant="outline"
               onClick={() => router.push('/admin/services')}
@@ -351,7 +495,7 @@ export default function CreateServicePage() {
             >
               Hủy
             </Button>
-            <Button onClick={handleSubmit} disabled={loading}>
+            <Button onClick={handleSubmit} disabled={loading} className="bg-[#B8967E] hover:bg-[#9b6f45] text-white">
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

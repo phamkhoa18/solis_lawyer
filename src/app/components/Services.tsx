@@ -33,7 +33,7 @@ const mapServiceToCard = (service: IService, lang: 'en' | 'vi'): ServiceData => 
   }
 
   return {
-    icon: service.img || '/fallback-image.jpg',
+    icon: service.icon || service.img || '/fallback-image.jpg',
     title,
     alt: `${title} Icon`,
     href,

@@ -5,7 +5,7 @@ import connectDB from '@/lib/dbConnect';
 import { IService } from '@/lib/types/iservice';
 import { ApiResponse } from '@/lib/types/api-response';
 import Service from '@/models/Service';
-
+import '@/models/Member'; // Ensure Member model is registered before populate
 // Utility function to validate MongoDB ObjectId
 const isValidObjectId = (id: string | null): id is string => {
   return !!id && mongoose.isValidObjectId(id);
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IS
         );
       }
 
-      const service = await Service.findById(id);
+      const service = await Service.findById(id).populate('team');
       if (!service) {
         return NextResponse.json(
           { success: false, message: 'Service not found', statusCode: 404 },
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IS
       );
     }
 
-    const services = await Service.find();
+    const services = await Service.find().populate('team');
     return NextResponse.json(
       { success: true, data: services, statusCode: 200 },
       { status: 200 }
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse<I
     }
 
     // Validate URL format for img
-    if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img)) {
+    if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img) && !body.img.startsWith('/')) {
       return NextResponse.json(
         { success: false, message: 'Invalid URL format for image', statusCode: 400 },
         { status: 400 }
@@ -123,7 +123,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse<ApiResponse<IS
         { status: 400 }
       );
     }
-    if (body.img && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img)) {
+    if (body.img && !/^https?:\/\/[^\s/$.?#].[^\s]*$/.test(body.img) && !body.img.startsWith('/')) {
       return NextResponse.json(
         { success: false, message: 'Invalid URL format for image', statusCode: 400 },
         { status: 400 }
