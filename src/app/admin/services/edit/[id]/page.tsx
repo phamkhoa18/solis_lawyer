@@ -84,7 +84,11 @@ export default function EditServicePage() {
             description: { en: s.description.en || '', vi: s.description.vi || '' },
             benefits: { en: s.benefits?.en || [], vi: s.benefits?.vi || [] },
             // team objects might be populated, so we extract IDs if they are objects
-            team: (s.team || []).map((t: string | { _id?: string; id?: string }) => typeof t === 'string' ? t : (t._id || t.id)).filter((id): id is string => !!id),
+            team: (s.team || []).map((t) => {
+              if (typeof t === 'string') return t;
+              const m = t as { _id?: string; id?: string };
+              return m._id || m.id || '';
+            }).filter((id): id is string => !!id),
           });
           
           setBenefitsTextEn(s.benefits?.en?.join('\n') || '');
