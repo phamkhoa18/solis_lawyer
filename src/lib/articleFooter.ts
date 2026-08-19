@@ -24,8 +24,8 @@ export function buildArticleFooter(lang: 'vi' | 'en', source?: FooterSource): st
 
   const ctaTitle = isVi ? 'Bạn cần luật sư hiểu rõ hoàn cảnh của mình?' : 'Need a lawyer who truly understands your situation?';
   const ctaBody = isVi
-    ? 'Solis Lawyers tư vấn trực tiếp bằng tiếng Việt, đã đồng hành cùng nhiều gia đình Việt tại Úc. Hãy liên hệ để trao đổi về tình huống của bạn — mọi thông tin hoàn toàn bảo mật.'
-    : 'Solis Lawyers advises in English and Vietnamese, with real experience supporting the Vietnamese community in Australia. Get in touch about your situation — everything you share stays confidential.';
+    ? 'Solis Lawyers là đội ngũ luật sư giàu kinh nghiệm trong luật hình sự và luật gia đình tại Úc. Hãy liên hệ để được tư vấn cho tình huống của bạn — mọi thông tin hoàn toàn bảo mật.'
+    : 'Solis Lawyers brings deep expertise in criminal and family law across Australia. Get in touch about your situation — everything you share stays confidential.';
   const emailBtn = `✉ contact@solislaw.com.au`;
   const webBtn = isVi ? '🌐 solislaw.com.au' : '🌐 solislaw.com.au';
   const contactLabel = isVi ? 'Liên hệ ngay' : 'Contact us';
