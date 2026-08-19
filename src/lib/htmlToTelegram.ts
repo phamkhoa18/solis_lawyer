@@ -11,7 +11,7 @@ export function articleHtmlToTelegram(html: string): string[] {
   // Bỏ footer chuẩn + sơ đồ mermaid (xem trên web) + bảng
   $('#root .solis-footer').remove();
   $('#root pre.mermaid').each((_, el) => {
-    $(el).replaceWith('<p><i>📊 [Sơ đồ minh hoạ — xem trên website]</i></p>');
+    $(el).replaceWith('<p><i>📊 Sơ đồ minh hoạ — hình nằm bên dưới và trên website</i></p>');
   });
   $('#root table').each((_, el) => {
     $(el).replaceWith('<p><i>📋 [Bảng so sánh — xem trên website]</i></p>');

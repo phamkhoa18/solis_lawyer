@@ -13,6 +13,7 @@ import BotSetting from '@/models/BotSetting';
 import SourceItem from '@/models/SourceItem';
 import { sendMessage, sendPhotoBuffer, TgButton, esc } from '@/lib/telegram';
 import { articleHtmlToTelegram } from '@/lib/htmlToTelegram';
+import { extractMermaidBlocks } from '@/lib/mermaidLint';
 
 const BASE = process.env.SITE_URL || 'http://localhost:3000';
 const MODEL = 'DeepSeek-V4-Flash';
@@ -246,6 +247,24 @@ export async function deliverPostToTelegram(post: IBotPost): Promise<{ chatId: s
   for (let i = 0; i < viChunks.length; i++) {
     await sendMessage(chatId, `${i === 0 ? '🇻🇳 <b>BẢN TIẾNG VIỆT</b>\n\n' : ''}${viChunks[i]}`);
   }
+
+  // 2.5) Sơ đồ minh hoạ dạng ẢNH THẬT (mermaid.ink render PNG) — gửi ngay sau bản VI
+  try {
+    const diagrams = extractMermaidBlocks(a.contentVi);
+    for (const d of diagrams.slice(0, 2)) {
+      const b64 = Buffer.from(d.code, 'utf8').toString('base64url');
+      const imgRes = await fetch(`https://mermaid.ink/img/${b64}?type=png&bgColor=white`, {
+        signal: AbortSignal.timeout(45000),
+      });
+      if (imgRes.ok) {
+        const buf = Buffer.from(await imgRes.arrayBuffer());
+        if (buf.length > 3000) await sendPhotoBuffer(chatId, buf, '📊 Sơ đồ minh hoạ');
+      }
+    }
+  } catch {
+    // ảnh sơ đồ lỗi — đã có placeholder trong text
+  }
+
   const enChunks = articleHtmlToTelegram(a.contentEn);
   for (let i = 0; i < enChunks.length; i++) {
     await sendMessage(chatId, `${i === 0 ? '🇬🇧 <b>ENGLISH VERSION</b>\n\n' : ''}${enChunks[i]}`);

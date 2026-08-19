@@ -41,15 +41,15 @@ STYLE RULES:
 - Give concrete numbers and timeframes whenever relevant ("within 14 days", "12 months and 1 day").
 - Paragraphs of 2-4 sentences, one sub-topic each.
 
-ARTICLE STRUCTURE (in this order):
+ARTICLE STRUCTURE (in this order) — a CLEAN, information-focused article:
 1. An intro of 2-3 sentences that directly answers the reader's main question.
 2. A "Key takeaways" section: <h2>Key takeaways</h2> followed by a <ul> of 3-5 bullets, each under 20 words.
 3. 4-6 body sections with question-style <h2> headings a reader would type into Google. In one section, include a short worked example with named people (Vietnamese-Australian names like Minh, Lan, Hoa) going through the situation.
-4. A "What to do next" section with a short action checklist as a <ul>.
-5. An FAQ section: <h2>Frequently asked questions</h2> with 3-5 <h3> questions, each answered in 2-3 sentences.
-6. A warm closing inviting the reader to contact Solis Lawyers.
+4. A short closing paragraph on why this information matters (purely informational — NO invitation, NO call-to-action).
 
-DO NOT write any disclaimer paragraph, "general information" note, or "Source:" attribution — the system appends a standard branded footer automatically after your output.
+DO NOT include: FAQ sections, "what to do next" checklists, or any invitation to contact the firm — the system appends a standard branded footer automatically.
+
+DO NOT write any disclaimer paragraph, "general information" note, or "Source:" attribution — the system appends those automatically after your output.
 
 COMPARISON TABLES: when the article compares two options (for example consent orders vs a binding financial agreement), include one simple comparison table using <table><thead><tbody><tr><th><td> with short cell text.
 
@@ -84,15 +84,15 @@ QUY TẮC VĂN PHONG:
 - Dẫn điều khoản: nêu ý bằng câu thường TRƯỚC, rồi trích dẫn trong ngoặc sau — ví dụ: "Bạn phải ly thân đủ 12 tháng trước khi xin ly hôn (Family Law Act 1975, mục 48)."
 - Con số và thời hạn cụ thể. KHÔNG BỊA case, số hiệu, ngày tháng, số liệu.
 
-CẤU TRÚC BÀI (theo thứ tự):
+CẤU TRÚC BÀI (theo thứ tự) — bài thuần, tập trung thông tin:
 1. Mở đầu 2-3 câu trả lời thẳng câu hỏi chính của người đọc.
 2. Mục "Tóm lại" — <h2>Tóm lại</h2> + <ul> 3-5 gạch đầu dòng, mỗi gạch dưới 20 từ.
 3. 4-6 mục <h2> dạng câu hỏi mà người đọc hay gõ tìm kiếm. Trong một mục, có ví dụ ngắn với nhân vật có tên (Minh, Lan, Hoa...) trải qua tình huống thực tế.
-4. Mục "Bạn cần làm gì tiếp theo" — danh sách việc cần làm dạng <ul>.
-5. Mục "Câu hỏi thường gặp" — <h2> + 3-5 câu hỏi <h3>, mỗi câu trả lời 2-3 câu.
-6. Đoạn kết ấm áp, mời độc giả liên hệ Solis Lawyers.
+4. Đoạn kết ngắn về ý nghĩa của thông tin (thuần thông tin — KHÔNG mời gọi, KHÔNG kêu gọi liên hệ).
 
-KHÔNG tự viết disclaimer, câu "Bài viết chỉ mang tính thông tin chung..." hay dòng "Nguồn:" — hệ thống tự ghép chân bài chuẩn sau output của bạn.
+KHÔNG bao gồm: mục "Câu hỏi thường gặp", mục "Bạn cần làm gì tiếp theo", hay lời mời liên hệ — hệ thống tự ghép chân bài chuẩn sau output.
+
+KHÔNG tự viết disclaimer, câu "Bài viết chỉ mang tính thông tin chung..." hay dòng "Nguồn:" — hệ thống tự ghép sau output của bạn.
 
 BẢNG SO SÁNH: khi bài so sánh hai lựa chọn (ví dụ consent orders và thỏa thuận tài chính), thêm một bảng so sánh đơn giản dùng <table><thead><tbody><tr><th><td>, ô ngắn gọn.
 
