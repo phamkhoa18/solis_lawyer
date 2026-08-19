@@ -7,12 +7,9 @@ let mermaidPromise: Promise<typeof import('mermaid').default> | null = null;
 async function getMermaid() {
   if (!mermaidPromise) {
     mermaidPromise = import('mermaid').then((m) => {
-      m.default.initialize({
-        startOnLoad: false,
-        theme: 'neutral',
-        fontFamily: 'inherit',
-        mindmap: { padding: 12 },
-      });
+      // Theme/brand nằm trong %%{init}%% nhúng sẵn trong code từng sơ đồ —
+      // initialize giữ tối giản để không xung đột directive
+      m.default.initialize({ startOnLoad: false });
       return m.default;
     });
   }

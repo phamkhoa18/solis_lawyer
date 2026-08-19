@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fptChat, FPT_FAST_MODEL } from '@/lib/fpt';
-import { computeQuality } from '@/lib/readability';
+import { computeQuality, lintEnglishProse } from '@/lib/readability';
 import { repairMermaidInHtml } from '@/lib/mermaidLint';
+import Typograf from 'typograf';
+
+const typograf = new Typograf({ locale: ['en-US'] });
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -49,7 +52,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Thiếu nội dung EN/VI' }, { status: 400 });
     }
     const feedback = body.feedback?.trim() || '';
-    const fbEn = feedback ? `\n\nAUTOMATED FEEDBACK TO FIX:\n${feedback}` : '';
+    const proseIssues = lintEnglishProse(body.contentEn);
+    const proseNote =
+      proseIssues.length > 0
+        ? `\n\nPROSE LINT FINDINGS (write-good) — fix these too:\n${proseIssues
+            .map((p) => `- "${p.text}": ${p.reason}`)
+            .join('\n')}`
+        : '';
+    const fbEn = (feedback ? `\n\nAUTOMATED FEEDBACK TO FIX:\n${feedback}` : '') + proseNote;
     const fbVi = feedback ? `\n\nGÓP Ý TỰ ĐỘNG CẦN SỬA:\n${feedback}` : '';
 
     const polishOne = async (system: string, content: string, lang: 'EN' | 'VI') => {
@@ -81,6 +91,13 @@ export async function POST(req: NextRequest) {
 
     let contentEn = await polishOne(EDITOR_EN, body.contentEn, 'EN');
     let contentVi = await polishOne(EDITOR_VI, body.contentVi, 'VI');
+
+    // Typography chuẩn tạp chí bản EN: ngoặc cong, em-dash, ellipsis (typograf)
+    try {
+      contentEn = typograf.execute(contentEn);
+    } catch {
+      /* giữ nguyên nếu lỗi */
+    }
 
     // Editor có thể làm hỏng mermaid — lint lại
     contentEn = (await repairMermaidInHtml(contentEn, repairCall)).html;

@@ -53,12 +53,7 @@ DO NOT write any disclaimer paragraph, "general information" note, or "Source:" 
 
 COMPARISON TABLES: when the article compares two options (for example consent orders vs a binding financial agreement), include one simple comparison table using <table><thead><tbody><tr><th><td> with short cell text.
 
-DIAGRAM (Mermaid): if the article explains a step-by-step process, a timeline of milestones, or a branching decision, include exactly ONE diagram, placed right after the section it illustrates, like:
-<pre class="mermaid">flowchart LR
-  A1["Separated 12 months"] --> B1["File the application"]
-  B1 --> C1["Court hearing"]
-</pre>
-Diagram rules: node IDs are ASCII (A1, B2); ALWAYS wrap every label in double quotes; maximum 9 nodes; use only flowchart TD/TB/LR, timeline, or mindmap; no styles or classes. For a simple overview of one concept, a mindmap with 4-6 branches works well. Skip the diagram for purely conceptual or comparison-table articles.
+DIAGRAM (Mermaid): include a diagram ONLY when the brief explicitly asks for one — otherwise write text only.
 
 OUTPUT: clean HTML fragments only (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). No <h1>, no <html>/<body>, no markdown, no code fences. Never copy sentences from the provided source material — write original analysis.`;
 
@@ -96,12 +91,7 @@ KHÔNG tự viết disclaimer, câu "Bài viết chỉ mang tính thông tin chu
 
 BẢNG SO SÁNH: khi bài so sánh hai lựa chọn (ví dụ consent orders và thỏa thuận tài chính), thêm một bảng so sánh đơn giản dùng <table><thead><tbody><tr><th><td>, ô ngắn gọn.
 
-SƠ ĐỒ MINH HOẠ (Mermaid): nếu bài giải thích một quy trình từng bước, dòng thời gian các cột mốc, hoặc một quyết định rẽ nhánh, hãy thêm ĐÚNG MỘT sơ đồ đặt ngay sau mục được minh hoạ, ví dụ:
-<pre class="mermaid">flowchart LR
-  A1["Ly thân đủ 12 tháng"] --> B1["Nộp đơn xin ly hôn"]
-  B1 --> C1["Phiên toà"]
-</pre>
-Quy tắc sơ đồ: ID node chỉ chữ ASCII (A1, B2); LUÔN bọc nhãn trong dấu ngoặc kép; tối đa 9 node; chỉ dùng flowchart TD/TB/LR, timeline, hoặc mindmap; không style. Bài thuần khái niệm hoặc đã có bảng so sánh thì bỏ sơ đồ.
+SƠ ĐỒ MINH HOẠ (Mermaid): chỉ thêm sơ đồ khi bản tóm tắt bài (brief) yêu cầu rõ ràng — không yêu cầu thì viết thuần chữ.
 
 OUTPUT: chỉ HTML (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). Không <h1>, không markdown, không code fence. Không sao chép câu từ bài nguồn — viết phân tích hoàn toàn mới.`;
 
@@ -154,6 +144,7 @@ export async function POST(req: NextRequest) {
           outline: string[];
           audience_note: string;
           sensitive: boolean;
+          needs_diagram: boolean;
         }>({
           model: FPT_FAST_MODEL,
           temperature: 0.2,
@@ -162,7 +153,7 @@ export async function POST(req: NextRequest) {
             {
               role: 'system',
               content:
-                'You plan blog articles for an Australian law firm blog read by the Vietnamese community. Output JSON: {"title_en": string (SEO-friendly, max 70 chars), "angle": string (why this matters to readers, 1-2 sentences), "outline": string[] (4-7 section headings in English, question-style), "audience_note": string (key concerns of Vietnamese-Australian readers on this topic), "sensitive": boolean (true ONLY if the topic involves domestic violence, family violence, abuse or sexual offences)}.',
+                'You plan blog articles for an Australian law firm blog read by the Vietnamese community. Output JSON: {"title_en": string (SEO-friendly, max 70 chars), "angle": string (why this matters to readers, 1-2 sentences), "outline": string[] (4-7 section headings in English, question-style), "audience_note": string (key concerns of Vietnamese-Australian readers on this topic), "sensitive": boolean (true ONLY if the topic involves domestic violence, family violence, abuse or sexual offences), "needs_diagram": boolean}. needs_diagram is true ONLY when the article CORE is a multi-step process, a timeline of deadlines, or a branching decision that text alone cannot convey clearly — when in doubt, false. Most articles do NOT need a diagram.',
             },
             {
               role: 'user',
@@ -192,6 +183,9 @@ export async function POST(req: NextRequest) {
               body.angle ? `EXTRA REQUIREMENTS FROM EDITOR: ${body.angle}` : '',
               analysis.outline?.length ? `SUGGESTED OUTLINE:\n${analysis.outline.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '',
               analysis.audience_note ? `AUDIENCE NOTE: ${analysis.audience_note}` : '',
+              analysis.needs_diagram
+                ? `DIAGRAM REQUIRED: include exactly ONE mermaid diagram right after the section it illustrates, as:\n<pre class="mermaid">flowchart LR\n  A1["Step one"] --> B1["Step two"]\n</pre>\nRules: ASCII node IDs (A1, B2); every label in double quotes; max 9 nodes; only flowchart TD/TB/LR, timeline, or mindmap.`
+                : 'NO DIAGRAM: this article does not need a mermaid diagram — write text only, no <pre> blocks.',
               sourceText ? `SOURCE ARTICLE (for facts only — do NOT copy sentences):\n${sourceText.slice(0, 25000)}` : '',
               `TARGET LENGTH: ${LENGTH_SPEC[length].en}.`,
             ]

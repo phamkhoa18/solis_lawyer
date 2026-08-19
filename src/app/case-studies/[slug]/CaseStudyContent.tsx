@@ -85,7 +85,19 @@ export default function CaseStudyContent({ caseStudy }: { caseStudy: CaseStudyDe
 
       {/* Content */}
       <motion.div variants={sectionVariants} custom={1} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-        <MermaidRenderer className="prose prose-gray max-w-none mb-8" html={content} />
+        <MermaidRenderer
+          className="prose prose-gray max-w-[75ch] mb-8
+            [&_h2]:font_play [&_h2]:text-[1.65rem] [&_h2]:text-slate-800 [&_h2]:mt-10 [&_h2]:tracking-tight
+            [&_h3]:font_play [&_h3]:text-xl [&_h3]:text-slate-700
+            [&_>p:first-child::first-letter]:float-left [&_>p:first-child::first-letter]:font_play [&_>p:first-child::first-letter]:text-[3.4rem] [&_>p:first-child::first-letter]:leading-[0.85] [&_>p:first-child::first-letter]:text-[#9b6f45] [&_>p:first-child::first-letter]:pr-2.5 [&_>p:first-child::first-letter]:pt-1.5
+            [&_blockquote]:border-l-4 [&_blockquote]:border-[#d5aa6d] [&_blockquote]:bg-[#fdf9f2] [&_blockquote]:py-3.5 [&_blockquote]:px-5 [&_blockquote]:rounded-r-2xl [&_blockquote]:text-slate-600 [&_blockquote]:not-italic [&_blockquote]:my-6
+            [&_table]:w-full [&_table]:text-sm [&_table]:border-collapse
+            [&_th]:bg-[#faf7f2] [&_th]:text-left [&_th]:text-slate-700 [&_th]:font-semibold [&_th]:px-3 [&_th]:py-2.5 [&_th]:border-b-2 [&_th]:border-[#e9e4db]
+            [&_td]:px-3 [&_td]:py-2.5 [&_td]:border-b [&_td]:border-slate-100
+            [&_.mermaid-diagram]:my-8
+            [&_a]:text-[#9b6f45] [&_a]:no-underline [&_a]:decoration-[#d5aa6d] [&_a]:underline-offset-4 [&_a:hover]:decoration-2"
+          html={content}
+        />
       </motion.div>
 
       {/* CTA */}

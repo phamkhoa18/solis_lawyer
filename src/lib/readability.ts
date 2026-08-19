@@ -7,6 +7,7 @@
  */
 
 import textReadability from 'text-readability';
+import writeGood from 'write-good';
 
 export interface EnglishScore {
   flesch: number;
@@ -147,10 +148,35 @@ export function scanLegalese(enHtml: string, viHtml: string): LegaleseMatch[] {
   return matches;
 }
 
+export interface ProseIssue {
+  text: string;
+  reason: string;
+}
+
+/** Lint văn phong báo chí bản EN (write-good): câu bị động, từ úp mở, sáo ngữ, câu cụt dài */
+export function lintEnglishProse(html: string): ProseIssue[] {
+  try {
+    const text = stripHtml(html);
+    const issues = (
+      writeGood as unknown as (
+        t: string,
+        o?: Record<string, boolean>
+      ) => Array<{ index: number; offset: number; reason: string }>
+    )(text, { illusion: true, so: true, thereIs: true, weasel: true, adverb: true, tooWordy: true, cliches: true });
+    return issues.slice(0, 8).map((i) => ({
+      text: text.slice(i.index, i.index + i.offset).slice(0, 90),
+      reason: i.reason,
+    }));
+  } catch {
+    return [];
+  }
+}
+
 export interface QualityReport {
   en: EnglishScore;
   vi: VietnameseScore;
   legalese: LegaleseMatch[];
+  proseIssues?: ProseIssue[];
   judge?: {
     en: { score: number; worst: string[] };
     vi: { score: number; worst: string[] };
@@ -165,5 +191,10 @@ export interface QualityReport {
 }
 
 export function computeQuality(enHtml: string, viHtml: string): QualityReport {
-  return { en: scoreEnglish(enHtml), vi: scoreVietnamese(viHtml), legalese: scanLegalese(enHtml, viHtml) };
+  return {
+    en: scoreEnglish(enHtml),
+    vi: scoreVietnamese(viHtml),
+    legalese: scanLegalese(enHtml, viHtml),
+    proseIssues: lintEnglishProse(enHtml),
+  };
 }

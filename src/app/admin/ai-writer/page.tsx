@@ -50,6 +50,7 @@ interface QualityReport {
   legalese: { phrase: string; replacement: string; count: number; lang: 'en' | 'vi' }[];
   judge?: { en: { score: number; worst: string[] }; vi: { score: number; worst: string[] } };
   sourceCheck?: { simVi: number; simEn: number; verbatimVi: number; verbatimEn: number; flag?: boolean };
+  proseIssues?: { text: string; reason: string }[];
 }
 
 interface GenResult {
@@ -167,6 +168,21 @@ function QualityPanel({
             từng chữ: VI {q.sourceCheck.verbatimVi}% · EN {q.sourceCheck.verbatimEn}% (an toàn &lt; 10%)
           </span>
         </div>
+      )}
+
+      {q.proseIssues && q.proseIssues.length > 0 && (
+        <details className="text-xs text-slate-500">
+          <summary className="cursor-pointer select-none">
+            ✍️ Văn phong báo chí (write-good): {q.proseIssues.length} điểm cần sửa
+          </summary>
+          <ul className="mt-1.5 space-y-1 list-disc pl-4">
+            {q.proseIssues.map((p, i) => (
+              <li key={i}>
+                &quot;{p.text.slice(0, 70)}&quot; — <span className="text-slate-400">{p.reason}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
       )}
 
       {(q.judge?.en?.worst?.length || q.judge?.vi?.worst?.length) ? (
@@ -588,6 +604,8 @@ export default function AIWriterPage() {
     if (longEn.length) parts.push(`EN sentences too long (over 25 words):\n${longEn.join('\n')}`);
     const longVi = q.vi.longSentences.slice(0, 3).map((s) => `"${s.text}..." (${s.syllables} âm tiết)`);
     if (longVi.length) parts.push(`Câu VI quá dài (trên 30 âm tiết):\n${longVi.join('\n')}`);
+    const prose = (q.proseIssues || []).slice(0, 5).map((p) => `"${p.text}": ${p.reason}`);
+    if (prose.length) parts.push(`EN prose lint (write-good):\n${prose.join('\n')}`);
     return parts.join('\n\n');
   };
 

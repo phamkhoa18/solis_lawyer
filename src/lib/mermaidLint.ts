@@ -12,6 +12,18 @@ const ALLOWED_TYPES = /^(flowchart\s+(TD|TB|LR)|timeline|mindmap)\b/;
 const VIETNAMESE = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i;
 const ASCII_ID = /^[A-Za-z][A-Za-z0-9_]*$/;
 
+/** Theme brand Solis nhúng thẳng vào code sơ đồ — chạy đồng nhất web + Telegram (mermaid.ink) */
+export const MERMAID_INIT =
+  '%%{init: {"theme":"base","themeVariables":{"primaryColor":"#fdf6ec","primaryBorderColor":"#9b6f45","primaryTextColor":"#1e293b","secondaryColor":"#f5ead9","tertiaryColor":"#faf7f2","lineColor":"#9b6f45","nodeBorder":"#9b6f45","clusterBkg":"#faf7f2","edgeLabelBackground":"#ffffff","fontFamily":"Georgia, serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":48,"rankSpacing":56}}}%%';
+
+/** Bỏ dòng init directive trước khi lint */
+function stripInit(code: string): string {
+  return code
+    .split('\n')
+    .filter((l) => !l.trim().startsWith('%%{'))
+    .join('\n');
+}
+
 export function extractMermaidBlocks(html: string): { code: string; full: string }[] {
   const blocks: { code: string; full: string }[] = [];
   const re = /<pre[^>]*class="[^"]*mermaid[^"]*"[^>]*>([\s\S]*?)<\/pre>/gi;
@@ -31,8 +43,9 @@ export function extractMermaidBlocks(html: string): { code: string; full: string
   return blocks;
 }
 
-export function lintMermaid(code: string): string[] {
+export function lintMermaid(rawCode: string): string[] {
   const errors: string[] = [];
+  const code = stripInit(rawCode);
   const trimmed = code.trim();
 
   if (!ALLOWED_TYPES.test(trimmed)) {
@@ -117,8 +130,12 @@ export async function repairMermaidInHtml(
       result = result.replace(block.full, '');
       report.push({ lang: '', ok: false, errors });
     } else {
-      // code sạch (hoặc đã sửa) → thay thế nội dung đã unescape
-      const escaped = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // code sạch (hoặc đã sửa) → nhúng theme brand + thay thế nội dung đã unescape
+      const withInit = `${MERMAID_INIT}\n${code}`;
+      const escaped = withInit
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
       result = result.replace(block.full, `<pre class="mermaid">${escaped}</pre>`);
       if (!report.some((r) => r.repaired)) report.push({ lang: '', ok: true });
     }
