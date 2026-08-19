@@ -12,6 +12,7 @@ Rewrite the draft article ONLY for clarity and warmth — target Grade 8.
 HARD RULES (never break):
 - Keep every legal fact, statute name, case citation, number, date and link EXACTLY as given.
 - Copy every <pre class="mermaid">...</pre> block VERBATIM — change nothing inside them.
+- Copy the final <div class="solis-footer">...</div> block VERBATIM — change nothing inside it.
 - Keep the overall HTML structure: same <h2> sections (headings may be lightly rephrased for clarity), same tables, same safety blockquote at the top if present.
 - Output ONLY the rewritten HTML. No commentary.
 
@@ -26,6 +27,7 @@ Viết lại bài THÔI — chỉ sửa cho rõ ràng, ấm áp, dễ như báo 
 QUY TẮC BẮT BUỘC (không được phá):
 - Giữ nguyên MỌI thông tin pháp lý: tên luật, case, số liệu, ngày tháng, link — đúng y hệt.
 - Chép NGUYÊN VĂN mọi khối <pre class="mermaid">...</pre> — không đổi gì bên trong.
+- Chép NGUYÊN VĂN khối <div class="solis-footer">...</div> cuối bài — không đổi gì bên trong.
 - Giữ cấu trúc HTML: đủ các mục <h2> như bản gốc (chỉ được chỉnh nhẹ tiêu đề cho rõ), giữ bảng, giữ hộp an toàn đầu bài nếu có.
 - Chỉ OUTPUT HTML đã sửa. Không giải thích.
 

@@ -5,6 +5,7 @@ import { repairMermaidInHtml } from '@/lib/mermaidLint';
 import { computeQuality, stripHtml } from '@/lib/readability';
 import type { QualityReport } from '@/lib/readability';
 import { fptEmbed, cosineSimilarity } from '@/lib/fpt';
+import { buildArticleFooter, stripLegacyFooter } from '@/lib/articleFooter';
 import connectDB from '@/lib/dbConnect';
 import CaseStudy from '@/models/Casestudy';
 
@@ -46,7 +47,8 @@ ARTICLE STRUCTURE (in this order):
 4. A "What to do next" section with a short action checklist as a <ul>.
 5. An FAQ section: <h2>Frequently asked questions</h2> with 3-5 <h3> questions, each answered in 2-3 sentences.
 6. A warm closing inviting the reader to contact Solis Lawyers.
-7. A final italic disclaimer paragraph: "This article is general information only and is not legal advice. Please contact Solis Lawyers for advice on your specific situation."
+
+DO NOT write any disclaimer paragraph, "general information" note, or "Source:" attribution — the system appends a standard branded footer automatically after your output.
 
 COMPARISON TABLES: when the article compares two options (for example consent orders vs a binding financial agreement), include one simple comparison table using <table><thead><tbody><tr><th><td> with short cell text.
 
@@ -88,7 +90,8 @@ CẤU TRÚC BÀI (theo thứ tự):
 4. Mục "Bạn cần làm gì tiếp theo" — danh sách việc cần làm dạng <ul>.
 5. Mục "Câu hỏi thường gặp" — <h2> + 3-5 câu hỏi <h3>, mỗi câu trả lời 2-3 câu.
 6. Đoạn kết ấm áp, mời độc giả liên hệ Solis Lawyers.
-7. Disclaimer in nghiêng cuối bài: "Bài viết chỉ mang tính thông tin chung, không phải tư vấn pháp lý. Vui lòng liên hệ Solis Lawyers để được tư vấn cho trường hợp cụ thể của bạn."
+
+KHÔNG tự viết disclaimer, câu "Bài viết chỉ mang tính thông tin chung..." hay dòng "Nguồn:" — hệ thống tự ghép chân bài chuẩn sau output của bạn.
 
 BẢNG SO SÁNH: khi bài so sánh hai lựa chọn (ví dụ consent orders và thỏa thuận tài chính), thêm một bảng so sánh đơn giản dùng <table><thead><tbody><tr><th><td>, ô ngắn gọn.
 
@@ -189,7 +192,6 @@ export async function POST(req: NextRequest) {
               analysis.outline?.length ? `SUGGESTED OUTLINE:\n${analysis.outline.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '',
               analysis.audience_note ? `AUDIENCE NOTE: ${analysis.audience_note}` : '',
               sourceText ? `SOURCE ARTICLE (for facts only — do NOT copy sentences):\n${sourceText.slice(0, 25000)}` : '',
-              sourceUrl ? `When relevant, mention the source with link: <a href="${sourceUrl}">${sourceTitle || 'source article'}</a>` : '',
               `TARGET LENGTH: ${LENGTH_SPEC[length].en}.`,
             ]
               .filter(Boolean)
@@ -258,6 +260,11 @@ export async function POST(req: NextRequest) {
         if (enFix.report.some((r) => !r.ok) || viFix.report.some((r) => !r.ok)) {
           send({ type: 'status', message: '⚠️ Một sơ đồ không sửa được — đã bỏ để tránh lỗi hiển thị.' });
         }
+
+        // ── Bước 3.7: ghép footer chuẩn (CTA Solis + disclaimer + nguồn) ──
+        const footerSource = sourceUrl ? { title: sourceTitle, url: sourceUrl } : undefined;
+        contentEn = `${stripLegacyFooter(contentEn)}\n${buildArticleFooter('en', footerSource)}`;
+        contentVi = `${stripLegacyFooter(contentVi)}\n${buildArticleFooter('vi', footerSource)}`;
 
         // ── Bước 4 (model nhanh): meta + slug ──
         send({ type: 'status', message: 'Đang hoàn thiện tiêu đề, mô tả & slug...' });

@@ -55,13 +55,13 @@ export async function buildImagePrompt(topic: string, titleEn?: string): Promise
   try {
     const r = await fptJson<{ prompt: string }>({
       model: FPT_FAST_MODEL,
-      temperature: 0.3,
+      temperature: 0.4,
       maxTokens: 300,
       messages: [
         {
           role: 'system',
           content:
-            'You write prompts for a text-to-image model to create an elegant blog cover for an Australian law firm (Solis Lawyers). Output JSON: {"prompt": string}. The prompt must: describe ONLY symbols/scenes/mood (scales of justice, courthouse, family silhouettes, open law book, handshake, protective hands, Australian landmarks, desk scenes) — NEVER the offence or graphic content; muted warm brown/gold palette; soft cinematic light; professional editorial photography or refined illustration style; low detail where text will sit; explicitly end with: "no text, no letters, no words, no logos, no watermark". Max 60 words.',
+            'You write prompts for a text-to-image model to create a VIVID, topic-illustrating blog cover for an Australian law firm (Solis Lawyers). Output JSON: {"prompt": string}. The prompt must: pick ONE concrete illustrative scene that DIRECTLY depicts the article topic (a mother holding her child\'s hand outside a courthouse, a judge\'s gavel on case files, a couple signing documents with a lawyer, handcuffs on a dark table, a family silhouetted at sunset, protective hands sheltering a paper family) — NEVER abstract or empty scenes; describe the subject clearly with visible details; rich saturated colors; strong dramatic lighting with deep shadows; high contrast; sharp focus on the subject; professional editorial photography or cinematic illustration style; NO violent or graphic content; keep lower-detail area on the left third for text overlay; explicitly end with: "no text, no letters, no words, no logos, no watermark". Max 60 words.',
         },
         { role: 'user', content: `ARTICLE TOPIC (Vietnamese): ${topic}${titleEn ? `\nENGLISH TITLE: ${titleEn}` : ''}` },
       ],
@@ -70,7 +70,7 @@ export async function buildImagePrompt(topic: string, titleEn?: string): Promise
   } catch {
     // fallback dưới
   }
-  return `elegant law firm blog cover, scales of justice and open law book on a dark wooden desk, warm golden hour light, muted brown and gold tones, professional photography, low detail areas, no text, no letters, no logos, no watermark`;
+  return `cinematic law blog cover, judge's gavel and stacked case files on dark mahogany desk, single dramatic spotlight from the side, deep shadows, rich saturated amber and brown tones, high contrast, sharp focus, professional photography, lower detail on left third, no text, no letters, no logos, no watermark`;
 }
 
 // ── Bước 2: sinh ảnh nền (Pollinations — free; provider pluggable qua env) ──
@@ -145,19 +145,20 @@ async function renderOverlayElement(opts: {
   const safeLabel = label.normalize('NFC').trim().slice(0, 40).toUpperCase();
   const scale = W >= 1080 ? 1 : 0.9;
 
-  const logoChip = (size = 96) => ({
+  const logoChip = (size = 118) => ({
     type: 'div',
     props: {
       style: flex({
         width: size,
         height: size,
-        borderRadius: Math.round(size * 0.23),
+        borderRadius: Math.round(size * 0.22),
         backgroundColor: '#ffffff',
         alignItems: 'center',
         justifyContent: 'center',
-        boxShadow: '0 6px 24px rgba(0,0,0,0.25)',
+        padding: Math.round(size * 0.07),
+        boxShadow: '0 6px 24px rgba(0,0,0,0.3)',
       }),
-      children: [{ type: 'img', props: { src: logo, width: Math.round(size * 0.75), height: Math.round(size * 0.75) } }],
+      children: [{ type: 'img', props: { src: logo, width: Math.round(size * 0.86), height: Math.round(size * 0.86) } }],
     },
   });
 
@@ -239,7 +240,7 @@ async function renderOverlayElement(opts: {
           backgroundImage: theme.bandScrim,
         }),
         children: [
-          logoChip(84),
+          logoChip(100),
           {
             type: 'div',
             props: {
@@ -266,7 +267,7 @@ async function renderOverlayElement(opts: {
           backgroundColor: theme.fullOverlay,
         }),
         children: [
-          logoChip(110),
+          logoChip(136),
           brandText('center'),
           {
             type: 'div',
@@ -339,6 +340,8 @@ async function composeOne(
     light,
   });
   return sharp(background)
+    .modulate({ saturation: 1.3, brightness: 0.96 }) // nền đậm sắc, hết nhạt nhẽo
+    .linear(1.08, -8) // tăng tương phản
     .resize(size.w, size.h, { fit: 'cover', position: 'attention' })
     .composite([{ input: overlay, top: 0, left: 0 }])
     .png({ compressionLevel: 9 })
