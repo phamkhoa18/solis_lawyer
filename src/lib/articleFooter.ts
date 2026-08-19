@@ -22,10 +22,10 @@ const BRAND = {
 export function buildArticleFooter(lang: 'vi' | 'en', source?: FooterSource): string {
   const isVi = lang === 'vi';
 
-  const ctaTitle = isVi ? 'Cần tư vấn cho tình huống của bạn?' : 'Need advice for your situation?';
+  const ctaTitle = isVi ? 'Bạn cần luật sư hiểu rõ hoàn cảnh của mình?' : 'Need a lawyer who truly understands your situation?';
   const ctaBody = isVi
-    ? 'Đội ngũ luật sư song ngữ Anh – Việt của Solis Lawyers sẵn sàng lắng nghe và hướng dẫn bạn từng bước. Mọi trao đổi đều bảo mật.'
-    : 'Our bilingual (English–Vietnamese) lawyers are ready to listen and guide you step by step. Everything you tell us is confidential.';
+    ? 'Solis Lawyers tư vấn trực tiếp bằng tiếng Việt, đã đồng hành cùng nhiều gia đình Việt tại Úc. Hãy liên hệ để trao đổi về tình huống của bạn — mọi thông tin hoàn toàn bảo mật.'
+    : 'Solis Lawyers advises in English and Vietnamese, with real experience supporting the Vietnamese community in Australia. Get in touch about your situation — everything you share stays confidential.';
   const emailBtn = `✉ contact@solislaw.com.au`;
   const webBtn = isVi ? '🌐 solislaw.com.au' : '🌐 solislaw.com.au';
   const contactLabel = isVi ? 'Liên hệ ngay' : 'Contact us';
