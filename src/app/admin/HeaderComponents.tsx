@@ -31,12 +31,11 @@ export function Breadcrumb() {
   const crumbs = segments.slice(1).map((seg, idx) => {
     const href = '/' + segments.slice(0, idx + 2).join('/');
     const label = pathLabels[seg] || seg;
-    const isLast = idx === segments.length - 2;
     // Skip ObjectId segments (mongo IDs)
     const isId = /^[a-f0-9]{24}$/.test(seg);
     if (isId) return null;
-    return { href, label, isLast };
-  }).filter(Boolean);
+    return { href: href || '/', label, isLast: false };
+  }).filter(Boolean).map((c, i, arr) => ({ ...c!, isLast: i === arr.length - 1 }));
 
   return (
     <nav className="hidden sm:flex items-center gap-1 text-sm">
@@ -68,10 +67,14 @@ export function HeaderSearch() {
     if (open && inputRef.current) inputRef.current.focus();
   }, [open]);
 
-  // Close on escape
+  // Close on escape + mở nhanh Ctrl/Cmd+K
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setOpen(false);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setOpen(true);
+      }
     };
     document.addEventListener('keydown', handleKey);
     return () => document.removeEventListener('keydown', handleKey);

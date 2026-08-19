@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import { useRef, useState } from 'react';
 import { Dialog, DialogContent } from './ui/dialog';
+import { toast } from 'react-hot-toast';
 
 // import Editor chỉ trên client, tắt SSR để tránh hydration mismatch
 const Editor = dynamic(() => import('@tinymce/tinymce-react').then(mod => mod.Editor), {
@@ -33,12 +34,12 @@ const TextEditor: React.FC<TextEditorProps> = ({ value, onChange }) => {
         if (!file) return;
 
         if (file.size > 5 * 1024 * 1024) {
-          alert('File quá lớn. Vui lòng chọn file dưới 5MB.');
+          toast.error('File quá lớn — chọn file dưới 5MB');
           return;
         }
 
         if (!file.type.startsWith('image/')) {
-          alert('Vui lòng chọn file ảnh.');
+          toast.error('Vui lòng chọn file ảnh');
           return;
         }
 

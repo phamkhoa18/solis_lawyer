@@ -50,19 +50,29 @@ export default function CaseStudyList({ caseStudies }: { caseStudies: ICaseStudy
   const searchParams = useSearchParams();
   const router = useRouter();
   const searchQuery = searchParams.get('q') || '';
+  const categorySlug = searchParams.get('category') || '';
 
   const allCards = useMemo(() => caseStudies.map((cs) => mapCaseStudyToCard(cs, normalizedLanguage)), [caseStudies, normalizedLanguage]);
 
-  // Filter by search query
+  // Filter theo danh mục (sidebar) + từ khoá tìm kiếm
   const filteredCards = useMemo(() => {
-    if (!searchQuery.trim()) return allCards;
-    const q = searchQuery.toLowerCase();
-    return allCards.filter(
-      (card) =>
-        card.title.toLowerCase().includes(q) ||
-        card.description.toLowerCase().includes(q)
-    );
-  }, [allCards, searchQuery]);
+    let cards = allCards;
+    if (categorySlug) {
+      cards = cards.filter((card, i) => {
+        const cat = caseStudies[i]?.category as { slug?: string } | string | undefined;
+        return (typeof cat === 'string' ? cat : cat?.slug) === categorySlug;
+      });
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      cards = cards.filter(
+        (card) =>
+          card.title.toLowerCase().includes(q) ||
+          card.description.toLowerCase().includes(q)
+      );
+    }
+    return cards;
+  }, [allCards, caseStudies, categorySlug, searchQuery]);
 
   const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
   const paginatedCards = filteredCards.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);

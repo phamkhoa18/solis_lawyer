@@ -119,7 +119,7 @@ export default function ServicesPage() {
                     {filteredServices.map((service) => (
                       <TableRow key={service._id?.toString()} className="transition-colors">
                         <TableCell>
-                          <Image src={service.img} alt={service.name.vi || 'Service'} width={50} height={50} className="object-cover rounded-lg" />
+                          <Image unoptimized src={service.img} alt={service.name.vi || 'Service'} width={50} height={50} className="object-cover rounded-lg" />
                         </TableCell>
                         <TableCell className="font-medium text-slate-700">{service.name.vi}</TableCell>
                         <TableCell className="text-slate-600">{service.name.en}</TableCell>

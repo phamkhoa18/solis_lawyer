@@ -5,6 +5,7 @@
  * bị mất. Hàm này bọc lại mọi cụm text trần vào <p> (tách theo dòng trắng).
  */
 
+// Lưu ý: regex không xử lý block cùng loại lồng nhau (div trong div) — AI hiếm khi sinh, chấp nhận về phòng thủ.
 const BLOCK = '(h[1-6]|p|ul|ol|table|blockquote|pre|figure|div)';
 const BLOCK_RE = new RegExp(`<${BLOCK}\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>`, 'gi');
 

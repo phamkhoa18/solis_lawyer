@@ -120,7 +120,7 @@ export default function TestimonialsPage() {
                     {filteredTestimonials.map((t) => (
                       <TableRow key={t._id?.toString()} className="transition-colors">
                         <TableCell>
-                          <Image src={t.image} alt={t.name.vi || 'Testimonial'} width={44} height={44} className="object-cover rounded-full" />
+                          <Image unoptimized src={t.image} alt={t.name.vi || 'Testimonial'} width={44} height={44} className="object-cover rounded-full" />
                         </TableCell>
                         <TableCell className="font-medium text-slate-700">{t.name.vi}</TableCell>
                         <TableCell className="text-slate-600">{t.name.en}</TableCell>

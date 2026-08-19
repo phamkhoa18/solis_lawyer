@@ -246,9 +246,22 @@ export default function MenuPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">-- Không có --</SelectItem>
-                  {menus.filter((menu) => !editMenu || menu._id !== editMenu._id).map((menu) => (
-                    <SelectItem key={menu._id.toString()} value={menu._id.toString()}>{menu.name.vi}</SelectItem>
-                  ))}
+                  {(() => {
+                    // loại chính nó + mọi hậu duệ để không tạo vòng lặp menu
+                    const descendants = new Set<string>();
+                    const collect = (id: string) => {
+                      menus.filter((m) => m.parentId?.toString() === id).forEach((m) => {
+                        const mid = m._id.toString();
+                        if (!descendants.has(mid)) { descendants.add(mid); collect(mid); }
+                      });
+                    };
+                    if (editMenu) collect(editMenu._id.toString());
+                    return menus
+                      .filter((menu) => (!editMenu || menu._id !== editMenu._id) && !descendants.has(menu._id.toString()))
+                      .map((menu) => (
+                        <SelectItem key={menu._id.toString()} value={menu._id.toString()}>{menu.name.vi}</SelectItem>
+                      ));
+                  })()}
                 </SelectContent>
               </Select>
             </div>

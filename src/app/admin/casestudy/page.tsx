@@ -151,7 +151,7 @@ export default function CaseStudiesPage() {
                       {paginatedItems.map((cs) => (
                         <TableRow key={cs._id}>
                           <TableCell>
-                            <Image src={cs.image || '/placeholder.jpg'} alt={cs.title.vi || 'Case Study'} width={40} height={40} className="object-cover rounded-md aspect-square" />
+                            <Image unoptimized src={cs.image || '/placeholder.jpg'} alt={cs.title.vi || 'Case Study'} width={40} height={40} className="object-cover rounded-md aspect-square" />
                           </TableCell>
                           <TableCell className="font-medium text-slate-700 truncate max-w-[200px]">{cs.title.en || 'N/A'}</TableCell>
                           <TableCell className="truncate max-w-[150px]">

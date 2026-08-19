@@ -154,7 +154,7 @@ export default function BannersPage() {
                       {paginatedBanners.map((banner) => (
                         <TableRow key={banner._id}>
                           <TableCell>
-                            <Image src={banner.image} alt={banner.name.vi || 'Banner'} width={50} height={50} className="object-cover rounded-md" />
+                            <Image unoptimized src={banner.image} alt={banner.name.vi || 'Banner'} width={50} height={50} className="object-cover rounded-md" />
                           </TableCell>
                           <TableCell className="font-medium text-slate-700 text-sm">{banner.name.vi}</TableCell>
                           <TableCell className="text-slate-600 text-sm">{banner.name.en}</TableCell>

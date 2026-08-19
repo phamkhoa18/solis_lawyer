@@ -247,13 +247,14 @@ export default function Header() {
             </div>
 
             {/* Desktop Get Started CTA */}
-            <motion.button
+            <motion.a
+              href="/contact"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="bg-gradient-to-r from-[#d5aa6d] to-[#9b6f45] text-white font-semibold py-2 px-6 rounded-full shadow-md hover:shadow-lg transition-all"
             >
-              {language === 'EN' ? 'Get Started' : 'Bắt Đầu'}
-            </motion.button>
+              {language === 'EN' ? 'Get Started' : 'Liên hệ ngay'}
+            </motion.a>
           </div>
 
           {/* Mobile Icons */}
@@ -394,7 +395,7 @@ export default function Header() {
                           size={20}
                           strokeWidth={2}
                           className={`transition-transform text-gray-800 ${
-                            activeDropdown === item.name ? 'rotate-180' : ''
+                            activeDropdown === item.name.en ? 'rotate-180' : ''
                           }`}
                         />
                       </motion.button>

@@ -441,6 +441,7 @@ export default function EditMemberPage() {
               <div className="mt-2">
                 <p className="text-sm text-gray-600 mb-2">Ảnh hiện tại:</p>
                 <Image
+              unoptimized
                   src={formData.image}
                   alt="Member preview"
                   width={100}

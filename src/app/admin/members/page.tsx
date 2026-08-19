@@ -120,7 +120,7 @@ export default function MembersPage() {
                     {filteredMembers.map((member) => (
                       <TableRow key={member._id?.toString()} className="transition-colors">
                         <TableCell>
-                          <Image src={member.image} alt={member.name.vi || 'Member'} width={44} height={44} className="object-cover rounded-full" />
+                          <Image unoptimized src={member.image} alt={member.name.vi || 'Member'} width={44} height={44} className="object-cover rounded-full" />
                         </TableCell>
                         <TableCell className="font-medium text-slate-700">{member.name.vi}</TableCell>
                         <TableCell className="text-slate-600">{member.name.en}</TableCell>

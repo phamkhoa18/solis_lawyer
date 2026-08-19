@@ -406,6 +406,7 @@ export default function CreateServicePage() {
                         {isSelected && <Check size={14} />}
                       </div>
                       <Image
+              unoptimized
                         src={member.image}
                         alt="avatar"
                         width={40}
@@ -455,6 +456,7 @@ export default function CreateServicePage() {
                 <div className="mt-2">
                   <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
                   <Image
+              unoptimized
                     src={formData.img}
                     alt="Service preview"
                     width={200}
@@ -475,6 +477,7 @@ export default function CreateServicePage() {
                   <p className="text-sm text-gray-600 mb-2">Icon đã chọn:</p>
                   <div className="bg-gray-100 w-16 h-16 flex items-center justify-center rounded">
                     <Image
+              unoptimized
                       src={formData.icon}
                       alt="Service icon"
                       width={48}

@@ -216,7 +216,7 @@ export default function EditBannerPage() {
             <ImageUploader onUploadSuccess={handleImageUploadSuccess} initialImage={formData.image} />
             {formData.image && (
               <div className="mt-3 relative w-full aspect-video rounded-md overflow-hidden border border-slate-100">
-                <Image src={formData.image} alt="Preview" fill className="object-cover" />
+                <Image unoptimized src={formData.image} alt="Preview" fill className="object-cover" />
               </div>
             )}
           </div>

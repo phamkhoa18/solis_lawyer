@@ -425,6 +425,7 @@ export default function EditCaseStudyPage() {
             {formData.image && (
               <div className="mt-3 relative w-full aspect-video rounded-md overflow-hidden border border-slate-200">
                 <Image
+              unoptimized
                   src={formData.image}
                   alt="Preview"
                   fill

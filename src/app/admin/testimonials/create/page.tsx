@@ -313,6 +313,7 @@ export default function CreateTestimonialPage() {
               <div className="mt-2">
                 <p className="text-sm text-gray-600 mb-2">Ảnh đã chọn:</p>
                 <Image
+              unoptimized
                   src={formData.image}
                   alt="Testimonial preview"
                   width={100}

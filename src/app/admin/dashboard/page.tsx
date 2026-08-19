@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Image as ImageIcon,
@@ -114,18 +114,28 @@ export default function AdminDashboard() {
       fill: s.color,
     }));
 
-  const totalContent = statCards.reduce((sum, s) => sum + s.value, 0);
-
-  // Simulated monthly trend (based on real data proportionally)
-  const monthlyTrend = [
-    { month: 'T1', value: Math.max(1, Math.round(totalContent * 0.3)) },
-    { month: 'T2', value: Math.max(1, Math.round(totalContent * 0.4)) },
-    { month: 'T3', value: Math.max(2, Math.round(totalContent * 0.5)) },
-    { month: 'T4', value: Math.max(2, Math.round(totalContent * 0.55)) },
-    { month: 'T5', value: Math.max(3, Math.round(totalContent * 0.7)) },
-    { month: 'T6', value: Math.max(3, Math.round(totalContent * 0.85)) },
-    { month: 'T7', value: totalContent },
-  ];
+  // Số bài đăng theo 7 tháng gần nhất — TÍNH THẬT từ createdAt của case studies
+  const [csList, setCsList] = useState<Array<{ createdAt?: string }>>([]);
+  useEffect(() => {
+    fetch('/api/casestudies?all=true')
+      .then((r) => r.json())
+      .then((d) => d.success && setCsList(d.data || []))
+      .catch(() => {});
+  }, []);
+  const monthlyTrend = useMemo(() => {
+    const now = new Date();
+    const months: { month: string; value: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const next = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      const value = csList.filter((c) => {
+        const t = c.createdAt ? new Date(c.createdAt) : null;
+        return t && t >= d && t < next;
+      }).length;
+      months.push({ month: `T${d.getMonth() + 1}`, value });
+    }
+    return months;
+  }, [csList]);
 
   return (
     <div className="space-y-6">
