@@ -30,6 +30,9 @@ import {
   ExternalLink,
   Globe,
   X,
+  ListPlus,
+  CircleCheck,
+  CircleX,
 } from 'lucide-react';
 
 interface FeedItem {
@@ -59,6 +62,7 @@ interface GenResult {
   contentEn: string;
   contentVi: string;
   quality?: QualityReport;
+  related?: { title: string; slug: string }[];
   source: { title: string; url: string };
 }
 
@@ -222,6 +226,9 @@ export default function AIWriterPage() {
   const [autoCover, setAutoCover] = useState(true);
   const [coverExtras, setCoverExtras] = useState<{ ogUrl: string; feedUrl: string } | null>(null);
   const [usage, setUsage] = useState<{ month: { costUsd: number; calls: number }; allTime: { costUsd: number } } | null>(null);
+  const [batchText, setBatchText] = useState('');
+  const [batchItems, setBatchItems] = useState<{ topic: string; status: 'pending' | 'running' | 'done' | 'error'; note?: string; slug?: string }[]>([]);
+  const [batchRunning, setBatchRunning] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -289,6 +296,143 @@ export default function AIWriterPage() {
     setStatus('Đã dừng.');
   };
 
+  /** Chạy 1 lần generate qua SSE — trả kết quả done (dùng chung cho 1 bài & hàng loạt) */
+  const runGenerateStream = async (
+    body: Record<string, unknown>,
+    handlers: {
+      onStatus?: (m: string) => void;
+      onEn?: (t: string) => void;
+      onVi?: (t: string) => void;
+    },
+    signal?: AbortSignal
+  ): Promise<GenResult> => {
+    const res = await fetch('/api/ai/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok || !res.body) {
+      const err = await res.json().catch(() => ({ message: 'Lỗi server' }));
+      throw new Error(err.message || `Lỗi ${res.status}`);
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let finalData: GenResult | null = null;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('data:')) continue;
+        try {
+          const evt = JSON.parse(trimmed.slice(5).trim());
+          if (evt.type === 'status') handlers.onStatus?.(evt.message);
+          else if (evt.type === 'en') handlers.onEn?.(evt.text);
+          else if (evt.type === 'vi') handlers.onVi?.(evt.text);
+          else if (evt.type === 'done') finalData = evt.data as GenResult;
+          else if (evt.type === 'error') throw new Error(evt.message);
+        } catch (parseErr) {
+          if (parseErr instanceof Error && parseErr.message && !parseErr.message.includes('JSON')) {
+            throw parseErr;
+          }
+        }
+      }
+    }
+    if (!finalData) throw new Error('Pipeline không trả kết quả');
+    return finalData;
+  };
+
+  /** Hàng loạt: sinh tuần tự từng đề → ảnh bìa → tự lưu NHÁP vào Case Studies */
+  const runBatch = async () => {
+    if (!me?._id) return toast.error('Cần đăng nhập');
+    if (!category) return toast.error('Chọn "Danh mục" ở panel thông tin xuất bản trước (dùng chung cả loạt)');
+    const topics = batchText
+      .split('\n')
+      .map((t) => t.trim())
+      .filter((t) => t.length > 10);
+    if (!topics.length) return toast.error('Nhập ít nhất 1 đề bài — mỗi dòng 1 đề');
+    if (topics.length > 10) return toast.error('Tối đa 10 đề mỗi loạt (đỡ treo máy)');
+
+    const cat = categories.find((c) => c._id === category);
+    const catLabel = cat?.name?.vi || cat?.name?.en || 'Luật Úc';
+
+    setBatchRunning(true);
+    setBatchItems(topics.map((t) => ({ topic: t, status: 'pending' as const })));
+
+    for (let i = 0; i < topics.length; i++) {
+      const t = topics[i];
+      const patch = (p: Partial<(typeof batchItems)[number]>) =>
+        setBatchItems((prev) => prev.map((x, j) => (j === i ? { ...x, ...p } : x)));
+      patch({ status: 'running', note: 'Bắt đầu...' });
+      try {
+        const data = await runGenerateStream(
+          { mode: 'topic', topic: t, model, length },
+          { onStatus: (m) => patch({ note: m }) }
+        );
+
+        // Ảnh bìa (nếu bật)
+        let coverUrl = '';
+        if (autoCover) {
+          patch({ note: 'Đang tạo ảnh bìa...' });
+          try {
+            const r = await fetch('/api/ai/cover', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ topic: t, titleVi: data.titleVi, titleEn: data.titleEn, categoryLabel: catLabel, variant: Date.now() % 100000 }),
+            });
+            const d = await r.json();
+            if (d.success) coverUrl = d.url;
+          } catch {
+            // ảnh lỗi vẫn lưu bài được
+          }
+        }
+
+        // Lưu nháp — trùng slug thì thử slug-2, slug-3
+        patch({ note: 'Đang lưu bản nháp...' });
+        let slug = data.slug;
+        let saved = false;
+        let lastErr = '';
+        for (let attempt = 0; attempt < 3 && !saved; attempt++) {
+          const res = await fetch('/api/casestudies', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              title: { en: data.titleEn, vi: data.titleVi },
+              description: { en: (data.descEn || '').slice(0, 199), vi: (data.descVi || '').slice(0, 199) },
+              content: { en: data.contentEn, vi: data.contentVi },
+              slug,
+              image: coverUrl || '/images/logo/solislaw.png',
+              category,
+              user: me._id,
+              isActive: false,
+            }),
+          });
+          const j = await res.json();
+          if (j.success) saved = true;
+          else if ((j.message || '').includes('Slug')) slug = `${data.slug}-${attempt + 2}`;
+          else {
+            lastErr = j.message || 'Lưu lỗi';
+            break;
+          }
+        }
+        if (saved) patch({ status: 'done', slug, note: 'Đã lưu nháp ✓ (xem trong Case Studies)' });
+        else patch({ status: 'error', note: lastErr });
+      } catch (e) {
+        patch({ status: 'error', note: (e as Error).message || 'Lỗi' });
+      }
+    }
+    setBatchRunning(false);
+    toast.success('Hoàn tất cả loạt! Các bài nằm trong Case Studies (trạng thái nháp).');
+  };
+
   const generate = async () => {
     if (mode === 'url' && !url.trim()) return toast.error('Nhập URL bài nguồn');
     if (mode === 'topic' && !topic.trim()) return toast.error('Nhập đề bài');
@@ -309,65 +453,32 @@ export default function AIWriterPage() {
     abortRef.current = controller;
 
     try {
-      const res = await fetch('/api/ai/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const data = await runGenerateStream(
+        {
           mode: activeMode,
           topic: topic.trim() || undefined,
           url: activeMode === 'url' ? url.trim() : undefined,
           angle: angle.trim() || undefined,
           model,
           length,
-        }),
-        signal: controller.signal,
-      });
-
-      if (!res.ok || !res.body) {
-        const err = await res.json().catch(() => ({ message: 'Lỗi server' }));
-        throw new Error(err.message || `Lỗi ${res.status}`);
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed.startsWith('data:')) continue;
-          try {
-            const evt = JSON.parse(trimmed.slice(5).trim());
-            if (evt.type === 'status') setStatus(evt.message);
-            else if (evt.type === 'en') setEnHtml((p) => p + evt.text);
-            else if (evt.type === 'vi') setViHtml((p) => p + evt.text);
-            else if (evt.type === 'done') {
-              setResult(evt.data);
-              // Thay stream bằng bản final (đã qua lint/repair mermaid)
-              setEnHtml(evt.data.contentEn || '');
-              setViHtml(evt.data.contentVi || '');
-              if (autoCover) {
-                setStatus('Bài xong! Đang tạo ảnh bìa tự động...');
-                const ok = await runCoverGeneration(evt.data);
-                setStatus(ok ? 'Hoàn tất! Bài + ảnh bìa đã sẵn sàng — kiểm tra và lưu bên dưới.' : 'Hoàn tất bài viết (ảnh bìa lỗi — bấm tạo lại).');
-              } else {
-                setStatus('Hoàn tất! Kiểm tra và lưu bài below.');
-              }
-            } else if (evt.type === 'error') {
-              throw new Error(evt.message);
-            }
-          } catch (parseErr) {
-            if (parseErr instanceof Error && parseErr.message && !parseErr.message.includes('JSON')) {
-              throw parseErr;
-            }
-          }
-        }
+        },
+        {
+          onStatus: setStatus,
+          onEn: (t) => setEnHtml((p) => p + t),
+          onVi: (t) => setViHtml((p) => p + t),
+        },
+        controller.signal
+      );
+      setResult(data);
+      // Thay stream bằng bản final (đã qua lint/repair mermaid)
+      setEnHtml(data.contentEn || '');
+      setViHtml(data.contentVi || '');
+      if (autoCover) {
+        setStatus('Bài xong! Đang tạo ảnh bìa tự động...');
+        const ok = await runCoverGeneration(data);
+        setStatus(ok ? 'Hoàn tất! Bài + ảnh bìa đã sẵn sàng — kiểm tra và lưu bên dưới.' : 'Hoàn tất bài viết (ảnh bìa lỗi — bấm tạo lại).');
+      } else {
+        setStatus('Hoàn tất! Kiểm tra và lưu bài below.');
       }
     } catch (e) {
       if ((e as Error).name !== 'AbortError') {
@@ -552,6 +663,7 @@ export default function AIWriterPage() {
                 ['topic', 'Đề bài', PenLine],
                 ['url', 'Từ URL', Link2],
                 ['feeds', 'Tin mới', Rss],
+                ['batch', 'Hàng loạt', ListPlus],
               ] as const
             ).map(([m, label, Icon]) => (
               <button
@@ -648,6 +760,63 @@ export default function AIWriterPage() {
             </div>
           )}
 
+          {mode === 'batch' && (
+            <div className="space-y-2">
+              <Label>Nhiều đề bài — mỗi dòng 1 đề (tối đa 10)</Label>
+              <Textarea
+                rows={6}
+                value={batchText}
+                onChange={(e) => setBatchText(e.target.value)}
+                placeholder={'Quyền nuôi con sau cải cách 2024...\nCoercive control là tội danh mới ở NSW...\nBail tại NSW sau 2025...'}
+              />
+              <p className="text-[11px] text-slate-400">
+                Mỗi đề: AI viết bài đầy đủ EN+VI → tạo ảnh bìa (nếu bật toggle) → <b>tự lưu NHÁP</b> vào Case Studies
+                theo danh mục đã chọn. Anh chỉ việc vào Case Studies duyệt và xuất bản.
+              </p>
+              {batchItems.length > 0 && (
+                <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
+                  {batchItems.map((b, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-start gap-2 p-2 rounded-md text-xs border ${
+                        b.status === 'done'
+                          ? 'border-emerald-100 bg-emerald-50/50'
+                          : b.status === 'error'
+                            ? 'border-red-100 bg-red-50/50'
+                            : 'border-slate-100'
+                      }`}
+                    >
+                      <span className="flex-shrink-0 mt-0.5">
+                        {b.status === 'done' ? (
+                          <CircleCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        ) : b.status === 'error' ? (
+                          <CircleX className="w-3.5 h-3.5 text-red-500" />
+                        ) : b.status === 'running' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#9b6f45]" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 inline-block rounded-full border border-slate-300" />
+                        )}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-700 line-clamp-1">{b.topic}</p>
+                        <p className="text-[11px] text-slate-400">
+                          {b.status === 'done' && b.slug ? (
+                            <a href={`/case-studies/${b.slug}`} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">
+                              /case-studies/{b.slug} ↗
+                            </a>
+                          ) : (
+                            b.note
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {mode !== 'batch' && (
           <div className="space-y-2">
             <Label>Yêu cầu thêm (tuỳ chọn)</Label>
             <Input
@@ -656,6 +825,7 @@ export default function AIWriterPage() {
               placeholder="VD: nhấn mạnh cho người Việt mới định cư, có ví dụ thực tế..."
             />
           </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -688,7 +858,14 @@ export default function AIWriterPage() {
             </div>
           </div>
 
-          {generating ? (
+          {mode === 'batch' ? (
+            <Button className="w-full bg-[#9b6f45] hover:bg-[#85603a]" onClick={runBatch} disabled={batchRunning}>
+              {batchRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <ListPlus className="w-4 h-4" />}
+              {batchRunning
+                ? 'Đang chạy hàng loạt...'
+                : `Chạy hàng loạt (${batchText.split('\n').filter((t) => t.trim().length > 10).length} đề)`}
+            </Button>
+          ) : generating ? (
             <Button variant="destructive" className="w-full" onClick={stopGeneration}>
               Dừng lại
             </Button>
@@ -862,6 +1039,25 @@ export default function AIWriterPage() {
                       {t}
                     </span>
                   ))}
+                </div>
+              )}
+
+              {result.related && result.related.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs text-slate-500">🔗 Nên internal-link sang các bài đã đăng:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {result.related.map((r) => (
+                      <a
+                        key={r.slug}
+                        href={`/case-studies/${r.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-[#9b6f45] hover:bg-amber-100"
+                      >
+                        {r.title.slice(0, 50)} ↗
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
 

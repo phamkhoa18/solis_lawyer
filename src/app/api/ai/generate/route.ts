@@ -5,6 +5,8 @@ import { repairMermaidInHtml } from '@/lib/mermaidLint';
 import { computeQuality, stripHtml } from '@/lib/readability';
 import type { QualityReport } from '@/lib/readability';
 import { fptEmbed, cosineSimilarity } from '@/lib/fpt';
+import connectDB from '@/lib/dbConnect';
+import CaseStudy from '@/models/Casestudy';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -346,6 +348,36 @@ export async function POST(req: NextRequest) {
           }
         }
 
+        // ── Bước 7: gợi ý internal-link (bài đã đăng liên quan chủ đề) ──
+        let related: { title: string; slug: string }[] = [];
+        try {
+          await connectDB();
+          const words = new Set(
+            `${analysis.title_en} ${topic}`
+              .toLowerCase()
+              .split(/\W+/)
+              .filter((w) => w.length > 4)
+          );
+          const posts = (await CaseStudy.find({ isActive: true })
+            .select('title slug')
+            .lean()) as unknown as Array<{ title?: { en?: string; vi?: string }; slug: string }>;
+          related = posts
+            .map((p) => {
+              const t = `${p.title?.en || ''} ${p.title?.vi || ''}`.toLowerCase();
+              let score = 0;
+              words.forEach((w) => {
+                if (t.includes(w)) score++;
+              });
+              return { title: p.title?.vi || p.title?.en || '', slug: p.slug, score };
+            })
+            .filter((p) => p.score >= 2)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3)
+            .map(({ title, slug }) => ({ title, slug }));
+        } catch {
+          // không chặn vì gợi ý link
+        }
+
         send({
           type: 'done',
           data: {
@@ -358,6 +390,7 @@ export async function POST(req: NextRequest) {
             contentEn,
             contentVi,
             quality,
+            related,
             source: { title: sourceTitle, url: sourceUrl },
           },
         });
