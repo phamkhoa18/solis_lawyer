@@ -20,6 +20,16 @@ export function articleHtmlToTelegram(html: string): string[] {
   const lines: string[] = [];
   const walk = (nodes: cheerio.Cheerio<never>) => {
     nodes.each((_, el) => {
+      // text node trần (đoạn AI không bọc <p>) → đẩy như đoạn văn
+      const type = (el as unknown as { type?: string }).type;
+      if (type === 'text') {
+        const t = $(el).text().trim();
+        if (t) {
+          lines.push(esc(t));
+          lines.push('');
+        }
+        return;
+      }
       const tag = (el as unknown as { tagName?: string }).tagName || '';
       const $el = $(el as never);
       const inner = inlineFormat($el);
@@ -69,7 +79,7 @@ export function articleHtmlToTelegram(html: string): string[] {
     return out;
   }
 
-  walk($('#root').children() as cheerio.Cheerio<never>);
+  walk($('#root').contents() as cheerio.Cheerio<never>);
 
   // Gộp dòng → chunk
   const text = lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();

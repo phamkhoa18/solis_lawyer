@@ -850,9 +850,9 @@ export default function AIWriterPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="short" className="text-xs">Ngắn (~700 từ)</SelectItem>
-                  <SelectItem value="medium" className="text-xs">Vừa (~1.200 từ)</SelectItem>
-                  <SelectItem value="long" className="text-xs">Dài (~1.700 từ)</SelectItem>
+                  <SelectItem value="short" className="text-xs">Ngắn (~600 từ)</SelectItem>
+                  <SelectItem value="medium" className="text-xs">Vừa (~800 từ)</SelectItem>
+                  <SelectItem value="long" className="text-xs">Học thuật (tối đa 1.500 từ)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

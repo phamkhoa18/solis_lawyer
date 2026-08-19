@@ -6,6 +6,7 @@ import { computeQuality, stripHtml } from '@/lib/readability';
 import type { QualityReport } from '@/lib/readability';
 import { fptEmbed, cosineSimilarity } from '@/lib/fpt';
 import { buildArticleFooter, stripLegacyFooter } from '@/lib/articleFooter';
+import { normalizeArticleHtml } from '@/lib/htmlNormalize';
 import connectDB from '@/lib/dbConnect';
 import CaseStudy from '@/models/Casestudy';
 
@@ -22,9 +23,9 @@ interface GenerateBody {
 }
 
 const LENGTH_SPEC = {
-  short: { en: '600-800 words', vi: 'tương đương bản Anh, khoảng 700-900 chữ' },
-  medium: { en: '1000-1300 words', vi: 'tương đương bản Anh, khoảng 1100-1500 chữ' },
-  long: { en: '1500-1900 words', vi: 'tương đương bản Anh, khoảng 1700-2200 chữ' },
+  short: { en: '500-700 words', vi: 'tương đương, khoảng 550-800 chữ' },
+  medium: { en: '700-1000 words', vi: 'tương đương, khoảng 750-1100 chữ' },
+  long: { en: '1200-1500 words (STRICT MAXIMUM 1500 words)', vi: 'tương đương, khoảng 1300-1600 chữ, KHÔNG vượt quá' },
 } as const;
 
 const WRITER_SYSTEM_EN = `You are a friendly, trusted legal writer for Solis Lawyers, a bilingual Australian law firm serving the Vietnamese community. You write for ordinary people with no legal training — like a good lawyer explaining things over a cup of coffee.
@@ -261,10 +262,10 @@ export async function POST(req: NextRequest) {
           send({ type: 'status', message: '⚠️ Một sơ đồ không sửa được — đã bỏ để tránh lỗi hiển thị.' });
         }
 
-        // ── Bước 3.7: ghép footer chuẩn (CTA Solis + disclaimer + nguồn) ──
+        // ── Bước 3.7: chuẩn hoá HTML (bọc đoạn trần vào <p>) + ghép footer chuẩn ──
         const footerSource = sourceUrl ? { title: sourceTitle, url: sourceUrl } : undefined;
-        contentEn = `${stripLegacyFooter(contentEn)}\n${buildArticleFooter('en', footerSource)}`;
-        contentVi = `${stripLegacyFooter(contentVi)}\n${buildArticleFooter('vi', footerSource)}`;
+        contentEn = `${normalizeArticleHtml(stripLegacyFooter(contentEn))}\n${buildArticleFooter('en', footerSource)}`;
+        contentVi = `${normalizeArticleHtml(stripLegacyFooter(contentVi))}\n${buildArticleFooter('vi', footerSource)}`;
 
         // ── Bước 4 (model nhanh): meta + slug ──
         send({ type: 'status', message: 'Đang hoàn thiện tiêu đề, mô tả & slug...' });

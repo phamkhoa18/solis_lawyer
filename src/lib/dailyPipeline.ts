@@ -56,7 +56,7 @@ export const SLOTS: Record<SlotPlan, {
     keywords: /(\[\d{4}\]|v the king|high court|appeal|judgment|fcfcoa|full court|precedent|ratio)/i,
     angle:
       'Bài phân tích án lệ có chiều sâu học thuật: nêu bối cảnh vụ án, cấp xét xử, tóm tắt diễn biến, ratio decidendi (lí do cốt lõi của phán quyết), ý nghĩa với thực tiễn và người hành luật tại Úc. Trích dẫn case citation đúng định dạng như [2025] HCA 12. Giữ ngôn từ vẫn gần gũi dễ hiểu cho độc giả phổ thông.',
-    length: 'long',
+    length: 'medium',
   },
 };
 
@@ -106,7 +106,7 @@ async function internal(path: string, init: RequestInit = {}): Promise<Response>
   return fetch(`${BASE}${path}`, {
     ...init,
     headers: { 'Content-Type': 'application/json', Cookie: cookie, ...(init.headers || {}) },
-    signal: AbortSignal.timeout(300000),
+    signal: AbortSignal.timeout(600000),
   });
 }
 
