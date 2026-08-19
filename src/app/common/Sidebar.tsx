@@ -30,14 +30,14 @@ export function Sidebar() {
     return pathname.startsWith(href);
   };
 
-  const sidebarWidth = collapsed ? 'w-[68px]' : 'w-[240px]';
+  const sidebarWidth = collapsed ? 'w-[76px]' : 'w-[244px]';
 
   return (
     <>
       {/* Mobile toggle */}
       <button
         onClick={() => setOpen(!open)}
-        className="md:hidden fixed top-3.5 left-4 z-50 p-2 rounded-md bg-white shadow-sm"
+        className="md:hidden fixed top-3.5 left-4 z-50 p-2 rounded-xl bg-white shadow-sm border border-border/60"
         aria-label="Toggle menu"
       >
         {open ? <X className="h-5 w-5 text-slate-700" /> : <Menu className="h-5 w-5 text-slate-700" />}
@@ -46,23 +46,24 @@ export function Sidebar() {
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-slate-900/25 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — bento panel nổi, bo tròn, kính mờ */}
       <aside
         className={clsx(
-          'fixed top-0 left-0 z-40 h-screen transform transition-all duration-300 ease-in-out',
-          'bg-white flex flex-col shadow-[1px_0_3px_rgba(0,0,0,0.04)]',
+          'fixed top-3 left-3 z-40 h-[calc(100vh-24px)] transform transition-all duration-300 ease-in-out',
+          'bg-white/90 backdrop-blur-xl flex flex-col rounded-2xl border border-border/60',
+          'shadow-[0_2px_6px_rgba(15,23,42,0.03),0_16px_40px_-20px_rgba(15,23,42,0.14)]',
           sidebarWidth,
-          open ? 'translate-x-0' : '-translate-x-full',
+          open ? 'translate-x-0' : '-translate-x-[110%]',
           'md:translate-x-0'
         )}
       >
-        {/* Logo area with background */}
-        <div className="relative flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-hidden"
+        {/* Logo area */}
+        <div className="relative flex items-center justify-center overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
           style={{ height: collapsed ? '56px' : '64px' }}
         >
           {/* Subtle gold accent overlay */}
@@ -132,13 +133,13 @@ export function Sidebar() {
                             onClick={() => setOpen(false)}
                             title={collapsed ? child.title : undefined}
                             className={clsx(
-                              'flex items-center rounded-md text-sm font-medium transition-all duration-200',
+                              'flex items-center rounded-xl text-sm font-medium transition-all duration-200',
                               collapsed
                                 ? 'justify-center p-2.5'
                                 : 'gap-3 px-3 py-2',
                               active
-                                ? 'bg-amber-50 text-[#9b6f45]'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                                ? 'bg-gradient-to-r from-[#fdf6ec] to-[#f9efdd] text-[#9b6f45] shadow-[inset_0_0_0_1px_rgba(155,111,69,0.12)]'
+                                : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                             )}
                           >
                             {Icon && (
@@ -162,13 +163,13 @@ export function Sidebar() {
                   onClick={() => setOpen(false)}
                   title={collapsed ? item.title : undefined}
                   className={clsx(
-                    'flex items-center rounded-md text-sm font-medium transition-all duration-200',
+                    'flex items-center rounded-xl text-sm font-medium transition-all duration-200',
                     collapsed
                       ? 'justify-center p-2.5'
                       : 'gap-3 px-3 py-2',
                     isActive(item.href || '')
-                      ? 'bg-amber-50 text-[#9b6f45]'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                      ? 'bg-gradient-to-r from-[#fdf6ec] to-[#f9efdd] text-[#9b6f45] shadow-[inset_0_0_0_1px_rgba(155,111,69,0.12)]'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                   )}
                 >
                   {item.icon && (
