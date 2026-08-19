@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import path from 'path';
-import { generateCover } from '@/lib/coverGen';
+import { generateCoverSet } from '@/lib/coverGen';
 import { generateUniqueFilename, getUploadDir, getPublicUrl } from '@/lib/uploadHelper';
 
 export const runtime = 'nodejs';
@@ -14,6 +14,17 @@ interface CoverBody {
   titleEn?: string;
   categoryLabel?: string;
   variant?: number;
+  template?: 1 | 2 | 3;
+}
+
+async function savePng(png: Buffer, name: string): Promise<string> {
+  const uploadDir = getUploadDir();
+  if (!existsSync(uploadDir)) {
+    await mkdir(uploadDir, { recursive: true });
+  }
+  const filename = generateUniqueFilename(name);
+  await writeFile(path.join(uploadDir, filename), png);
+  return getPublicUrl(filename);
 }
 
 export async function POST(req: NextRequest) {
@@ -24,24 +35,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Thiếu tiêu đề tiếng Việt' }, { status: 400 });
     }
 
-    const png = await generateCover({
+    const seed = body.variant ?? Math.floor(Math.random() * 100000);
+    const set = await generateCoverSet({
       topic: body.topic || title,
       title,
       titleEn: body.titleEn,
       categoryLabel: body.categoryLabel,
-      seed: body.variant, // đổi variant = đổi nền khác
+      seed,
+      template: body.template,
     });
 
-    // Lưu theo đúng chuẩn /api/upload hiện có
-    const uploadDir = getUploadDir();
-    if (!existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
-    }
-    const filename = generateUniqueFilename(`ai-cover-${Date.now()}.png`);
-    await writeFile(path.join(uploadDir, filename), png);
-    const url = getPublicUrl(filename);
+    const stamp = `ai-cover-${Date.now()}`;
+    const [url, ogUrl, feedUrl] = await Promise.all([
+      savePng(set.main, `${stamp}.png`),
+      savePng(set.og, `${stamp}-og.png`),
+      savePng(set.feed, `${stamp}-feed.png`),
+    ]);
 
-    return NextResponse.json({ success: true, url, size: png.length });
+    return NextResponse.json({
+      success: true,
+      url,
+      ogUrl,
+      feedUrl,
+      template: set.template,
+      theme: set.light ? 'light' : 'dark',
+      size: set.main.length,
+    });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Lỗi không xác định';
     console.error('POST /api/ai/cover error:', message);

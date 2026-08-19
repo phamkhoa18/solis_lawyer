@@ -155,6 +155,13 @@ export interface QualityReport {
     en: { score: number; worst: string[] };
     vi: { score: number; worst: string[] };
   };
+  sourceCheck?: {
+    simVi: number;
+    simEn: number;
+    verbatimVi: number;
+    verbatimEn: number;
+    flag?: boolean;
+  };
 }
 
 export function computeQuality(enHtml: string, viHtml: string): QualityReport {

@@ -9,6 +9,8 @@
 const BASE_URL = process.env.FPT_CLOUD_BASE_URL || 'https://mkp-api.fptcloud.com';
 const API_KEY = process.env.FPT_CLOUD_API_KEY || '';
 
+import { logUsage, estimateTokens } from '@/lib/usageLog';
+
 export interface FptMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -93,6 +95,11 @@ async function chatOnce(opts: FptChatOptions): Promise<string | Error> {
     if (!stream) {
       const json = await res.json();
       const content = json?.choices?.[0]?.message?.content;
+      logUsage({
+        model: opts.model,
+        promptTokens: json?.usage?.prompt_tokens,
+        completionTokens: json?.usage?.completion_tokens,
+      });
       if (!content || !String(content).trim()) {
         return new Error('FPT API trả content rỗng (thử tăng max_tokens — model reasoning tốn token suy nghĩ)');
       }
@@ -131,6 +138,14 @@ async function chatOnce(opts: FptChatOptions): Promise<string | Error> {
     }
 
     if (!full.trim()) return new Error('FPT API stream không trả nội dung');
+    // Stream không có usage chính xác → ước lượng
+    const promptChars = opts.messages.reduce((s, m) => s + (m.content?.length || 0), 0);
+    logUsage({
+      model: opts.model,
+      promptTokens: estimateTokens(promptChars),
+      completionTokens: estimateTokens(full.length),
+      estimated: true,
+    });
     return full;
   } catch (e) {
     if ((e as Error).name === 'AbortError') throw e;
@@ -138,7 +153,41 @@ async function chatOnce(opts: FptChatOptions): Promise<string | Error> {
   }
 }
 
-/** Gọi model lấy JSON — robust: cắt {..} khỏi prose, auto retry */
+/** Gọi model embedding (Vietnamese_Embedding / multilingual-e5) — trả về vector */
+export async function fptEmbed(texts: string[], model = 'Vietnamese_Embedding'): Promise<number[][]> {
+  if (!API_KEY) throw new Error('Thiếu FPT_CLOUD_API_KEY trong .env.local');
+  // giới hạn 8K token context của model embedding
+  const inputs = texts.map((t) => t.slice(0, 12000));
+  const res = await fetch(`${BASE_URL}/v1/embeddings`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${API_KEY}`,
+    },
+    body: JSON.stringify({ model, input: inputs }),
+    signal: AbortSignal.timeout(60000),
+  });
+  if (!res.ok) throw new Error(`FPT Embedding lỗi ${res.status}`);
+  const json = await res.json();
+  logUsage({
+    model,
+    kind: 'embedding',
+    promptTokens: json?.usage?.prompt_tokens || estimateTokens(inputs.join(' ').length),
+  });
+  return (json?.data || []).map((d: { embedding: number[] }) => d.embedding);
+}
+
+export function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0,
+    na = 0,
+    nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    na += a[i] * a[i];
+    nb += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1);
+}
 export async function fptJson<T>(opts: Omit<FptChatOptions, 'onChunk'>): Promise<T> {
   // Gộp chỉ dẫn JSON vào system message đầu (tránh message system cuối gây model "nói nhiều")
   const messages: FptMessage[] = opts.messages.map((m, i) =>

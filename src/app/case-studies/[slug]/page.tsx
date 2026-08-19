@@ -85,6 +85,69 @@ export async function generateMetadata({
   };
 }
 
+// Trích FAQ từ HTML: <h3>câu hỏi</h3> + <p>câu trả lời</p> liền sau (dùng cho schema SEO rich results)
+function extractFaq(html: string): { question: string; answer: string }[] {
+  const text = (s: string) =>
+    s
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const faqs: { question: string; answer: string }[] = [];
+  const re = /<h3[^>]*>([\s\S]*?)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) && faqs.length < 8) {
+    const q = text(m[1]);
+    const a = text(m[2]);
+    if (q.length > 8 && q.includes('?') && a.length > 20) {
+      faqs.push({ question: q, answer: a.slice(0, 500) });
+    }
+  }
+  return faqs;
+}
+
+function buildJsonLd(caseStudy: any): string[] {
+  const url = `https://solislaw.com.au/case-studies/${caseStudy.slug}`;
+  const schemas: string[] = [
+    JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: (caseStudy.title?.en || caseStudy.title?.vi || '').slice(0, 110),
+      description: caseStudy.description?.en || caseStudy.description?.vi || '',
+      image: caseStudy.image ? [caseStudy.image.startsWith('http') ? caseStudy.image : `https://solislaw.com.au${caseStudy.image}`] : undefined,
+      datePublished: caseStudy.publishedAt || caseStudy.createdAt,
+      dateModified: caseStudy.updatedAt || caseStudy.createdAt,
+      inLanguage: ['en', 'vi'],
+      author: { '@type': 'Person', name: caseStudy.user?.name || 'Solis Lawyers' },
+      publisher: {
+        '@type': 'Organization',
+        name: 'Solis Lawyers',
+        logo: { '@type': 'ImageObject', url: 'https://solislaw.com.au/images/logo/solislaw.png' },
+      },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    }),
+  ];
+  const faqs = extractFaq(caseStudy.content?.en || caseStudy.content?.vi || '');
+  if (faqs.length >= 2) {
+    schemas.push(
+      JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqs.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      })
+    );
+  }
+  return schemas;
+}
+
 // Generate static params for known case studies
 export async function generateStaticParams() {
   try {
@@ -118,6 +181,10 @@ export default async function DetailCaseStudies({
   return (
     <>
       <Header />
+      {/* Schema.org JSON-LD: Article + FAQ (SEO rich results) */}
+      {buildJsonLd(caseStudy).map((s, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: s }} />
+      ))}
       <section className="case-studies bg-gray-50 min-h-screen">
         <PageTitle
           title={caseStudy.title?.en || 'Case Study'}

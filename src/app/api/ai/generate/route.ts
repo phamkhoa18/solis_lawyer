@@ -4,6 +4,7 @@ import { extractContent } from '@/lib/contentExtract';
 import { repairMermaidInHtml } from '@/lib/mermaidLint';
 import { computeQuality, stripHtml } from '@/lib/readability';
 import type { QualityReport } from '@/lib/readability';
+import { fptEmbed, cosineSimilarity } from '@/lib/fpt';
 
 export const runtime = 'nodejs';
 export const maxDuration = 300;
@@ -308,6 +309,42 @@ export async function POST(req: NextRequest) {
         }
 
         const quality: QualityReport = { ...computeQuality(contentEn, contentVi), judge };
+
+        // ── Bước 6: kiểm tra đạo văn (chỉ mode=url, dùng Vietnamese_Embedding) ──
+        if (sourceText) {
+          send({ type: 'status', message: 'Đang kiểm tra độ giống nguồn gốc...' });
+          try {
+            const [vSrc, vVi, vEn] = await fptEmbed([
+              sourceText.slice(0, 12000),
+              stripHtml(contentVi).slice(0, 12000),
+              stripHtml(contentEn).slice(0, 12000),
+            ]);
+            // Verbatim: overlap shingle 8 từ (phát hiện copy từng chữ, embedding không thấy được)
+            const shingles = (t: string) => {
+              const words = stripHtml(t).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').split(/\s+/);
+              const s = new Set<string>();
+              for (let i = 0; i + 8 <= words.length; i++) s.add(words.slice(i, i + 8).join(' '));
+              return s;
+            };
+            const srcSh = shingles(sourceText);
+            const overlapRatio = (t: string) => {
+              const art = [...shingles(t)];
+              if (!art.length) return 0;
+              const hit = art.filter((s) => srcSh.has(s)).length;
+              return Math.round((hit / art.length) * 1000) / 10;
+            };
+            quality.sourceCheck = {
+              simVi: Math.round(cosineSimilarity(vSrc, vVi) * 1000) / 1000,
+              simEn: Math.round(cosineSimilarity(vSrc, vEn) * 1000) / 1000,
+              verbatimVi: overlapRatio(contentVi),
+              verbatimEn: overlapRatio(contentEn),
+            };
+            quality.sourceCheck.flag =
+              quality.sourceCheck.verbatimVi > 10 || quality.sourceCheck.verbatimEn > 10 || quality.sourceCheck.simVi > 0.96;
+          } catch {
+            // embedding fail không chặn bài
+          }
+        }
 
         send({
           type: 'done',
