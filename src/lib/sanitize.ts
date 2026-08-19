@@ -3,7 +3,6 @@
  * vẫn giữ footer chuẩn (inline styles) + cấu trúc tạp chí.
  */
 import sanitizeHtml from 'sanitize-html';
-// eslint-disable-next-line @typescript-eslint/no-namespace
 import type { IOptions } from 'sanitize-html';
 
 const ALLOWED: IOptions = {
