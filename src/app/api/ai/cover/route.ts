@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Lỗi không xác định';
-    console.error('POST /api/ai/cover error:', message);
+    console.error('POST /api/ai/cover error:', message, e instanceof Error ? e.stack : undefined);
     return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }

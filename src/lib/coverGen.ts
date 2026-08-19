@@ -189,7 +189,13 @@ async function renderOverlayElement(opts: {
     props: {
       style: flex({ alignItems: 'center', gap: 12 }),
       children: [
-        { type: 'div', props: { style: flex({ width: 42, height: 4, backgroundColor: GOLD, borderRadius: 2 }) } },
+        {
+          type: 'div',
+          props: {
+            style: flex({ width: 42, height: 4, backgroundColor: GOLD, borderRadius: 2 }),
+            children: [],
+          },
+        },
         {
           type: 'div',
           props: {
@@ -209,7 +215,8 @@ async function renderOverlayElement(opts: {
         lineHeight: 1.22,
         fontWeight: 700,
         color: theme.title,
-        textAlign: center ? ('center' as const) : undefined,
+        // satori crash khi nhận textAlign: undefined — chỉ thêm key khi cần
+        ...(center ? { textAlign: 'center' as const } : {}),
         textShadow: light ? 'none' : '0 2px 18px rgba(0,0,0,0.45)',
       }),
       children: safeTitle,
