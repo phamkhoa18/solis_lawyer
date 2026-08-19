@@ -53,7 +53,7 @@ export const SLOTS: Record<SlotPlan, {
     categorySlug: 'case-analysis',
     categoryName: { en: 'Case Analysis', vi: 'Phân Tích Án Lệ' },
     categoryLabel: 'Phân Tích Án Lệ',
-    keywords: /(\[\d{4}\]|v the king|high court|appeal|judgment|fcfcoa|full court|precedent|ratio)/i,
+    keywords: /(\[\d{4}\]|v the king|v r\b|high court|full court|court of appeal|precedent|ratio|judgment)/i,
     angle:
       'Bài phân tích án lệ có chiều sâu học thuật: nêu bối cảnh vụ án, cấp xét xử, tóm tắt diễn biến, ratio decidendi (lí do cốt lõi của phán quyết), ý nghĩa với thực tiễn và người hành luật tại Úc. Trích dẫn case citation đúng định dạng như [2025] HCA 12. Giữ ngôn từ vẫn gần gũi dễ hiểu cho độc giả phổ thông.',
     length: 'medium',
@@ -173,7 +173,11 @@ async function pickTopic(plan: SlotPlan): Promise<{ topic: string; sourceUrl?: s
     const filter: Record<string, unknown> = { status: 'new' };
     if (plan === 'family') filter.sourceId = { $in: ['mondaq-family', 'lsj'] };
     const candidates = await SourceItem.find(filter).sort({ createdAt: -1 }).limit(120);
-    const match = candidates.find((c) => slot.keywords.test(`${c.title} ${c.snippet || ''}`));
+    // bỏ tin video/ảnh (không có text để AI đọc) và tin quá ngắn
+    const readable = candidates.filter(
+      (c) => !/video|watch live|photos|photo|\bopinion\b/i.test(c.title) && (c.snippet || '').length > 60
+    );
+    const match = readable.find((c) => slot.keywords.test(`${c.title} ${c.snippet || ''}`));
     if (match && match.title.length > 25) {
       await SourceItem.updateOne({ _id: match._id }, { $set: { status: 'dismissed' } }); // đánh dấu đã dùng
       return { topic: match.title, sourceUrl: match.link, sourceTitle: match.title };
@@ -379,9 +383,11 @@ async function runSlot(plan: SlotPlan, force: boolean): Promise<{ status: 'sent'
     }
     return { status: 'queued', detail: 'admin chưa /start bot — bài đang chờ, sẽ tự gửi khi bot được kích hoạt' };
   } catch (e) {
+    const detail = e instanceof Error ? e.message : 'lỗi';
+    console.error(`Daily slot "${plan}" lỗi:`, detail);
     post.status = 'failed';
     await post.save();
-    return { status: 'error', detail: e instanceof Error ? e.message : 'lỗi' };
+    return { status: 'error', detail };
   }
 }
 

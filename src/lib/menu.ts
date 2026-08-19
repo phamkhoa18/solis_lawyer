@@ -9,6 +9,7 @@ import {
   FolderTree,
   ShieldCheck,
   Sparkles,
+  CalendarClock,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -35,6 +36,11 @@ export const adminMenu: AdminMenuGroup[] = [
     title: 'AI Writer',
     href: '/admin/ai-writer',
     icon: Sparkles,
+  },
+  {
+    title: 'Bài Mỗi Ngày',
+    href: '/admin/daily',
+    icon: CalendarClock,
   },
   {
     title: 'Quản lý nội dung',
