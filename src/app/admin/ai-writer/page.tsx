@@ -192,7 +192,7 @@ function QualityPanel({
 
 export default function AIWriterPage() {
   // ── Input state ──
-  const [mode, setMode] = useState<'feeds' | 'url' | 'topic'>('topic');
+  const [mode, setMode] = useState<'feeds' | 'url' | 'topic' | 'batch'>('topic');
   const [topic, setTopic] = useState('');
   const [url, setUrl] = useState('');
   const [angle, setAngle] = useState('');

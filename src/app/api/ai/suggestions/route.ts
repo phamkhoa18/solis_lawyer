@@ -7,6 +7,10 @@ import { AUTH_COOKIE_NAME, verifyJWT } from '@/lib/auth';
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
+// Cache quét nguồn 10 phút trong module (không dùng globalThis)
+let lastScan = 0;
+const SCAN_INTERVAL = 10 * 60 * 1000;
+
 async function auth(req: NextRequest): Promise<boolean> {
   const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   return !!(token && (await verifyJWT(token)));
@@ -24,11 +28,8 @@ export async function GET(req: NextRequest) {
   try {
     await connectDB();
 
-    // Cache 10 phút trong memory để không quét nguồn liên tục
-    const cacheKey = 'suggestions_last_scan';
-    const now = Date.now();
-    if (!(globalThis as Record<string, unknown>)[cacheKey] || now - ((globalThis as Record<string, number>)[cacheKey] as number) > 10 * 60 * 1000) {
-      (globalThis as Record<string, number>)[cacheKey] = now;
+    if (Date.now() - lastScan > SCAN_INTERVAL) {
+      lastScan = Date.now();
       const items = await fetchAllFeeds();
       if (items.length) {
         // bulk upsert theo link — bài đã biết không đè status
