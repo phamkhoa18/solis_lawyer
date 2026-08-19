@@ -38,6 +38,7 @@ interface Post {
   casestudySlug?: string;
   runDate: string;
   createdAt: string;
+  sentAt?: string;
 }
 
 const PLAN_META: Record<Post['plan'], { label: string; emoji: string; dot: string }> = {
@@ -301,6 +302,7 @@ export default function DailyPostsPage() {
                 <div key={p._id} className="flex items-center gap-2 p-2 rounded-xl bg-slate-50/70">
                   <span className="text-base">{PLAN_META[p.plan].emoji}</span>
                   <p className="flex-1 text-xs text-slate-600 line-clamp-2">{p.article?.titleVi || p.topic}</p>
+                  {p.sentAt && <span className="text-[10px]" title="Đã gửi Telegram">📱</span>}
                   <span className={`w-2 h-2 rounded-full flex-shrink-0 ${STATUS_META[p.status].dot}`} />
                 </div>
               ))}
@@ -348,6 +350,15 @@ export default function DailyPostsPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-medium text-slate-400">{plan.emoji} {plan.label}</span>
                     <span className={`text-[10px] px-2 py-0.5 rounded-full border ${st.cls}`}>{st.label}</span>
+                    {p.sentAt ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full border border-sky-200/70 bg-sky-50 text-sky-500" title={`Đã gửi Telegram ${new Date(p.sentAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`}>
+                        📱 Đã gửi TG
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full border border-slate-200/70 bg-slate-50 text-slate-400">
+                        📲 Chưa gửi TG
+                      </span>
+                    )}
                     {p.version > 1 && <span className="text-[10px] text-sky-500">🔁 v{p.version}</span>}
                     <span className="text-[10px] text-slate-300">{p.runDate.split('-').reverse().join('/')}</span>
                     {p.article?.quality?.judge && (
