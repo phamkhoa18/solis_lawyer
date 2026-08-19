@@ -184,7 +184,7 @@ export async function POST(req: NextRequest) {
               analysis.outline?.length ? `SUGGESTED OUTLINE:\n${analysis.outline.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '',
               analysis.audience_note ? `AUDIENCE NOTE: ${analysis.audience_note}` : '',
               analysis.needs_diagram
-                ? `DIAGRAM REQUIRED: include exactly ONE mermaid diagram right after the section it illustrates, as:\n<pre class="mermaid">flowchart LR\n  A1["Step one"] --> B1["Step two"]\n</pre>\nRules: ASCII node IDs (A1, B2); every label in double quotes; max 9 nodes; only flowchart TD/TB/LR, timeline, or mindmap.`
+                ? `DIAGRAM REQUIRED: include exactly ONE mermaid diagram right after the section it illustrates, as:\n<pre class="mermaid">flowchart TD\n  A1["Step one"] --> B1["Step two"]\n</pre>\nRules: ASCII node IDs (A1, B2); every label in double quotes; max 9 nodes; use flowchart TD (top-down, preferred) or LR; only flowchart/timeline/mindmap types.`
                 : 'NO DIAGRAM: this article does not need a mermaid diagram — write text only, no <pre> blocks.',
               sourceText ? `SOURCE ARTICLE (for facts only — do NOT copy sentences):\n${sourceText.slice(0, 25000)}` : '',
               `TARGET LENGTH: ${LENGTH_SPEC[length].en}.`,

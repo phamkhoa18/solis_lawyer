@@ -12,9 +12,9 @@ const ALLOWED_TYPES = /^(flowchart\s+(TD|TB|LR)|timeline|mindmap)\b/;
 const VIETNAMESE = /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i;
 const ASCII_ID = /^[A-Za-z][A-Za-z0-9_]*$/;
 
-/** Theme brand Solis nhúng thẳng vào code sơ đồ — chạy đồng nhất web + Telegram (mermaid.ink) */
+/** Theme brand Solis — phong cách VẼ TAY (hand-drawn sketch), serif, ấm — chạy đồng nhất web + Telegram */
 export const MERMAID_INIT =
-  '%%{init: {"theme":"base","themeVariables":{"primaryColor":"#fdf6ec","primaryBorderColor":"#9b6f45","primaryTextColor":"#1e293b","secondaryColor":"#f5ead9","tertiaryColor":"#faf7f2","lineColor":"#9b6f45","nodeBorder":"#9b6f45","clusterBkg":"#faf7f2","edgeLabelBackground":"#ffffff","fontFamily":"Georgia, serif","fontSize":"15px"},"flowchart":{"curve":"basis","nodeSpacing":48,"rankSpacing":56}}}%%';
+  '%%{init: {"look":"handDrawn","handDrawnSeed":7,"theme":"base","themeVariables":{"primaryColor":"#fdf6ec","primaryBorderColor":"#8a5a2e","primaryTextColor":"#1f2937","secondaryColor":"#f5ead9","tertiaryColor":"#faf7f2","lineColor":"#9b6f45","nodeBorder":"#8a5a2e","clusterBkg":"#faf7f2","edgeLabelBackground":"#ffffff","fontFamily":"Georgia, serif","fontSize":"17px"},"flowchart":{"curve":"basis","nodeSpacing":60,"rankSpacing":70,"padding":20}}}%%';
 
 /** Bỏ dòng init directive trước khi lint */
 function stripInit(code: string): string {
