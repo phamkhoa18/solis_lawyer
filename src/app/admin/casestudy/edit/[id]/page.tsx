@@ -78,8 +78,8 @@ export default function EditCaseStudyPage() {
           content: { en: data.data.content.en || '', vi: data.data.content.vi || '' },
           slug: data.data.slug || '',
           image: data.data.image || '',
-          category: data.data.category._id || '',
-          user: data.data.user._id || '',
+          category: data.data?.category?._id || '',
+          user: data.data?.user?._id || '',
           status: (data.data as any).isActive ? 'published' : 'draft',
           publishedAt: data.data.publishedAt,
         });

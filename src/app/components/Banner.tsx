@@ -61,8 +61,6 @@ export default function Banner() {
   const normalizedLanguage = language.toLowerCase() as 'en' | 'vi';
 
   // Log normalized language for debugging
-  console.log('Normalized Language:', normalizedLanguage);
-
   const scrollTo = (index: number) => emblaApi?.scrollTo(index);
 
   const fetchBanners = async () => {
@@ -72,7 +70,6 @@ export default function Banner() {
       const res = await fetch('/api/banners');
       const data: ApiResponse<IBanner[]> = await res.json();
       if (data.success && data.data) {
-        console.log('API Response:', data.data);
         setBanners(data.data.filter((banner) => banner.isActive));
       } else {
         setError(data.message || 'Không thể tải banner');

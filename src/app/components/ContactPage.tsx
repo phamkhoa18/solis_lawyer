@@ -231,9 +231,32 @@ export default function Contact() {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    // Gửi thật về server
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          subject: formData.subject,
+          message: formData.message,
+          source: 'contact-page',
+        }),
+      });
+      const json = await res.json();
+      if (!json.success) {
+        setIsSubmitting(false);
+        alert(json.message || 'Gửi thất bại — vui lòng thử lại');
+        return;
+      }
+    } catch {
+      setIsSubmitting(false);
+      alert('Không thể kết nối — vui lòng thử lại');
+      return;
+    }
+
     setIsSubmitting(false);
     setIsSuccess(true);
     

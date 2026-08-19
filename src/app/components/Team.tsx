@@ -58,8 +58,6 @@ export default function Team() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Log normalized language for debugging
-  console.log('Normalized Language:', normalizedLanguage);
-
   // Animation variants for heading section
   const headingVariants: Variants = {
     hidden: { opacity: 0, y: -20 },
@@ -112,7 +110,6 @@ export default function Team() {
       const res = await fetch('/api/members');
       const data: ApiResponse<IMember[]> = await res.json();
       if (data.success && data.data) {
-        console.log('API Response:', data.data);
         setMembers(data.data);
       } else {
         setError(data.message || (normalizedLanguage === 'vi' ? 'Không thể tải thành viên' : 'Unable to load members'));

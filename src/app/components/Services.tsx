@@ -48,8 +48,6 @@ export default function Services() {
   const [error, setError] = useState<string | null>(null);
 
   // Log normalized language for debugging
-  console.log('Normalized Language:', normalizedLanguage);
-
   // Animation variants for the heading
   const headingVariants: Variants = {
     hidden: { opacity: 0, y: -20 },
@@ -89,7 +87,6 @@ export default function Services() {
       const res = await fetch('/api/services');
       const data: ApiResponse<IService[]> = await res.json();
       if (data.success && data.data) {
-        console.log('API Response:', data.data);
         setServices(data.data);
       } else {
         setError(data.message || 'Không thể tải dịch vụ');

@@ -1,8 +1,15 @@
 import { SignJWT, jwtVerify } from 'jose';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-secret-change-this-in-production'
-);
+function getJwtSecret(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('Thiếu JWT_SECRET trong .env.local — từ chối khởi động để tránh giả mạo token');
+  return new TextEncoder().encode(secret);
+}
+let JWT_SECRET_CACHE: Uint8Array | null = null;
+const JWT_SECRET = () => {
+  if (!JWT_SECRET_CACHE) JWT_SECRET_CACHE = getJwtSecret();
+  return JWT_SECRET_CACHE;
+};
 
 const JWT_EXPIRATION = '2d'; // 2 days
 
@@ -21,7 +28,7 @@ export async function signJWT(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(JWT_EXPIRATION)
-    .sign(JWT_SECRET);
+    .sign(JWT_SECRET());
 }
 
 /**
@@ -29,7 +36,7 @@ export async function signJWT(payload: JWTPayload): Promise<string> {
  */
 export async function verifyJWT(token: string): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, JWT_SECRET());
     return payload as unknown as JWTPayload;
   } catch {
     return null;

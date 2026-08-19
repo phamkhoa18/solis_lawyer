@@ -28,7 +28,6 @@ export function buildArticleFooter(lang: 'vi' | 'en', source?: FooterSource): st
     : 'Solis Lawyers brings deep expertise in criminal and family law across Australia. Get in touch about your situation — everything you share stays confidential.';
   const emailBtn = `✉ contact@solislaw.com.au`;
   const webBtn = isVi ? '🌐 solislaw.com.au' : '🌐 solislaw.com.au';
-  const contactLabel = isVi ? 'Liên hệ ngay' : 'Contact us';
 
   const disLabel = isVi ? 'Thông tin chung:' : 'General information:';
   const disBody = isVi

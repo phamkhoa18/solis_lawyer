@@ -36,8 +36,6 @@ export default function Header() {
       
       if(json.success) {
         setMenus(json.data); // cập nhật state      
-        console.log(json.data);
-        
       }
 
     } catch (err) {

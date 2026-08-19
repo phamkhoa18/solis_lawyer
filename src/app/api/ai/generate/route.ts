@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server';
 import { fptChat, fptJson, FPT_FAST_MODEL, FPT_WRITER_MODELS, FptMessage } from '@/lib/fpt';
 import { extractContent } from '@/lib/contentExtract';
-import { repairMermaidInHtml } from '@/lib/mermaidLint';
 import { computeQuality, stripHtml } from '@/lib/readability';
 import type { QualityReport } from '@/lib/readability';
 import { fptEmbed, cosineSimilarity } from '@/lib/fpt';
 import { buildArticleFooter, stripLegacyFooter } from '@/lib/articleFooter';
 import { normalizeArticleHtml } from '@/lib/htmlNormalize';
+import { sanitizeArticleHtml } from '@/lib/sanitize';
 import connectDB from '@/lib/dbConnect';
 import CaseStudy from '@/models/Casestudy';
 
@@ -62,7 +62,7 @@ WRITING CRAFT (magazine quality):
 - Vary rhythm: mix one long explanatory sentence with two short punchy ones.
 - Close the article with ONE memorable, quotable sentence summarising the human stakes — no clichés.
 
-OUTPUT: clean HTML fragments only (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). No <h1>, no <html>/<body>, no markdown, no code fences. Never copy sentences from the provided source material — write original analysis.`;
+OUTPUT: clean HTML fragments only (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a>). No <h1>, no <html>/<body>, no markdown, no code fences. Never copy sentences from the provided source material — write original analysis.`;
 
 const SENSITIVE_EN = `
 
@@ -107,7 +107,7 @@ NGHỆ THUẬT VIẾT (chất lượng tạp chí):
 
 SƠ ĐỒ: tuyệt đối không có sơ đồ, code mermaid hay khối <pre> nào — chỉ văn viết đẹp.
 
-OUTPUT: chỉ HTML (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). Không <h1>, không markdown, không code fence. Không sao chép câu từ bài nguồn — viết phân tích hoàn toàn mới.`;
+OUTPUT: chỉ HTML (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a>). Không <h1>, không markdown, không code fence, không <pre>. Không sao chép câu từ bài nguồn — viết phân tích hoàn toàn mới.`;
 
 const SENSITIVE_VI = `
 
@@ -158,7 +158,6 @@ export async function POST(req: NextRequest) {
           outline: string[];
           audience_note: string;
           sensitive: boolean;
-          needs_diagram: boolean;
         }>({
           model: FPT_FAST_MODEL,
           temperature: 0.2,
@@ -167,7 +166,7 @@ export async function POST(req: NextRequest) {
             {
               role: 'system',
               content:
-                'You plan blog articles for an Australian law firm blog read by the Vietnamese community. Output JSON: {"title_en": string (SEO-friendly, max 70 chars), "angle": string (why this matters to readers, 1-2 sentences), "outline": string[] (4-7 section headings in English, question-style), "audience_note": string (key concerns of Vietnamese-Australian readers on this topic), "sensitive": boolean (true ONLY if the topic involves domestic violence, family violence, abuse or sexual offences), "needs_diagram": boolean}. needs_diagram is true ONLY when the article CORE is a multi-step process, a timeline of deadlines, or a branching decision that text alone cannot convey clearly — when in doubt, false. Most articles do NOT need a diagram.',
+                'You plan blog articles for an Australian law firm blog read by the Vietnamese community. Output JSON: {"title_en": string (SEO-friendly, max 70 chars), "angle": string (why this matters to readers, 1-2 sentences), "outline": string[] (4-7 section headings in English, question-style), "audience_note": string (key concerns of Vietnamese-Australian readers on this topic), "sensitive": boolean (true ONLY if the topic involves domestic violence, family violence, abuse or sexual offences)}.',
             },
             {
               role: 'user',
@@ -238,40 +237,10 @@ export async function POST(req: NextRequest) {
           onChunk: (t) => send({ type: 'vi', text: t }),
         });
 
-        // ── Bước 3.5: lint + tự sửa sơ đồ mermaid (1 lượt; vẫn lỗi thì xoá) ──
-        const repairCall = async (code: string, errors: string[]): Promise<string> => {
-          const fixed = await fptChat({
-            model: FPT_FAST_MODEL,
-            temperature: 0,
-            maxTokens: 2500,
-            messages: [
-              {
-                role: 'system',
-                content:
-                  'You fix broken Mermaid diagram code. Return ONLY the corrected mermaid code — no prose, no markdown fences.',
-              },
-              {
-                role: 'user',
-                content: `Fix this mermaid diagram.\n\nERRORS TO FIX:\n${errors.map((e) => `- ${e}`).join('\n')}\n\nRULES: first line is flowchart TD/TB/LR, timeline or mindmap; ASCII node IDs (A1, B2); every label in double quotes; max 9 nodes.\n\nBROKEN CODE:\n${code}`,
-              },
-            ],
-            signal: req.signal,
-          });
-          return fixed.replace(/```(?:mermaid)?/g, '').trim();
-        };
-
-        const enFix = await repairMermaidInHtml(contentEn, repairCall, (m) => send({ type: 'status', message: m }));
-        contentEn = enFix.html;
-        const viFix = await repairMermaidInHtml(contentVi, repairCall, (m) => send({ type: 'status', message: m }));
-        contentVi = viFix.html;
-        if (enFix.report.some((r) => !r.ok) || viFix.report.some((r) => !r.ok)) {
-          send({ type: 'status', message: '⚠️ Một sơ đồ không sửa được — đã bỏ để tránh lỗi hiển thị.' });
-        }
-
         // ── Bước 3.7: chuẩn hoá HTML (bọc đoạn trần vào <p>) + ghép footer chuẩn ──
         const footerSource = sourceUrl ? { title: sourceTitle, url: sourceUrl } : undefined;
-        contentEn = `${normalizeArticleHtml(stripLegacyFooter(contentEn))}\n${buildArticleFooter('en', footerSource)}`;
-        contentVi = `${normalizeArticleHtml(stripLegacyFooter(contentVi))}\n${buildArticleFooter('vi', footerSource)}`;
+        contentEn = sanitizeArticleHtml(`${normalizeArticleHtml(stripLegacyFooter(contentEn))}\n${buildArticleFooter('en', footerSource)}`);
+        contentVi = sanitizeArticleHtml(`${normalizeArticleHtml(stripLegacyFooter(contentVi))}\n${buildArticleFooter('vi', footerSource)}`);
 
         // ── Bước 4 (model nhanh): meta + slug ──
         send({ type: 'status', message: 'Đang hoàn thiện tiêu đề, mô tả & slug...' });

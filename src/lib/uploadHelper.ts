@@ -7,7 +7,6 @@ const ALLOWED_TYPES = [
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
 ];
 
 // Max file size: 5MB
@@ -22,7 +21,7 @@ export function validateFile(file: File): { valid: boolean; error?: string } {
   }
 
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return { valid: false, error: 'Chỉ hỗ trợ file ảnh (JPG, PNG, GIF, WebP, SVG)' };
+    return { valid: false, error: 'Chỉ hỗ trợ file ảnh (JPG, PNG, GIF, WebP)' };
   }
 
   if (file.size > MAX_FILE_SIZE) {
@@ -61,6 +60,9 @@ export function getPublicUrl(filename: string): string {
  */
 export function getFilenameFromUrl(url: string): string | null {
   if (!url) return null;
-  const match = url.match(/\/uploads\/(.+)$/);
-  return match ? match[1] : null;
+  const match = url.match(/\/uploads\/([^\\/?#]+)$/);
+  if (!match) return null;
+  // chặn path traversal — chỉ nhận tên file phẳng
+  if (match[1].includes('..') || match[1].includes('/') || match[1].includes('\\')) return null;
+  return match[1];
 }

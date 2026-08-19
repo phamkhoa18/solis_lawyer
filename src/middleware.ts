@@ -5,6 +5,7 @@ import { verifyJWT, AUTH_COOKIE_NAME } from '@/lib/auth';
 const publicPaths = [
   '/login',
   '/api/login',
+  '/api/contact',
   // Public frontend pages
   '/',
   '/about',
@@ -26,9 +27,6 @@ const publicApiPaths = [
   '/api/categories',
   '/api/menus',
   '/api/stats',
-  '/api/posts',
-  '/api/products',
-  '/api/type',
 ];
 
 function isPublicApiGET(req: NextRequest, pathname: string): boolean {
@@ -42,12 +40,8 @@ function isPublicApiGET(req: NextRequest, pathname: string): boolean {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Skip static files and Next.js internals
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname.includes('.') // static files
-  ) {
+  // Skip static files and Next.js internals (KHÔNG dùng '.' rộng → tránh bypass /api/x.json)
+  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon')) {
     return NextResponse.next();
   }
 
@@ -61,9 +55,10 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if route needs protection (admin pages + API mutations)
+  // Check if route needs protection (admin pages + API mutations + sensitive GETs)
   const isAdminRoute = pathname.startsWith('/admin');
-  const isProtectedApi = pathname.startsWith(protectedApiPrefix) && req.method !== 'GET';
+  const sensitiveGetApis = ['/api/users'];
+  const isProtectedApi = (pathname.startsWith(protectedApiPrefix) && req.method !== 'GET') || (req.method === 'GET' && sensitiveGetApis.some((p) => pathname.startsWith(p)));
   const isUploadApi = pathname.startsWith('/api/upload');
 
   if (isAdminRoute || isProtectedApi || isUploadApi) {
@@ -97,13 +92,13 @@ export async function middleware(req: NextRequest) {
       );
     }
 
-    // Attach user info to headers for API routes
-    const response = NextResponse.next();
-    response.headers.set('x-user-id', payload.userId);
-    response.headers.set('x-user-email', payload.email);
-    response.headers.set('x-user-name', payload.name);
-    response.headers.set('x-user-role', payload.role);
-    return response;
+    // Forward user info to route handlers (request headers, không lộ ra response)
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set('x-user-id', payload.userId);
+    requestHeaders.set('x-user-email', payload.email);
+    requestHeaders.set('x-user-name', payload.name);
+    requestHeaders.set('x-user-role', payload.role);
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   return NextResponse.next();

@@ -52,8 +52,6 @@ export default function Testimonial() {
   const [error, setError] = useState<string | null>(null);
 
   // Log normalized language for debugging
-  console.log('Normalized Language:', normalizedLanguage);
-
   const scrollTo = useCallback(
     (index: number) => {
       if (emblaApi) emblaApi.scrollTo(index);
@@ -69,7 +67,6 @@ export default function Testimonial() {
       const res = await fetch('/api/testimonials');
       const data: ApiResponse<ITestimonial[]> = await res.json();
       if (data.success && data.data) {
-        console.log('API Response:', data.data);
         setTestimonials(data.data.filter((t) => t.isActive)); // Only active testimonials
       } else {
         setError(data.message || (normalizedLanguage === 'vi' ? 'Không thể tải lời chứng thực' : 'Unable to load testimonials'));

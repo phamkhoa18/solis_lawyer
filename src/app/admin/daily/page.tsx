@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import MermaidRenderer from '@/components/MermaidRenderer';
 import { toast } from 'react-hot-toast';
@@ -73,22 +73,27 @@ export default function DailyPostsPage() {
   });
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const loadingRef = useRef(false);
+  const load = useCallback(async (silent = false) => {
+    if (loadingRef.current) return; // không chồng chéo
+    loadingRef.current = true;
+    if (!silent) setLoading(true);
     try {
       const res = await fetch('/api/ai/daily/posts');
       const d = await res.json();
       if (d.success) setPosts(d.data);
+      else if (!silent) toast.error(d.message || 'Lỗi tải danh sách');
     } catch {
-      toast.error('Lỗi tải danh sách');
+      if (!silent) toast.error('Lỗi kết nối');
     } finally {
-      setLoading(false);
+      loadingRef.current = false;
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 30000);
+    const t = setInterval(() => load(true), 30000); // refresh ngầm — không nhấp nháy
     return () => clearInterval(t);
   }, [load]);
 
@@ -112,7 +117,10 @@ export default function DailyPostsPage() {
     }
   };
 
+  const [sending, setSending] = useState(false);
   const sendNow = async () => {
+    if (sending) return;
+    setSending(true);
     try {
       const res = await fetch('/api/ai/daily/run', {
         method: 'POST',
@@ -122,10 +130,12 @@ export default function DailyPostsPage() {
       const d = await res.json();
       if (d.success) {
         toast.success('Đang viết 3 bài nền — vài phút nữa sẽ hiện ở đây + Telegram');
-        setTimeout(load, 45000);
-      }
+        setTimeout(() => load(true), 45000);
+      } else toast.error(d.message || 'Lỗi');
     } catch {
-      toast.error('Lỗi');
+      toast.error('Lỗi kết nối');
+    } finally {
+      setTimeout(() => setSending(false), 10000); // khoá 10s chống double-click
     }
   };
 
@@ -188,10 +198,10 @@ export default function DailyPostsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="h-9 text-xs" onClick={load} disabled={loading}>
+          <Button variant="outline" size="sm" className="h-9 text-xs" onClick={() => load()} disabled={loading}>
             {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Làm mới
           </Button>
-          <Button size="sm" className="h-9 text-xs bg-[#9b6f45] hover:bg-[#85603a] rounded-xl" onClick={sendNow}>
+          <Button size="sm" className="h-9 text-xs bg-[#9b6f45] hover:bg-[#85603a] rounded-xl" onClick={sendNow} disabled={sending || loading}>
             <Sparkles className="w-3.5 h-3.5" /> Viết 3 bài ngay
           </Button>
         </div>

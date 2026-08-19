@@ -240,11 +240,15 @@ export default function AIWriterPage() {
   const [coverLoading, setCoverLoading] = useState(false);
   const [coverVariant, setCoverVariant] = useState(0);
   const [autoCover, setAutoCover] = useState(true);
+  const autoCoverRef = useRef(autoCover);
+  autoCoverRef.current = autoCover;
   const [coverExtras, setCoverExtras] = useState<{ ogUrl: string; feedUrl: string } | null>(null);
   const [usage, setUsage] = useState<{ month: { costUsd: number; calls: number }; allTime: { costUsd: number } } | null>(null);
   const [batchText, setBatchText] = useState('');
   const [batchItems, setBatchItems] = useState<{ topic: string; status: 'pending' | 'running' | 'done' | 'error'; note?: string; slug?: string }[]>([]);
   const [batchRunning, setBatchRunning] = useState(false);
+  const batchItemsRef = useRef(batchItems);
+  batchItemsRef.current = batchItems;
 
   useEffect(() => {
     (async () => {
@@ -446,7 +450,10 @@ export default function AIWriterPage() {
       }
     }
     setBatchRunning(false);
-    toast.success('Hoàn tất cả loạt! Các bài nằm trong Case Studies (trạng thái nháp).');
+    const okCount = batchItemsRef.current.filter((b) => b.status === 'done').length;
+    const errCount = batchItemsRef.current.filter((b) => b.status === 'error').length;
+    if (errCount === 0) toast.success(`Hoàn tất ${okCount}/${okCount} bài — đã lưu nháp trong Case Studies!`);
+    else toast.error(`Xong ${okCount} bài, LỖI ${errCount} bài — xem ghi chú từng dòng`);
   };
 
   const generate = async () => {
@@ -494,7 +501,7 @@ export default function AIWriterPage() {
         const ok = await runCoverGeneration(data);
         setStatus(ok ? 'Hoàn tất! Bài + ảnh bìa đã sẵn sàng — kiểm tra và lưu bên dưới.' : 'Hoàn tất bài viết (ảnh bìa lỗi — bấm tạo lại).');
       } else {
-        setStatus('Hoàn tất! Kiểm tra và lưu bài below.');
+        setStatus('Hoàn tất! Kiểm tra và lưu bài bên dưới.');
       }
     } catch (e) {
       if ((e as Error).name !== 'AbortError') {
@@ -636,7 +643,9 @@ export default function AIWriterPage() {
     }
   };
 
-  const previewHtml = previewTab === 'vi' ? viHtml : enHtml;
+  // preview: nếu đã có result (sửa tay/polish) luôn dùng bản mới nhất; đang stream thì dùng buffer
+  const streamingHtml = previewTab === 'vi' ? viHtml : enHtml;
+  const previewHtml = result ? (previewTab === 'vi' ? result.contentVi : result.contentEn) : streamingHtml;
   const editingContent = previewTab === 'vi' ? result?.contentVi : result?.contentEn;
 
   return (

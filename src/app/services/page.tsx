@@ -8,6 +8,8 @@ import connectDB from '@/lib/dbConnect';
 import Service from '@/models/Service';
 import { IService } from '@/lib/types/iservice';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Our Services",
   description:

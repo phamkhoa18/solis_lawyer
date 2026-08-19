@@ -12,8 +12,10 @@ export const maxDuration = 800;
 export async function POST(req: NextRequest) {
   try {
     const body = (await req.json().catch(() => ({}))) as { slots?: SlotPlan[]; force?: boolean };
+    const valid: SlotPlan[] = ['criminal', 'family', 'academic'];
+    const slots = (body.slots || []).filter((s): s is SlotPlan => valid.includes(s));
     // chạy nền — không giữ client chờ (pipeline có thể mất vài phút)
-    void runDailyPipeline({ slots: body.slots, force: body.force }).catch((e) =>
+    void runDailyPipeline({ slots: slots.length ? slots : undefined, force: body.force }).catch((e) =>
       console.error('daily/run nền lỗi:', e instanceof Error ? e.message : e)
     );
     return NextResponse.json({

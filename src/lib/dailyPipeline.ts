@@ -91,7 +91,8 @@ const FALLBACK_TOPICS: Record<SlotPlan, string[]> = {
 let serviceCookieCache: { cookie: string; exp: number } | null = null;
 async function serviceCookie(): Promise<string> {
   if (serviceCookieCache && serviceCookieCache.exp > Date.now() + 3600_000) return serviceCookieCache.cookie;
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'fallback-secret-change-this-in-production');
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET || '');
+  if (!process.env.JWT_SECRET) throw new Error('Thiếu JWT_SECRET');
   const token = await new SignJWT({ userId: 'daily-pipeline', email: 'bot@solis', name: 'Daily Bot', role: 'admin' })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -144,16 +145,17 @@ export async function runGenerate(body: Record<string, unknown>): Promise<GenRes
     for (const part of parts) {
       const line = part.trim();
       if (!line.startsWith('data:')) continue;
+      let evt: { type?: string; data?: GenResult; message?: string };
       try {
-        const evt = JSON.parse(line.slice(5).trim());
-        if (evt.type === 'done') {
-          done = evt.data as GenResult;
-          break outer;
-        }
-        if (evt.type === 'error') throw new Error(evt.message);
+        evt = JSON.parse(line.slice(5).trim());
       } catch {
-        /* bỏ qua */
+        continue; // chunk lỗi format — bỏ qua
       }
+      if (evt.type === 'done') {
+        done = evt.data as GenResult;
+        break outer;
+      }
+      if (evt.type === 'error') throw new Error(evt.message);
     }
   }
   if (!done) throw new Error('generate không trả kết quả');
@@ -177,10 +179,15 @@ async function pickTopic(plan: SlotPlan): Promise<{ topic: string; sourceUrl?: s
     const readable = candidates.filter(
       (c) => !/video|watch live|photos|photo|\bopinion\b/i.test(c.title) && (c.snippet || '').length > 60
     );
-    const match = readable.find((c) => slot.keywords.test(`${c.title} ${c.snippet || ''}`));
-    if (match && match.title.length > 25) {
-      await SourceItem.updateOne({ _id: match._id }, { $set: { status: 'dismissed' } }); // đánh dấu đã dùng
-      return { topic: match.title, sourceUrl: match.link, sourceTitle: match.title };
+    // atomic: nếu 2 tiến trình cùng quét, chỉ 1 bên nhận được bài
+    for (const c of readable) {
+      if (!slot.keywords.test(`${c.title} ${c.snippet || ''}`) || c.title.length <= 25) continue;
+      const claimed = await SourceItem.findOneAndUpdate(
+        { _id: c._id, status: 'new' },
+        { $set: { status: 'dismissed' } },
+        { new: true }
+      );
+      if (claimed) return { topic: claimed.title, sourceUrl: claimed.link, sourceTitle: claimed.title };
     }
   } catch {
     /* fallback */
@@ -312,9 +319,14 @@ export async function publishPost(post: IBotPost): Promise<string> {
 }
 
 // ── chạy pipeline một slot ──
+function vnDateKey(d = new Date()): string {
+  // ngày theo giờ Việt Nam (UTC+7) — tránh lệch ngày với cron 7h VN
+  return new Date(d.getTime() + 7 * 3600_000).toISOString().slice(0, 10);
+}
+
 async function runSlot(plan: SlotPlan, force: boolean): Promise<{ status: 'sent' | 'queued' | 'skipped' | 'error'; detail?: string }> {
   await connectDB();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = vnDateKey();
   const slot = SLOTS[plan];
 
   if (!force) {

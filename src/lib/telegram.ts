@@ -43,16 +43,6 @@ export async function sendMessage(chatId: string, html: string, buttons?: TgButt
   });
 }
 
-export async function sendPhoto(chatId: string, photoUrl: string, caption: string, buttons?: TgButton[][]) {
-  return tgCall<{ message_id: number }>('sendPhoto', {
-    chat_id: chatId,
-    photo: photoUrl,
-    caption: caption.slice(0, 1000),
-    parse_mode: 'HTML',
-    ...(buttons ? { reply_markup: { inline_keyboard: buttons } } : {}),
-  });
-}
-
 /**
  * Gửi ảnh bằng upload multipart (buffer) — BẮT BUỘC với localhost:
  * Telegram không thể tải ảnh qua URL localhost/192.168.x, chỉ nhận upload thẳng.
@@ -140,7 +130,7 @@ export async function getUpdates(offset: number): Promise<{ updates: TgUpdate[];
   }
 }
 
-/** Escape HTML cho Telegram */
+/** Escape HTML cho Telegram (kể cả dấu nháy — chống vỡ attribute href) */
 export function esc(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

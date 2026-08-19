@@ -78,13 +78,28 @@ const GetInTouch: React.FC<GetInTouchItem> = ({
         return isValid;
       };
     
-      const handleSubmit = (e: React.FormEvent) => {
+      const [sending, setSending] = useState(false);
+      const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (validateForm()) {
-          // Handle form submission (e.g., API call)
-          console.log('Form submitted:', formData);
-          setIsPopupOpen(false);
-          setFormData({ name: '', email: '', phone: '', message: '' });
+        if (!validateForm() || sending) return;
+        setSending(true);
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...formData, source: 'get-in-touch' }),
+          });
+          const json = await res.json();
+          if (json.success) {
+            setIsPopupOpen(false);
+            setFormData({ name: '', email: '', phone: '', message: '' });
+          } else {
+            alert(json.message || 'Gửi thất bại');
+          }
+        } catch {
+          alert('Không thể kết nối — thử lại sau');
+        } finally {
+          setSending(false);
         }
       };
 

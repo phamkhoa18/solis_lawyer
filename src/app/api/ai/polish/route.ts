@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fptChat, FPT_FAST_MODEL } from '@/lib/fpt';
 import { computeQuality, lintEnglishProse } from '@/lib/readability';
-import { repairMermaidInHtml } from '@/lib/mermaidLint';
 import Typograf from 'typograf';
+import { sanitizeArticleHtml } from '@/lib/sanitize';
 
 const typograf = new Typograf({ locale: ['en-US'] });
 
@@ -14,7 +14,6 @@ Rewrite the draft article ONLY for clarity and warmth — target Grade 8.
 
 HARD RULES (never break):
 - Keep every legal fact, statute name, case citation, number, date and link EXACTLY as given.
-- Copy every <pre class="mermaid">...</pre> block VERBATIM — change nothing inside them.
 - Copy the final <div class="solis-footer">...</div> block VERBATIM — change nothing inside it.
 - Keep the overall HTML structure: same <h2> sections (headings may be lightly rephrased for clarity), same tables, same safety blockquote at the top if present.
 - Output ONLY the rewritten HTML. No commentary.
@@ -29,7 +28,6 @@ Viết lại bài THÔI — chỉ sửa cho rõ ràng, ấm áp, dễ như báo 
 
 QUY TẮC BẮT BUỘC (không được phá):
 - Giữ nguyên MỌI thông tin pháp lý: tên luật, case, số liệu, ngày tháng, link — đúng y hệt.
-- Chép NGUYÊN VĂN mọi khối <pre class="mermaid">...</pre> — không đổi gì bên trong.
 - Chép NGUYÊN VĂN khối <div class="solis-footer">...</div> cuối bài — không đổi gì bên trong.
 - Giữ cấu trúc HTML: đủ các mục <h2> như bản gốc (chỉ được chỉnh nhẹ tiêu đề cho rõ), giữ bảng, giữ hộp an toàn đầu bài nếu có.
 - Chỉ OUTPUT HTML đã sửa. Không giải thích.
@@ -76,18 +74,6 @@ export async function POST(req: NextRequest) {
       return polished.replace(/^```(?:html)?\s*/i, '').replace(/```\s*$/i, '').trim();
     };
 
-    const repairCall = async (code: string, errors: string[]): Promise<string> => {
-      const fixed = await fptChat({
-        model: FPT_FAST_MODEL,
-        temperature: 0,
-        maxTokens: 2500,
-        messages: [
-          { role: 'system', content: 'You fix broken Mermaid diagram code. Return ONLY the corrected mermaid code.' },
-          { role: 'user', content: `Fix:\n${errors.map((e) => '- ' + e).join('\n')}\n\nCODE:\n${code}` },
-        ],
-      });
-      return fixed.replace(/```(?:mermaid)?/g, '').trim();
-    };
 
     let contentEn = await polishOne(EDITOR_EN, body.contentEn, 'EN');
     let contentVi = await polishOne(EDITOR_VI, body.contentVi, 'VI');
@@ -99,10 +85,9 @@ export async function POST(req: NextRequest) {
       /* giữ nguyên nếu lỗi */
     }
 
-    // Editor có thể làm hỏng mermaid — lint lại
-    contentEn = (await repairMermaidInHtml(contentEn, repairCall)).html;
-    contentVi = (await repairMermaidInHtml(contentVi, repairCall)).html;
 
+    contentEn = sanitizeArticleHtml(contentEn);
+    contentVi = sanitizeArticleHtml(contentVi);
     const quality = computeQuality(contentEn, contentVi);
     return NextResponse.json({ success: true, data: { contentEn, contentVi, quality } });
   } catch (e) {

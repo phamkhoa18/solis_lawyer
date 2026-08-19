@@ -16,8 +16,16 @@ export async function GET(
       return new NextResponse('File not found', { status: 404 });
     }
 
+    // chống path traversal: chỉ nhận tên file phẳng, không .. / / / \
     const filename = filePathArray.join('/');
-    const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+    if (filename.includes('..') || filename.split('/').some((seg) => !/^[A-Za-z0-9._ -]+$/.test(seg))) {
+      return new NextResponse('File not found', { status: 404 });
+    }
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+    const filePath = path.join(uploadDir, filename);
+    if (!filePath.startsWith(uploadDir + path.sep)) {
+      return new NextResponse('File not found', { status: 404 });
+    }
 
     if (!fs.existsSync(filePath)) {
       return new NextResponse('File not found', { status: 404 });

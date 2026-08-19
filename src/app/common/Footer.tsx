@@ -162,7 +162,7 @@ export default function Footer() {
                 <ChevronRight className='text-[#d5aa6d]' size={18} strokeWidth={1.5} />
                 <span>{currentContent.menuItems.services}</span>
               </Link>
-              <a href="/team" className='flex gap-2 items-center hover:text-[#d5aa6d] transition-colors duration-300'>
+              <a href="/about" className='flex gap-2 items-center hover:text-[#d5aa6d] transition-colors duration-300'>
                 <ChevronRight className='text-[#d5aa6d]' size={18} strokeWidth={1.5} />
                 <span>{currentContent.menuItems.team}</span>
               </a>

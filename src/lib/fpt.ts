@@ -84,7 +84,8 @@ async function chatOnce(opts: FptChatOptions): Promise<string | Error> {
         max_tokens: opts.maxTokens ?? 4000,
         stream,
       }),
-      signal: opts.signal,
+      // timeout mặc định 2 phút (kết hợp với signal của caller nếu có)
+      signal: opts.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(120000)]) : AbortSignal.timeout(120000),
     });
 
     if (!res.ok) {
@@ -95,14 +96,15 @@ async function chatOnce(opts: FptChatOptions): Promise<string | Error> {
     if (!stream) {
       const json = await res.json();
       const content = json?.choices?.[0]?.message?.content;
+      if (!content || !String(content).trim()) {
+        return new Error('FPT API trả content rỗng (thử tăng max_tokens — model reasoning tốn token suy nghĩ)');
+      }
+      // chỉ tính usage khi call thành công (tránh đếm double khi retry)
       logUsage({
         model: opts.model,
         promptTokens: json?.usage?.prompt_tokens,
         completionTokens: json?.usage?.completion_tokens,
       });
-      if (!content || !String(content).trim()) {
-        return new Error('FPT API trả content rỗng (thử tăng max_tokens — model reasoning tốn token suy nghĩ)');
-      }
       return String(content);
     }
 

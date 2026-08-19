@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/dbConnect';
 import User from '@/models/User';
+import { hashPassword } from '@/lib/password';
+import { verifyJWT, AUTH_COOKIE_NAME } from '@/lib/auth';
+
+/** Chỉ admin (theo JWT cookie) được mutate users */
+async function requireAdmin(req: NextRequest): Promise<boolean> {
+  const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+  if (!token) return false;
+  const payload = await verifyJWT(token);
+  return payload?.role === 'admin';
+}
 
 // GET: Lấy danh sách user
 export async function GET() {
@@ -18,6 +28,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
+    if (!(await requireAdmin(req))) return NextResponse.json({ success: false, message: 'Chỉ admin' }, { status: 403 });
     const body = await req.json();
     const { email, password, name, role } = body;
 
@@ -30,7 +41,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, message: 'Email đã tồn tại' }, { status: 400 });
     }
 
-    const newUser = new User({ email, password, name, role: role || 'admin' });
+    const hashed = await hashPassword(password);
+    const newUser = new User({ email, password: hashed, name, role: role || 'admin' });
     await newUser.save();
 
     const userResponse = {
@@ -49,6 +61,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     await connectDB();
+    if (!(await requireAdmin(req))) return NextResponse.json({ success: false, message: 'Chỉ admin' }, { status: 403 });
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ success: false, message: 'Thiếu ID' }, { status: 400 });
@@ -60,7 +73,7 @@ export async function PUT(req: NextRequest) {
     if (body.email) updateData.email = body.email;
     if (body.role) updateData.role = body.role;
     if (typeof body.isActive === 'boolean') updateData.isActive = body.isActive;
-    if (body.password && body.password.trim()) updateData.password = body.password;
+    if (body.password && body.password.trim()) updateData.password = await hashPassword(body.password);
 
     if (body.email) {
       const exist = await User.findOne({ email: body.email, _id: { $ne: id } });
@@ -81,9 +94,20 @@ export async function PUT(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     await connectDB();
+    if (!(await requireAdmin(req))) return NextResponse.json({ success: false, message: 'Chỉ admin' }, { status: 403 });
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id) return NextResponse.json({ success: false, message: 'Thiếu ID' }, { status: 400 });
+
+    // không cho xoá admin đang đăng nhập / admin cuối cùng
+    const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+    const me = token ? await verifyJWT(token) : null;
+    if (me?.userId === id) return NextResponse.json({ success: false, message: 'Không thể tự xoá tài khoản đang đăng nhập' }, { status: 400 });
+    const admins = await User.countDocuments({ role: 'admin' });
+    const target = await User.findById(id).select('role');
+    if (target?.role === 'admin' && admins <= 1) {
+      return NextResponse.json({ success: false, message: 'Phải còn ít nhất 1 admin' }, { status: 400 });
+    }
 
     const deleted = await User.findByIdAndDelete(id);
     if (!deleted) return NextResponse.json({ success: false, message: 'Không tìm thấy user' }, { status: 404 });

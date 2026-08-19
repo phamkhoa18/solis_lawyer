@@ -10,6 +10,8 @@ import CaseStudy from '@/models/Casestudy';
 import Category from '@/models/Category';
 import { ICaseStudy } from '@/lib/types/icasestudy';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "Case Studies",
   description:

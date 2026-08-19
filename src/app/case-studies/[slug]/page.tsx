@@ -145,7 +145,8 @@ function buildJsonLd(caseStudy: any): string[] {
       })
     );
   }
-  return schemas;
+  // chống phá vỡ <script> bằng </script> trong dữ liệu AI
+  return schemas.map((s) => s.replace(/</g, '\\u003c'));
 }
 
 // Generate static params for known case studies

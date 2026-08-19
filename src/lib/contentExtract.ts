@@ -61,8 +61,22 @@ async function extractDirect(url: string): Promise<ExtractedContent | null> {
   }
 }
 
+const PRIVATE_HOST = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.|0\.|\[?::1)/i;
+
+function assertSafeUrl(url: string): void {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    throw new Error('URL không hợp lệ');
+  }
+  if (!/^https?:$/.test(u.protocol)) throw new Error('Chỉ hỗ trợ http/https');
+  if (PRIVATE_HOST.test(u.hostname)) throw new Error('Không cho phép truy cập địa chỉ nội bộ');
+}
+
 export async function extractContent(url: string): Promise<ExtractedContent> {
-  const viaJina = await extractViaJina(url);
+  assertSafeUrl(url);
+  const viaJina = await extractViaJina(encodeURIComponent(url));
   if (viaJina) return viaJina;
   const viaDirect = await extractDirect(url);
   if (viaDirect) return viaDirect;

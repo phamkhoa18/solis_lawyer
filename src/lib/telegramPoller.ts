@@ -8,7 +8,7 @@
 import connectDB from '@/lib/dbConnect';
 import BotPost from '@/models/BotPost';
 import BotSetting from '@/models/BotSetting';
-import { getUpdates, sendMessage, answerCallbackQuery, editMessageText, TgUpdate } from '@/lib/telegram';
+import { getUpdates, sendMessage, answerCallbackQuery, editMessageText, esc, TgUpdate } from '@/lib/telegram';
 import { runDailyPipeline, publishPost, regeneratePost, flushUndeliveredPosts, getAdminChatId, SLOTS } from '@/lib/dailyPipeline';
 
 let started = false;
@@ -51,7 +51,13 @@ async function handleUpdate(update: TgUpdate) {
     // /start — admin đầu tiên đăng ký
     if (text.startsWith('/start')) {
       const existing = await BotSetting.findOne({ key: 'admin' });
+      const envAdmin = process.env.TELEGRAM_ADMIN_USER_ID;
       if (!existing) {
+        if (envAdmin && String(from?.id) !== envAdmin) {
+          await sendMessage(chatId, '⛔️ Bot này dành riêng cho quản trị viên Solis Lawyers.');
+          return;
+        }
+        console.log(`🤖 Admin Telegram đã kích hoạt: ${from?.first_name} (${from?.id})`);
         await BotSetting.create({
           key: 'admin',
           adminChatId: chatId,
@@ -112,7 +118,7 @@ async function handleUpdate(update: TgUpdate) {
       }
       const lines = posts.map((p) => {
         const icons: Record<string, string> = { pending: '🕓 chờ duyệt', approved: '✅ đã đăng', rejected: '🗑 đã huỷ', failed: '❌ lỗi', awaiting_feedback: '✏️ chờ góp ý' };
-        return `${SLOTS[p.plan as 'criminal']?.emoji} ${p.article?.titleVi || p.topic}\n    → ${icons[p.status]}${p.casestudySlug ? ` · <a href="${p.casestudySlug}">/case-studies/${p.casestudySlug}</a>` : ''}`;
+        return `${SLOTS[p.plan as 'criminal']?.emoji} ${esc(p.article?.titleVi || p.topic)}\n    → ${icons[p.status]}${p.casestudySlug ? ` · <a href="${p.casestudySlug}">/case-studies/${p.casestudySlug}</a>` : ''}`;
       });
       await sendMessage(chatId, `<b>Hàng đợi hôm nay</b> (${today}):\n\n${lines.join('\n\n')}`);
       return;
@@ -158,7 +164,7 @@ async function handleUpdate(update: TgUpdate) {
       if (post.tgChatId && post.tgControlMessageId) {
         await editMessageText(post.tgChatId, post.tgControlMessageId, '✅ <b>ĐÃ ĐĂNG</b> — bấm nút bên dưới để xem thành phẩm.');
       }
-      await sendMessage(chatId, `🎉 Bài đã lên web!\n\n<b>${post.article?.titleVi}</b>\n<i>${post.article?.titleEn}</i>`, [
+      await sendMessage(chatId, `🎉 Bài đã lên web!\n\n<b>${esc(post.article?.titleVi || '')}</b>\n<i>${esc(post.article?.titleEn || '')}</i>`, [
         [{ text: '🔗 Xem bài trên website', url: link }],
       ]);
     } catch (e) {

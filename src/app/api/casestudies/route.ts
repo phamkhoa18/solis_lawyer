@@ -8,6 +8,7 @@ import { ApiResponse } from '@/lib/types/api-response';
 import Category from '@/models/Category';
 import User from '@/models/User';
 import CaseStudy from '@/models/Casestudy' ;
+import { verifyJWT, AUTH_COOKIE_NAME } from '@/lib/auth';
 
 // Utility function to validate MongoDB ObjectId
 const isValidObjectId = (id: string | null): id is string => {
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IC
         );
       }
 
-      const caseStudy = await CaseStudy.findById(id).populate('category user');
+      const caseStudy = await CaseStudy.findById(id).populate('category', 'name slug').populate('user', 'name email role');
       if (!caseStudy) {
         return NextResponse.json(
           { success: false, message: 'Nghiên cứu tình huống không tìm thấy', statusCode: 404 },
@@ -54,10 +55,16 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse<IC
       );
     }
 
-    // If ?all=true, return all case studies (admin); otherwise only active ones (public)
-    const showAll = searchParams.get('all') === 'true';
+    // If ?all=true, return all case studies — CHỈ cho admin (verify JWT cookie)
+    const showAllParam = searchParams.get('all') === 'true';
+    let showAll = false;
+    if (showAllParam) {
+      const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+      const payload = token ? await verifyJWT(token) : null;
+      showAll = !!payload;
+    }
     const filter = showAll ? {} : { isActive: true };
-    const caseStudies = await CaseStudy.find(filter).populate('category user').sort({ createdAt: -1 });
+    const caseStudies = await CaseStudy.find(filter).populate('category', 'name slug').populate('user', 'name email role').sort({ createdAt: -1 });
     return NextResponse.json(
       { success: true, data: caseStudies, statusCode: 200 },
       { status: 200 }

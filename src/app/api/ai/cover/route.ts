@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, readdir, unlink } from 'fs/promises';
 import { existsSync } from 'fs';
+import { stat } from 'fs/promises';
 import path from 'path';
 import { generateCoverSet } from '@/lib/coverGen';
 import { generateUniqueFilename, getUploadDir, getPublicUrl } from '@/lib/uploadHelper';
@@ -15,6 +16,26 @@ interface CoverBody {
   categoryLabel?: string;
   variant?: number;
   template?: 1 | 2 | 3;
+}
+
+/** Dọn ảnh AI cover cũ (>7 ngày) — tránh đầy ổ đĩa */
+async function pruneOldCovers(): Promise<void> {
+  try {
+    const dir = getUploadDir();
+    const files = await readdir(dir);
+    const now = Date.now();
+    await Promise.all(
+      files
+        .filter((f) => f.startsWith('ai-cover-'))
+        .map(async (f) => {
+          const p = path.join(dir, f);
+          const { mtimeMs } = await stat(p);
+          if (now - mtimeMs > 7 * 24 * 3600_000) await unlink(p).catch(() => {});
+        })
+    );
+  } catch {
+    /* dọn dẹp không được phép lỗi */
+  }
 }
 
 async function savePng(png: Buffer, name: string): Promise<string> {
@@ -36,6 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     const seed = body.variant ?? Math.floor(Math.random() * 100000);
+    void pruneOldCovers();
     const set = await generateCoverSet({
       topic: body.topic || title,
       title,
