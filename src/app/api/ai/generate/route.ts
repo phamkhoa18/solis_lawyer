@@ -53,7 +53,14 @@ DO NOT write any disclaimer paragraph, "general information" note, or "Source:" 
 
 COMPARISON TABLES: when the article compares two options (for example consent orders vs a binding financial agreement), include one simple comparison table using <table><thead><tbody><tr><th><td> with short cell text.
 
-DIAGRAM (Mermaid): include a diagram ONLY when the brief explicitly asks for one — otherwise write text only.
+DIAGRAM: never include diagrams, mermaid code, or <pre> blocks — the article is beautiful writing only.
+
+WRITING CRAFT (magazine quality):
+- Open each section with the key point in the first sentence — no warm-up paragraphs.
+- Bold the KEY NUMBERS and deadlines readers must remember: "<strong>12 months</strong>", "<strong>within 14 days</strong>".
+- Use a numbered <ol> when explaining steps in order; a bulleted <ul> only for unordered points.
+- Vary rhythm: mix one long explanatory sentence with two short punchy ones.
+- Close the article with ONE memorable, quotable sentence summarising the human stakes — no clichés.
 
 OUTPUT: clean HTML fragments only (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). No <h1>, no <html>/<body>, no markdown, no code fences. Never copy sentences from the provided source material — write original analysis.`;
 
@@ -91,7 +98,14 @@ KHÔNG tự viết disclaimer, câu "Bài viết chỉ mang tính thông tin chu
 
 BẢNG SO SÁNH: khi bài so sánh hai lựa chọn (ví dụ consent orders và thỏa thuận tài chính), thêm một bảng so sánh đơn giản dùng <table><thead><tbody><tr><th><td>, ô ngắn gọn.
 
-SƠ ĐỒ MINH HOẠ (Mermaid): chỉ thêm sơ đồ khi bản tóm tắt bài (brief) yêu cầu rõ ràng — không yêu cầu thì viết thuần chữ.
+NGHỆ THUẬT VIẾT (chất lượng tạp chí):
+- Mỗi mục mở đầu bằng ý chính ngay câu đầu — không đoạn "khởi động" vòng vo.
+- IN ĐẬM con số và thời hạn người đọc phải nhớ: "<strong>12 tháng</strong>", "<strong>trong 14 ngày</strong>".
+- Dùng <ol> đánh số khi giải thích các bước theo trình tự; <ul> chỉ cho gạch ý không theo thứ tự.
+- Nhịp điệu: xen kẽ một câu giải thích dài với hai câu ngắn gọn.
+- Kết bài bằng MỘT câu đáng nhớ, chạm đến hệ quả thật cho con người — không sáo rỗng.
+
+SƠ ĐỒ: tuyệt đối không có sơ đồ, code mermaid hay khối <pre> nào — chỉ văn viết đẹp.
 
 OUTPUT: chỉ HTML (<h2> <h3> <p> <ul> <li> <strong> <em> <blockquote> <table> <thead> <tbody> <tr> <th> <td> <a> <pre class="mermaid">). Không <h1>, không markdown, không code fence. Không sao chép câu từ bài nguồn — viết phân tích hoàn toàn mới.`;
 
@@ -183,9 +197,7 @@ export async function POST(req: NextRequest) {
               body.angle ? `EXTRA REQUIREMENTS FROM EDITOR: ${body.angle}` : '',
               analysis.outline?.length ? `SUGGESTED OUTLINE:\n${analysis.outline.map((s, i) => `${i + 1}. ${s}`).join('\n')}` : '',
               analysis.audience_note ? `AUDIENCE NOTE: ${analysis.audience_note}` : '',
-              analysis.needs_diagram
-                ? `DIAGRAM REQUIRED: include exactly ONE mermaid diagram right after the section it illustrates, as:\n<pre class="mermaid">flowchart TD\n  A1["Step one"] --> B1["Step two"]\n</pre>\nRules: ASCII node IDs (A1, B2); every label in double quotes; max 9 nodes; use flowchart TD (top-down, preferred) or LR; only flowchart/timeline/mindmap types.`
-                : 'NO DIAGRAM: this article does not need a mermaid diagram — write text only, no <pre> blocks.',
+              'NO DIAGRAM: never include any mermaid or <pre> block — beautiful writing only.',
               sourceText ? `SOURCE ARTICLE (for facts only — do NOT copy sentences):\n${sourceText.slice(0, 25000)}` : '',
               `TARGET LENGTH: ${LENGTH_SPEC[length].en}.`,
             ]

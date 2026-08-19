@@ -95,6 +95,9 @@ export default function CaseStudyContent({ caseStudy }: { caseStudy: CaseStudyDe
             [&_th]:bg-[#faf7f2] [&_th]:text-left [&_th]:text-slate-700 [&_th]:font-semibold [&_th]:px-3 [&_th]:py-2.5 [&_th]:border-b-2 [&_th]:border-[#e9e4db]
             [&_td]:px-3 [&_td]:py-2.5 [&_td]:border-b [&_td]:border-slate-100
             [&_.mermaid-diagram]:my-8
+            [&_ol]:list-decimal [&_ol]:pl-6 [&_ol>li]:text-slate-700 [&_ol>li]:mb-1.5 [&_ol>li::marker]:font-semibold [&_ol>li::marker]:text-[#9b6f45]
+            [&_ul]:list-disc [&_ul]:pl-6 [&_ul>li]:mb-1.5 [&_ul>li::marker]:text-[#9b6f45]
+            [&_strong]:text-slate-900 [&_strong]:font-semibold
             [&_a]:text-[#9b6f45] [&_a]:no-underline [&_a]:decoration-[#d5aa6d] [&_a]:underline-offset-4 [&_a:hover]:decoration-2"
           html={content}
         />
