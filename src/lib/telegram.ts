@@ -53,6 +53,41 @@ export async function sendPhoto(chatId: string, photoUrl: string, caption: strin
   });
 }
 
+/**
+ * Gửi ảnh bằng upload multipart (buffer) — BẮT BUỘC với localhost:
+ * Telegram không thể tải ảnh qua URL localhost/192.168.x, chỉ nhận upload thẳng.
+ */
+export async function sendPhotoBuffer(
+  chatId: string,
+  image: Buffer,
+  caption: string,
+  buttons?: TgButton[][]
+): Promise<{ message_id: number } | null> {
+  if (!TOKEN) return null;
+  try {
+    const form = new FormData();
+    form.append('chat_id', chatId);
+    form.append('caption', caption.slice(0, 1000));
+    form.append('parse_mode', 'HTML');
+    if (buttons) form.append('reply_markup', JSON.stringify({ inline_keyboard: buttons }));
+    form.append('photo', new Blob([new Uint8Array(image)], { type: 'image/png' }), 'cover.png');
+    const res = await fetch(API('sendPhoto'), {
+      method: 'POST',
+      body: form,
+      signal: AbortSignal.timeout(60000),
+    });
+    const json = await res.json();
+    if (!json.ok) {
+      console.error('Telegram sendPhoto(multipart) lỗi:', JSON.stringify(json).slice(0, 200));
+      return null;
+    }
+    return json.result as { message_id: number };
+  } catch (e) {
+    console.error('Telegram sendPhoto(multipart) lỗi mạng:', e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
 export async function editMessageText(chatId: string, messageId: number, html: string, buttons?: TgButton[][]) {
   return tgCall('editMessageText', {
     chat_id: chatId,

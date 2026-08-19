@@ -11,7 +11,7 @@ import connectDB from '@/lib/dbConnect';
 import BotPost, { IBotPost } from '@/models/BotPost';
 import BotSetting from '@/models/BotSetting';
 import SourceItem from '@/models/SourceItem';
-import { sendMessage, sendPhoto, TgButton, esc } from '@/lib/telegram';
+import { sendMessage, sendPhotoBuffer, TgButton, esc } from '@/lib/telegram';
 import { articleHtmlToTelegram } from '@/lib/htmlToTelegram';
 
 const BASE = process.env.SITE_URL || 'http://localhost:3000';
@@ -211,7 +211,7 @@ export async function deliverPostToTelegram(post: IBotPost): Promise<{ chatId: s
         '\n'
       : '');
 
-  // 1) Ảnh bìa + header + nút điều khiển (duyệt bài = duyệt cả ảnh)
+  // 1) Ảnh bìa (upload multipart — Telegram không đọc được URL localhost) + header + nút điều khiển
   const buttons: TgButton[][] = [
     [
       { text: '✅ Duyệt & Đăng ngay', callback_data: `ap:${post._id}` },
@@ -219,15 +219,25 @@ export async function deliverPostToTelegram(post: IBotPost): Promise<{ chatId: s
     ],
     [{ text: '🗑 Huỷ hẳn bài này', callback_data: `sk:${post._id}` }],
   ];
-  const photoMsg = await sendPhoto(chatId, coverUrl, header, buttons);
-  if (!photoMsg) {
-    // ảnh lỗi → gửi text
+  let controlMessageId: number | null = null;
+  try {
+    // server tự fetch ảnh từ chính nó được (localhost OK phía server)
+    const imgRes = await fetch(coverUrl, { signal: AbortSignal.timeout(30000) });
+    if (imgRes.ok) {
+      const buf = Buffer.from(await imgRes.arrayBuffer());
+      const photoMsg = await sendPhotoBuffer(chatId, buf, header, buttons);
+      if (photoMsg) controlMessageId = photoMsg.message_id;
+    }
+  } catch {
+    /* ảnh lỗi → gửi text */
+  }
+  if (controlMessageId === null) {
     const txt = await sendMessage(chatId, header, buttons);
     if (!txt) return null;
-    return { chatId, messageId: txt.message_id };
+    controlMessageId = txt.message_id;
   }
 
-  // 2) Toàn văn VI rồi EN (đánh dấu ngôn ngữ)
+  // 2) Toàn văn VI rồi EN — LUÔN gửi kể cả khi ảnh lỗi
   const viChunks = articleHtmlToTelegram(a.contentVi);
   for (let i = 0; i < viChunks.length; i++) {
     await sendMessage(chatId, `${i === 0 ? '🇻🇳 <b>BẢN TIẾNG VIỆT</b>\n\n' : ''}${viChunks[i]}`);
@@ -236,7 +246,7 @@ export async function deliverPostToTelegram(post: IBotPost): Promise<{ chatId: s
   for (let i = 0; i < enChunks.length; i++) {
     await sendMessage(chatId, `${i === 0 ? '🇬🇧 <b>ENGLISH VERSION</b>\n\n' : ''}${enChunks[i]}`);
   }
-  return { chatId, messageId: photoMsg.message_id };
+  return { chatId, messageId: controlMessageId };
 }
 
 // ── đăng bài sau khi duyệt ──
