@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Native modules — để Next load runtime thay vì bundle (fix Turbopack + resvg/sharp)
+  serverExternalPackages: ['sharp', '@resvg/resvg-js'],
   images: {
     remotePatterns: [
       {

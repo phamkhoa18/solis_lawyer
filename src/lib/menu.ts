@@ -8,6 +8,7 @@ import {
   Users,
   FolderTree,
   ShieldCheck,
+  Sparkles,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -29,6 +30,11 @@ export const adminMenu: AdminMenuGroup[] = [
     title: 'Dashboard',
     href: '/admin/dashboard',
     icon: LayoutDashboard,
+  },
+  {
+    title: 'AI Writer',
+    href: '/admin/ai-writer',
+    icon: Sparkles,
   },
   {
     title: 'Quản lý nội dung',

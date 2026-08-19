@@ -19,6 +19,7 @@ const pathLabels: Record<string, string> = {
   create: 'Tạo mới',
   edit: 'Chỉnh sửa',
   accounts: 'Tài khoản',
+  'ai-writer': 'AI Writer',
 };
 
 export function Breadcrumb() {

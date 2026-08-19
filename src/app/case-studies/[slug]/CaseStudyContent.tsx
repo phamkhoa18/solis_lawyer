@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { motion, Variants } from 'framer-motion';
 import { useLanguage } from '@/app/context/LanguageContext';
 import GetInTouch from '@/app/components/GetInTouch';
+import MermaidRenderer from '@/components/MermaidRenderer';
 
 interface CaseStudyDetailData {
   title: { en: string; vi: string };
@@ -84,7 +85,7 @@ export default function CaseStudyContent({ caseStudy }: { caseStudy: CaseStudyDe
 
       {/* Content */}
       <motion.div variants={sectionVariants} custom={1} initial="hidden" whileInView="visible" viewport={{ once: true }}>
-        <div className="prose prose-gray max-w-none mb-8" dangerouslySetInnerHTML={{ __html: content }} />
+        <MermaidRenderer className="prose prose-gray max-w-none mb-8" html={content} />
       </motion.div>
 
       {/* CTA */}
