@@ -16,11 +16,38 @@ export async function register() {
     const { startTelegramPoller } = await import('@/lib/telegramPoller');
 
     const tz = process.env.CRON_TIMEZONE || 'Asia/Ho_Chi_Minh';
+
+    // Đọc giờ cron từ DB (nếu có), fallback 7:00
+    let cronHour = 7, cronMinute = 0;
+    try {
+      const { default: connectDB } = await import('@/lib/dbConnect');
+      await connectDB();
+      const { default: BotSetting } = await import('@/models/BotSetting');
+      const s = await BotSetting.findOne({ key: 'admin' });
+      if (s) {
+        if (typeof s.cronHour === 'number') cronHour = s.cronHour;
+        if (typeof s.cronMinute === 'number') cronMinute = s.cronMinute;
+      }
+    } catch {
+      // DB chưa sẵn sàng → dùng default
+    }
+
+    const cronExpr = `${cronMinute} ${cronHour} * * *`;
+
     cronMod.default.schedule(
-      '0 7 * * *',
+      cronExpr,
       async () => {
-        console.log('⏰ Cron 7h: chạy daily pipeline');
         try {
+          // Kiểm tra cronEnabled trước khi chạy
+          const { default: connectDB } = await import('@/lib/dbConnect');
+          await connectDB();
+          const { default: BotSetting } = await import('@/models/BotSetting');
+          const s = await BotSetting.findOne({ key: 'admin' });
+          if (s?.cronEnabled === false) {
+            console.log('⏰ Cron: tự động đã TẮT — bỏ qua');
+            return;
+          }
+          console.log('⏰ Cron: chạy daily pipeline');
           const { runDailyPipeline } = await import('@/lib/dailyPipeline');
           const r = await runDailyPipeline();
           console.log('⏰ Daily pipeline xong:', JSON.stringify(r));
@@ -32,7 +59,7 @@ export async function register() {
     );
 
     startTelegramPoller();
-    console.log(`✅ Solis Daily Bot: cron 07:00 (${tz}) + Telegram poller đã chạy`);
+    console.log(`✅ Solis Daily Bot: cron ${String(cronHour).padStart(2, '0')}:${String(cronMinute).padStart(2, '0')} (${tz}) + Telegram poller đã chạy`);
   } catch (e) {
     console.error('❌ Khởi động daily bot lỗi:', e instanceof Error ? e.message : e);
   }

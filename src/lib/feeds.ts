@@ -2,18 +2,18 @@ import Parser from 'rss-parser';
 import * as cheerio from 'cheerio';
 import { AI_SOURCES, FeedItem } from '@/lib/aiSources';
 
-const parser = new Parser({ timeout: 15000 });
+const parser = new Parser({ timeout: 10000 });
 
 /** Mondaq không có RSS chuẩn — trang listing HTML được parse làm feed */
 export async function fetchMondaq(sourceId: string, sourceName: string, url: string): Promise<FeedItem[]> {
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)' },
-    signal: AbortSignal.timeout(20000),
+    signal: AbortSignal.timeout(10000),
   });
   if (!res.ok) return [];
   const $ = cheerio.load(await res.text());
   const FAMILY_TOPICS = /^(family-law|divorce|child-custody|wills-intestacy-estate-planning|adoption|domestic-violence)$/;
-  const LINK_RE = /^\/australia\/([a-z0-9-]+)\/(\d+)\/[a-z0-9%-]+/;
+  const LINK_RE = /^\/australia\/([a-z0-9-]+)\/(\d+)\/([a-z0-9_%-]+)/i;
   const items: FeedItem[] = [];
   const seen = new Set<string>();
   $('a[href]').each((_, el) => {

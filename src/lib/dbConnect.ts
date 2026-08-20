@@ -7,36 +7,34 @@ if (!MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
-const cached: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } = {
-  conn: null,
-  promise: null,
-};
+declare global {
+  var _mongoConn: typeof mongoose | null;
+  var _mongoPromise: Promise<typeof mongoose> | null;
+}
+
+globalThis._mongoConn ??= null;
+globalThis._mongoPromise ??= null;
 
 async function connectDB() {
-    console.log('Run mongodb connect');
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (globalThis._mongoConn) return globalThis._mongoConn;
 
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log('Connected to MongoDB');
-      return mongoose;
-    });
+  if (!globalThis._mongoPromise) {
+    globalThis._mongoPromise = mongoose
+      .connect(MONGODB_URI, { bufferCommands: false })
+      .then((m) => {
+        console.log('✅ Connected to MongoDB');
+        return m;
+      });
   }
 
   try {
-    cached.conn = await cached.promise;
+    globalThis._mongoConn = await globalThis._mongoPromise;
   } catch (e) {
-    cached.promise = null;
+    globalThis._mongoPromise = null;
     throw e;
   }
 
-  return cached.conn;
+  return globalThis._mongoConn;
 }
 
 export default connectDB;

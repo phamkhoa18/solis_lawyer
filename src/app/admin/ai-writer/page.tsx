@@ -5,6 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import {
   Select,
   SelectContent,
@@ -33,8 +38,13 @@ import {
   ListPlus,
   CircleCheck,
   CircleX,
+  ImagePlus,
+  Upload,
+  ChevronDown,
+  Square,
 } from 'lucide-react';
 
+/* ───────────────────────── types ───────────────────────── */
 interface FeedItem {
   sourceId: string;
   sourceName: string;
@@ -67,167 +77,148 @@ interface GenResult {
   source: { title: string; url: string };
 }
 
+/* ───────────────────────── constants ───────────────────── */
 const MODELS = [
-  { id: 'DeepSeek-V4-Flash', label: 'DeepSeek V4 Flash', note: 'rẻ · nhanh · khuyên dùng' },
-  { id: 'GLM-5.2', label: 'GLM 5.2', note: 'chất lượng nhất · chậm hơn' },
-  { id: 'gemma-4-31B-it', label: 'Gemma 4 31B', note: 'rẻ · đa ngôn ngữ' },
+  { id: 'DeepSeek-V4-Flash', label: 'DeepSeek V4 Flash', note: 'Rẻ · Nhanh' },
+  { id: 'GLM-5.2', label: 'GLM 5.2', note: 'Chất lượng cao' },
+  { id: 'gemma-4-31B-it', label: 'Gemma 4 31B', note: 'Đa ngôn ngữ' },
 ];
 
-// 20 đề bài từ deep research 19/08/2026 (cải cách luật Úc 2024-2026 + nhu cầu cộng đồng Việt)
 const SUGGESTED_TOPICS = [
-  'Ly hôn Úc: "chia đôi 50/50" là hiểu lầm — thay đổi quyền nuôi con từ 6/5/2024 ảnh hưởng đơn của bạn thế nào',
-  'Cha mẹ Việt cần biết 6 yếu tố "lợi ích tốt nhất của con" sau cải cách Luật Gia đình 2023 — an toàn của con lên hàng đầu',
-  'Vợ/chồng giấu tài sản khi ly hôn: nghĩa vụ khai báo tài sản mới trong Luật Gia đình từ 10/6/2025',
+  'Ly hôn Úc: "chia đôi 50/50" là hiểu lầm — thay đổi quyền nuôi con từ 6/5/2024',
+  'Cha mẹ Việt cần biết 6 yếu tố "lợi ích tốt nhất của con" sau cải cách Luật Gia đình 2023',
+  'Vợ/chồng giấu tài sản khi ly hôn: nghĩa vụ khai báo tài sản mới từ 10/6/2025',
   'Bạo hành gia đình giờ thay đổi khoản chia tài sản: Kennon adjustment được luật hoá từ 6/2025',
   'Ai được giữ thú cưng khi chia tay? Thú cưng là tài sản theo sửa đổi Luật Gia đình 2024',
-  'Thỏa thuận tài chính trước hôn nhân (BFA) có bị hủy không? Bài học từ phán quyết Thorne v Kennedy',
+  'Thỏa thuận tài chính trước hôn nhân (BFA) có bị hủy không? Bài học từ Thorne v Kennedy',
   'Luật sư bảo vệ quyền lợi trẻ em (ICL) giờ phải gặp trực tiếp con bạn — điều đó nghĩa là gì',
-  'Ly hôn khi đang giữ visa partner: cạm bẫy của luật gia đình và luật di trú người Việt cần tránh',
-  'Coercive control — kiểm soát tâm lý trở thành tội danh tại NSW từ 7/2024: những hành vi nào có thể đi tù',
-  'Bị cảnh sát chặn xe tại Úc: quyền của bạn — hướng dẫn cho người Việt (phiên bản tiếng Việt)',
-  'Đồng thuận tình dục (affirmative consent) và stealthing: luật NSW thay đổi từ 2022, người Việt cần biết',
+  'Ly hôn khi đang giữ visa partner: cạm bẫy luật gia đình và luật di trú người Việt cần tránh',
+  'Coercive control — kiểm soát tâm lý trở thành tội danh tại NSW từ 7/2024',
+  'Bị cảnh sát chặn xe tại Úc: quyền của bạn — hướng dẫn cho người Việt',
+  'Đồng thuận tình dục (affirmative consent) và stealthing: luật NSW từ 2022',
   'Vòng đeo GPS: theo dõi điện tử cho bị cáo bạo hành gia đình tại NSW và QLD',
-  'Bail (bảo lãnh) tại NSW sau cải cách 2024-2025: show cause, unacceptable risk và đợt rà soát 2026',
-  'ACT phi hình sự hoá ma túy số lượng nhỏ từ 10/2023 — nếu bị bắt thì chuyện gì thực sự xảy ra',
-  'Trẻ 10 tuổi đã có thể bị truy tố hình sự tại Úc — tranh cãi nâng tuổi chịu trách nhiệm hình sự',
+  'Bail (bảo lãnh) tại NSW sau cải cách 2024-2025: show cause, unacceptable risk',
+  'ACT phi hình sự hoá ma túy số lượng nhỏ từ 10/2023 — nếu bị bắt thì sao',
+  'Trẻ 10 tuổi đã có thể bị truy tố hình sự tại Úc — tranh cãi nâng tuổi TNHS',
   'QLD "Adult Crime, Adult Time": khi trẻ vị thành niên chịu mức án như người lớn',
-  'Hơn 340.000 người phạm tội trong một năm: số liệu tội phạm ABS 2024-25 nói gì',
-  'Một vụ trục xuất gian lận liên bang diễn ra thế nào: hành trình vụ án qua các giai đoạn',
-  'Cơ hội được ân xá sớm không dùng để giảm án: phán quyết của Tòa án Cấp cao về s 19ALB',
-  'Ủy ban điều tra bạo hành gia đình bang Nam Úc với 136 khuyến nghị: điều gì ảnh hưởng đến NSW',
+  'Hơn 340.000 người phạm tội trong một năm: số liệu tội phạm ABS 2024-25',
+  'Một vụ trục xuất gian lận liên bang diễn ra thế nào: hành trình vụ án',
+  'Cơ hội được ân xá sớm không dùng để giảm án: phán quyết Tòa Cấp cao về s 19ALB',
+  'Ủy ban điều tra bạo hành gia đình bang Nam Úc với 136 khuyến nghị',
 ];
 
-function QualityPanel({
-  quality: q,
-  polishing,
-  onPolish,
-}: {
-  quality: QualityReport;
-  polishing: boolean;
-  onPolish: () => void;
-}) {
+/* ────────── Score bar ────────── */
+function ScoreBar({ value, max = 100, label, good }: { value: number; max?: number; label: string; good: boolean }) {
+  const pct = Math.min((value / max) * 100, 100);
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-slate-900">📊 Chất lượng bài viết</h3>
-        <Button variant="outline" size="sm" className="h-7 text-xs" onClick={onPolish} disabled={polishing}>
-          {polishing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />} Sửa giọng tự động
-        </Button>
+    <div className="space-y-1">
+      <div className="flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">{label}</span>
+        <span className={`font-semibold tabular-nums ${good ? 'text-emerald-600' : 'text-amber-600'}`}>
+          {value}{max !== 100 ? '' : '/100'}
+        </span>
       </div>
-
-      <div className="grid sm:grid-cols-2 gap-3 text-xs">
-        <div className="rounded-lg bg-slate-50 p-3 space-y-1">
-          <p className="font-medium text-slate-700">🇬🇧 English</p>
-          <p className="text-slate-600">
-            Flesch <b>{q.en.flesch}</b> {q.en.flesch >= 60 ? '✅' : q.en.flesch >= 50 ? '⚠️' : '❌'} · Grade{' '}
-            <b>{q.en.grade}</b> {q.en.grade <= 9 ? '✅' : '⚠️'} (target ≤ 9)
-          </p>
-          <p className="text-slate-600">TB {q.en.avgSentenceWords} từ/câu · câu dài: {q.en.longSentences.length}</p>
-          {q.judge && (
-            <p className="text-slate-600">
-              LLM Judge: <b>{q.judge.en.score}/100</b> {q.judge.en.score >= 70 ? '✅' : '⚠️'}
-            </p>
-          )}
-        </div>
-        <div className="rounded-lg bg-slate-50 p-3 space-y-1">
-          <p className="font-medium text-slate-700">🇻🇳 Tiếng Việt</p>
-          <p className="text-slate-600">
-            TB <b>{q.vi.avgSyllPerSentence}</b> âm tiết/câu {q.vi.avgSyllPerSentence <= 22 ? '✅' : '⚠️'} (target ≤ 22)
-          </p>
-          <p className="text-slate-600">
-            Câu &gt;30 âm tiết: {q.vi.pctLongSentences}% · từ khó: {q.vi.pctHardWords}%
-          </p>
-          {q.judge && (
-            <p className="text-slate-600">
-              LLM Judge: <b>{q.judge.vi.score}/100</b> {q.judge.vi.score >= 70 ? '✅' : '⚠️'}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {q.legalese.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 items-center">
-          <span className="text-[11px] text-slate-400">Cụm trang trọng cần thay:</span>
-          {q.legalese.map((l) => (
-            <span key={l.phrase} className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-[#9b6f45]">
-              &quot;{l.phrase}&quot; → &quot;{l.replacement}&quot; ×{l.count}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {q.sourceCheck && (
+      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
         <div
-          className={`rounded-lg p-3 text-xs ${
-            q.sourceCheck.flag ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'
-          }`}
-        >
-          {q.sourceCheck.flag ? '⚠️ Cảnh báo: bài quá giống nguồn — nên sửa thêm trước khi đăng' : '✅ Kiểm tra đạo văn: đã viết lại đủ khác nguồn'}
-          <span className="block mt-1 opacity-80">
-            Tương đồng nghĩa với nguồn: VI {(q.sourceCheck.simVi * 100).toFixed(0)}% · EN {(q.sourceCheck.simEn * 100).toFixed(0)}% — Copy
-            từng chữ: VI {q.sourceCheck.verbatimVi}% · EN {q.sourceCheck.verbatimEn}% (an toàn &lt; 10%)
-          </span>
-        </div>
-      )}
-
-      {q.proseIssues && q.proseIssues.length > 0 && (
-        <details className="text-xs text-slate-500">
-          <summary className="cursor-pointer select-none">
-            ✍️ Văn phong báo chí (write-good): {q.proseIssues.length} điểm cần sửa
-          </summary>
-          <ul className="mt-1.5 space-y-1 list-disc pl-4">
-            {q.proseIssues.map((p, i) => (
-              <li key={i}>
-                &quot;{p.text.slice(0, 70)}&quot; — <span className="text-slate-400">{p.reason}</span>
-              </li>
-            ))}
-          </ul>
-        </details>
-      )}
-
-      {(q.judge?.en?.worst?.length || q.judge?.vi?.worst?.length) ? (
-        <details className="text-xs text-slate-500">
-          <summary className="cursor-pointer select-none">Câu khó đọc nhất (LLM judge)</summary>
-          <ul className="mt-1.5 space-y-1 list-disc pl-4">
-            {q.judge?.en?.worst?.map((w, i) => (
-              <li key={`e${i}`}>🇬🇧 {w.slice(0, 120)}</li>
-            ))}
-            {q.judge?.vi?.worst?.map((w, i) => (
-              <li key={`v${i}`}>🇻🇳 {w.slice(0, 120)}</li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
-
-      <p className="text-[11px] text-slate-400">
-        Điểm chỉ mang tính tham khảo — quyết định cuối thuộc biên tập viên. Nút sửa giữ nguyên mọi thông tin pháp lý.
-      </p>
+          className={`h-full rounded-full transition-all duration-500 ${good ? 'bg-emerald-500' : 'bg-amber-500'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
     </div>
   );
 }
 
+/* ────────── Quality panel ────────── */
+function QualityPanel({ quality: q, polishing, onPolish }: { quality: QualityReport; polishing: boolean; onPolish: () => void }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-sm">📊 Chất lượng bài viết</CardTitle>
+            <CardDescription className="text-xs">Tham khảo — quyết định cuối thuộc biên tập viên</CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={onPolish} disabled={polishing}>
+            {polishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+            Sửa giọng
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50">
+            <p className="text-xs font-semibold">🇬🇧 English</p>
+            <ScoreBar value={q.en.flesch} label="Flesch (dễ đọc)" good={q.en.flesch >= 60} />
+            <ScoreBar value={q.en.grade} max={12} label="Grade level (≤ 9)" good={q.en.grade <= 9} />
+            {q.judge && <ScoreBar value={q.judge.en.score} label="LLM Judge" good={q.judge.en.score >= 70} />}
+            <p className="text-[11px] text-muted-foreground">TB {q.en.avgSentenceWords} từ/câu · {q.en.longSentences.length} câu dài</p>
+          </div>
+          <div className="space-y-3 p-4 rounded-xl bg-muted/50">
+            <p className="text-xs font-semibold">🇻🇳 Tiếng Việt</p>
+            <ScoreBar value={q.vi.avgSyllPerSentence} max={30} label="TB âm tiết/câu (≤ 22)" good={q.vi.avgSyllPerSentence <= 22} />
+            <ScoreBar value={100 - q.vi.pctLongSentences} label={`Câu ngắn gọn (${q.vi.pctLongSentences}% dài)`} good={q.vi.pctLongSentences <= 20} />
+            {q.judge && <ScoreBar value={q.judge.vi.score} label="LLM Judge" good={q.judge.vi.score >= 70} />}
+            <p className="text-[11px] text-muted-foreground">Từ khó: {q.vi.pctHardWords}%</p>
+          </div>
+        </div>
+
+        {q.sourceCheck && (
+          <div className={`rounded-xl p-4 text-xs flex items-start gap-3 border ${q.sourceCheck.flag ? 'bg-destructive/5 border-destructive/20 text-destructive' : 'bg-emerald-50 border-emerald-200 text-emerald-700'}`}>
+            <span className="text-base">{q.sourceCheck.flag ? '⚠️' : '✅'}</span>
+            <div>
+              <p className="font-medium">{q.sourceCheck.flag ? 'Bài quá giống nguồn — sửa thêm trước khi đăng' : 'Đã viết lại đủ khác nguồn'}</p>
+              <p className="mt-1 opacity-75">Tương đồng: VI {(q.sourceCheck.simVi * 100).toFixed(0)}% · EN {(q.sourceCheck.simEn * 100).toFixed(0)}% — Copy: VI {q.sourceCheck.verbatimVi}% · EN {q.sourceCheck.verbatimEn}%</p>
+            </div>
+          </div>
+        )}
+
+        {q.legalese.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {q.legalese.map((l) => (
+              <Badge key={l.phrase} variant="outline" className="text-[11px] bg-amber-50 text-amber-700 border-amber-200">
+                &quot;{l.phrase}&quot; → &quot;{l.replacement}&quot; ×{l.count}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {(q.proseIssues?.length || q.judge?.en?.worst?.length) ? (
+          <>
+            <button onClick={() => setExpanded(!expanded)} className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+              {expanded ? 'Thu gọn' : 'Xem chi tiết'}
+            </button>
+            {expanded && (
+              <div className="space-y-2 text-[11px] text-muted-foreground">
+                {q.proseIssues?.slice(0, 5).map((p, i) => <p key={i}>✍️ &quot;{p.text.slice(0, 70)}&quot; — {p.reason}</p>)}
+                {q.judge?.en?.worst?.map((w, i) => <p key={`e${i}`}>🇬🇧 {w.slice(0, 120)}</p>)}
+                {q.judge?.vi?.worst?.map((w, i) => <p key={`v${i}`}>🇻🇳 {w.slice(0, 120)}</p>)}
+              </div>
+            )}
+          </>
+        ) : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ═══════════════════════ MAIN PAGE ═══════════════════════ */
 export default function AIWriterPage() {
-  // ── Input state ──
-  const [mode, setMode] = useState<'feeds' | 'url' | 'topic' | 'batch'>('topic');
+  const [mode, setMode] = useState<'topic' | 'url' | 'feeds' | 'batch'>('topic');
   const [topic, setTopic] = useState('');
   const [url, setUrl] = useState('');
   const [angle, setAngle] = useState('');
   const [model, setModel] = useState('DeepSeek-V4-Flash');
   const [length, setLength] = useState<'short' | 'medium' | 'long'>('medium');
-
-  // ── Feeds ──
   const [feeds, setFeeds] = useState<FeedItem[]>([]);
   const [loadingFeeds, setLoadingFeeds] = useState(false);
-
-  // ── Generation state ──
   const [generating, setGenerating] = useState(false);
   const [status, setStatus] = useState('');
   const [enHtml, setEnHtml] = useState('');
   const [viHtml, setViHtml] = useState('');
   const [result, setResult] = useState<GenResult | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-
-  // ── Save state ──
   const [previewTab, setPreviewTab] = useState<'vi' | 'en'>('vi');
   const [editing, setEditing] = useState(false);
   const [category, setCategory] = useState('');
@@ -240,8 +231,6 @@ export default function AIWriterPage() {
   const [coverLoading, setCoverLoading] = useState(false);
   const [coverVariant, setCoverVariant] = useState(0);
   const [autoCover, setAutoCover] = useState(true);
-  const autoCoverRef = useRef(autoCover);
-  autoCoverRef.current = autoCover;
   const [coverExtras, setCoverExtras] = useState<{ ogUrl: string; feedUrl: string } | null>(null);
   const [usage, setUsage] = useState<{ month: { costUsd: number; calls: number }; allTime: { costUsd: number } } | null>(null);
   const [batchText, setBatchText] = useState('');
@@ -258,920 +247,491 @@ export default function AIWriterPage() {
         if (catData.success) setCategories(catData.data);
         const meData = await meRes.json();
         if (meData.success) setMe(meData.user);
-      } catch {
-        toast.error('Không tải được danh mục / thông tin người dùng');
-      }
+      } catch { toast.error('Không tải được danh mục / thông tin người dùng'); }
     })();
-    fetch('/api/ai/usage')
-      .then((r) => r.json())
-      .then((d) => d.success && setUsage(d.data))
-      .catch(() => {});
+    fetch('/api/ai/usage').then((r) => r.json()).then((d) => d.success && setUsage(d.data)).catch(() => {});
   }, []);
 
   const loadFeeds = useCallback(async () => {
     setLoadingFeeds(true);
     try {
-      // Dùng suggestions endpoint: có DB nên chỉ hiện bài MỚI chưa từng thấy/đã bỏ qua
       const res = await fetch('/api/ai/suggestions');
       const data = await res.json();
-      if (data.success) {
-        setFeeds(data.data);
-        if (!data.data?.length) toast.success('Không có tin mới — đã xem hết từ lần trước');
-      } else toast.error(data.message || 'Lỗi tải đề xuất');
-    } catch {
-      toast.error('Lỗi kết nối khi tải đề xuất');
-    } finally {
-      setLoadingFeeds(false);
-    }
+      if (data.success) { setFeeds(data.data); if (!data.data?.length) toast.success('Không có tin mới'); }
+      else toast.error(data.message || 'Lỗi tải đề xuất');
+    } catch { toast.error('Lỗi kết nối'); }
+    finally { setLoadingFeeds(false); }
   }, []);
 
   const dismissFeedItem = async (link: string) => {
     setFeeds((p) => p.filter((f) => f.link !== link));
-    try {
-      await fetch('/api/ai/suggestions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link, action: 'dismiss' }),
-      });
-    } catch {
-      // bỏ qua lỗi mạng khi dismiss
-    }
+    try { await fetch('/api/ai/suggestions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link, action: 'dismiss' }) }); } catch {}
   };
 
-  useEffect(() => {
-    if (mode === 'feeds' && !feeds.length && !loadingFeeds) loadFeeds();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  useEffect(() => { if (mode === 'feeds' && !feeds.length && !loadingFeeds) loadFeeds(); }, [mode, feeds.length, loadingFeeds, loadFeeds]);
 
-  const pickFeedItem = (item: FeedItem) => {
-    setMode('url');
-    setUrl(item.link);
-    setTopic('');
-    toast.success(`Đã chọn: ${item.title.slice(0, 60)}...`);
-  };
+  const pickFeedItem = (item: FeedItem) => { setMode('url'); setUrl(item.link); setTopic(''); toast.success(`Đã chọn: ${item.title.slice(0, 60)}...`); };
+  const stopGeneration = () => { abortRef.current?.abort(); setGenerating(false); setStatus('Đã dừng.'); };
 
-  const stopGeneration = () => {
-    abortRef.current?.abort();
-    setGenerating(false);
-    setStatus('Đã dừng.');
-  };
-
-  /** Chạy 1 lần generate qua SSE — trả kết quả done (dùng chung cho 1 bài & hàng loạt) */
-  const runGenerateStream = async (
-    body: Record<string, unknown>,
-    handlers: {
-      onStatus?: (m: string) => void;
-      onEn?: (t: string) => void;
-      onVi?: (t: string) => void;
-    },
-    signal?: AbortSignal
-  ): Promise<GenResult> => {
-    const res = await fetch('/api/ai/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal,
-    });
-    if (!res.ok || !res.body) {
-      const err = await res.json().catch(() => ({ message: 'Lỗi server' }));
-      throw new Error(err.message || `Lỗi ${res.status}`);
-    }
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let finalData: GenResult | null = null;
-
+  const runGenerateStream = async (body: Record<string, unknown>, handlers: { onStatus?: (m: string) => void; onEn?: (t: string) => void; onVi?: (t: string) => void }, signal?: AbortSignal): Promise<GenResult> => {
+    const res = await fetch('/api/ai/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal });
+    if (!res.ok || !res.body) { const err = await res.json().catch(() => ({ message: 'Lỗi server' })); throw new Error(err.message || `Lỗi ${res.status}`); }
+    const reader = res.body.getReader(); const decoder = new TextDecoder(); let buffer = ''; let finalData: GenResult | null = null;
     while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n\n');
-      buffer = lines.pop() || '';
-
+      const { done, value } = await reader.read(); if (done) break;
+      buffer += decoder.decode(value, { stream: true }); const lines = buffer.split('\n\n'); buffer = lines.pop() || '';
       for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed.startsWith('data:')) continue;
-        try {
-          const evt = JSON.parse(trimmed.slice(5).trim());
-          if (evt.type === 'status') handlers.onStatus?.(evt.message);
-          else if (evt.type === 'en') handlers.onEn?.(evt.text);
-          else if (evt.type === 'vi') handlers.onVi?.(evt.text);
-          else if (evt.type === 'done') finalData = evt.data as GenResult;
-          else if (evt.type === 'error') throw new Error(evt.message);
-        } catch (parseErr) {
-          if (parseErr instanceof Error && parseErr.message && !parseErr.message.includes('JSON')) {
-            throw parseErr;
-          }
-        }
+        const trimmed = line.trim(); if (!trimmed.startsWith('data:')) continue;
+        try { const evt = JSON.parse(trimmed.slice(5).trim()); if (evt.type === 'status') handlers.onStatus?.(evt.message); else if (evt.type === 'en') handlers.onEn?.(evt.text); else if (evt.type === 'vi') handlers.onVi?.(evt.text); else if (evt.type === 'done') finalData = evt.data as GenResult; else if (evt.type === 'error') throw new Error(evt.message); }
+        catch (parseErr) { if (parseErr instanceof Error && parseErr.message && !parseErr.message.includes('JSON')) throw parseErr; }
       }
     }
-    if (!finalData) throw new Error('Pipeline không trả kết quả');
-    return finalData;
+    if (!finalData) throw new Error('Pipeline không trả kết quả'); return finalData;
   };
 
-  /** Hàng loạt: sinh tuần tự từng đề → ảnh bìa → tự lưu NHÁP vào Case Studies */
   const runBatch = async () => {
     if (!me?._id) return toast.error('Cần đăng nhập');
-    if (!category) return toast.error('Chọn "Danh mục" ở panel thông tin xuất bản trước (dùng chung cả loạt)');
-    const topics = batchText
-      .split('\n')
-      .map((t) => t.trim())
-      .filter((t) => t.length > 10);
-    if (!topics.length) return toast.error('Nhập ít nhất 1 đề bài — mỗi dòng 1 đề');
-    if (topics.length > 10) return toast.error('Tối đa 10 đề mỗi loạt (đỡ treo máy)');
-
+    if (!category) return toast.error('Chọn danh mục trước');
+    const topics = batchText.split('\n').map((t) => t.trim()).filter((t) => t.length > 10);
+    if (!topics.length) return toast.error('Nhập ít nhất 1 đề bài');
+    if (topics.length > 10) return toast.error('Tối đa 10 đề mỗi loạt');
     const cat = categories.find((c) => c._id === category);
     const catLabel = cat?.name?.vi || cat?.name?.en || 'Luật Úc';
-
-    setBatchRunning(true);
-    setBatchItems(topics.map((t) => ({ topic: t, status: 'pending' as const })));
-
+    setBatchRunning(true); setBatchItems(topics.map((t) => ({ topic: t, status: 'pending' as const })));
     for (let i = 0; i < topics.length; i++) {
       const t = topics[i];
-      const patch = (p: Partial<(typeof batchItems)[number]>) =>
-        setBatchItems((prev) => prev.map((x, j) => (j === i ? { ...x, ...p } : x)));
+      const patch = (p: Partial<(typeof batchItems)[number]>) => setBatchItems((prev) => prev.map((x, j) => (j === i ? { ...x, ...p } : x)));
       patch({ status: 'running', note: 'Bắt đầu...' });
       try {
-        const data = await runGenerateStream(
-          { mode: 'topic', topic: t, model, length },
-          { onStatus: (m) => patch({ note: m }) }
-        );
-
-        // Ảnh bìa (nếu bật)
+        const data = await runGenerateStream({ mode: 'topic', topic: t, model, length }, { onStatus: (m) => patch({ note: m }) });
         let coverUrl = '';
-        if (autoCover) {
-          patch({ note: 'Đang tạo ảnh bìa...' });
-          try {
-            const r = await fetch('/api/ai/cover', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ topic: t, titleVi: data.titleVi, titleEn: data.titleEn, categoryLabel: catLabel, variant: Date.now() % 100000 }),
-            });
-            const d = await r.json();
-            if (d.success) coverUrl = d.url;
-          } catch {
-            // ảnh lỗi vẫn lưu bài được
-          }
-        }
-
-        // Lưu nháp — trùng slug thì thử slug-2, slug-3
-        patch({ note: 'Đang lưu bản nháp...' });
-        let slug = data.slug;
-        let saved = false;
-        let lastErr = '';
-        for (let attempt = 0; attempt < 3 && !saved; attempt++) {
-          const res = await fetch('/api/casestudies', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              title: { en: data.titleEn, vi: data.titleVi },
-              description: { en: (data.descEn || '').slice(0, 199), vi: (data.descVi || '').slice(0, 199) },
-              content: { en: data.contentEn, vi: data.contentVi },
-              slug,
-              image: coverUrl || '/images/logo/solislaw.png',
-              category,
-              user: me._id,
-              isActive: false,
-            }),
-          });
-          const j = await res.json();
-          if (j.success) saved = true;
-          else if ((j.message || '').includes('Slug')) slug = `${data.slug}-${attempt + 2}`;
-          else {
-            lastErr = j.message || 'Lưu lỗi';
-            break;
-          }
-        }
-        if (saved) patch({ status: 'done', slug, note: 'Đã lưu nháp ✓ (xem trong Case Studies)' });
-        else patch({ status: 'error', note: lastErr });
-      } catch (e) {
-        patch({ status: 'error', note: (e as Error).message || 'Lỗi' });
-      }
+        if (autoCover) { patch({ note: 'Tạo ảnh bìa...' }); try { const r = await fetch('/api/ai/cover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: t, titleVi: data.titleVi, titleEn: data.titleEn, categoryLabel: catLabel, variant: Date.now() % 100000 }) }); const d = await r.json(); if (d.success) coverUrl = d.url; } catch {} }
+        patch({ note: 'Lưu nháp...' }); let slug = data.slug; let saved = false; let lastErr = '';
+        for (let attempt = 0; attempt < 3 && !saved; attempt++) { const res = await fetch('/api/casestudies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: { en: data.titleEn, vi: data.titleVi }, description: { en: (data.descEn || '').slice(0, 199), vi: (data.descVi || '').slice(0, 199) }, content: { en: data.contentEn, vi: data.contentVi }, slug, image: coverUrl || '/images/logo/solislaw.png', category, user: me._id, isActive: false }) }); const j = await res.json(); if (j.success) saved = true; else if ((j.message || '').includes('Slug')) slug = `${data.slug}-${attempt + 2}`; else { lastErr = j.message || 'Lỗi'; break; } }
+        if (saved) patch({ status: 'done', slug, note: 'Đã lưu nháp ✓' }); else patch({ status: 'error', note: lastErr });
+      } catch (e) { patch({ status: 'error', note: (e as Error).message || 'Lỗi' }); }
     }
     setBatchRunning(false);
     const okCount = batchItemsRef.current.filter((b) => b.status === 'done').length;
     const errCount = batchItemsRef.current.filter((b) => b.status === 'error').length;
-    if (errCount === 0) toast.success(`Hoàn tất ${okCount}/${okCount} bài — đã lưu nháp trong Case Studies!`);
-    else toast.error(`Xong ${okCount} bài, LỖI ${errCount} bài — xem ghi chú từng dòng`);
+    if (errCount === 0) toast.success(`Hoàn tất ${okCount} bài!`); else toast.error(`Xong ${okCount}, LỖI ${errCount} bài`);
   };
 
   const generate = async () => {
     if (mode === 'url' && !url.trim()) return toast.error('Nhập URL bài nguồn');
     if (mode === 'topic' && !topic.trim()) return toast.error('Nhập đề bài');
-    if (mode === 'feeds') {
-      if (!url.trim() && !topic.trim()) return toast.error('Chọn một tin trong danh sách trước');
-      setMode(url.trim() ? 'url' : 'topic');
-    }
-
+    if (mode === 'feeds') { if (!url.trim() && !topic.trim()) return toast.error('Chọn tin trước'); setMode(url.trim() ? 'url' : 'topic'); }
     const activeMode = url.trim() && mode !== 'topic' ? 'url' : 'topic';
-    setGenerating(true);
-    setResult(null);
-    setEnHtml('');
-    setViHtml('');
-    setEditing(false);
-    setStatus('Bắt đầu...');
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
+    setGenerating(true); setResult(null); setEnHtml(''); setViHtml(''); setEditing(false); setStatus('Bắt đầu...');
+    const toastId = toast.loading('Đang tạo bài viết...');
+    const controller = new AbortController(); abortRef.current = controller;
     try {
-      const data = await runGenerateStream(
-        {
-          mode: activeMode,
-          topic: topic.trim() || undefined,
-          url: activeMode === 'url' ? url.trim() : undefined,
-          angle: angle.trim() || undefined,
-          model,
-          length,
-        },
-        {
-          onStatus: setStatus,
-          onEn: (t) => setEnHtml((p) => p + t),
-          onVi: (t) => setViHtml((p) => p + t),
-        },
-        controller.signal
-      );
-      setResult(data);
-      // Thay stream bằng bản final (đã qua lint/repair mermaid)
-      setEnHtml(data.contentEn || '');
-      setViHtml(data.contentVi || '');
-      if (autoCover) {
-        setStatus('Bài xong! Đang tạo ảnh bìa tự động...');
-        const ok = await runCoverGeneration(data);
-        setStatus(ok ? 'Hoàn tất! Bài + ảnh bìa đã sẵn sàng — kiểm tra và lưu bên dưới.' : 'Hoàn tất bài viết (ảnh bìa lỗi — bấm tạo lại).');
-      } else {
-        setStatus('Hoàn tất! Kiểm tra và lưu bài bên dưới.');
-      }
-    } catch (e) {
-      if ((e as Error).name !== 'AbortError') {
-        toast.error((e as Error).message || 'Lỗi khi tạo bài viết');
-        setStatus('Lỗi: ' + (e as Error).message);
-      }
-    } finally {
-      setGenerating(false);
-      abortRef.current = null;
-    }
+      const data = await runGenerateStream({ mode: activeMode, topic: topic.trim() || undefined, url: activeMode === 'url' ? url.trim() : undefined, angle: angle.trim() || undefined, model, length }, { onStatus: (m) => { setStatus(m); toast.loading(m, { id: toastId }); }, onEn: (t) => setEnHtml((p) => p + t), onVi: (t) => setViHtml((p) => p + t) }, controller.signal);
+      setResult(data); setEnHtml(data.contentEn || ''); setViHtml(data.contentVi || '');
+      if (autoCover) { setStatus('Bài xong! Tạo ảnh bìa...'); toast.loading('Tạo ảnh bìa...', { id: toastId }); const ok = await runCoverGeneration(data); setStatus(ok ? 'Hoàn tất!' : 'Xong bài (ảnh bìa lỗi).'); }
+      toast.success('Bài viết đã hoàn tất!', { id: toastId }); setStatus('Hoàn tất!');
+    } catch (e) { if ((e as Error).name !== 'AbortError') { toast.error((e as Error).message || 'Lỗi tạo bài', { id: toastId }); setStatus('Lỗi: ' + (e as Error).message); } else { toast.dismiss(toastId); } }
+    finally { setGenerating(false); abortRef.current = null; }
   };
 
   const handleSave = async () => {
     if (!result) return;
-    const checks: [boolean, string][] = [
-      [!!result.titleVi && !!result.titleEn, 'Tiêu đề VI & EN'],
-      [!!result.descVi && !!result.descEn, 'Mô tả VI & EN'],
-      [!!result.contentVi && !!result.contentEn, 'Nội dung VI & EN'],
-      [!!result.slug, 'Slug'],
-      [!!category, 'Danh mục'],
-      [!!image, 'Ảnh bìa'],
-      [!!me, 'Tác giả (cần đăng nhập)'],
-    ];
+    const checks: [boolean, string][] = [[!!result.titleVi && !!result.titleEn, 'Tiêu đề'], [!!result.descVi && !!result.descEn, 'Mô tả'], [!!result.contentVi && !!result.contentEn, 'Nội dung'], [!!result.slug, 'Slug'], [!!category, 'Danh mục'], [!!image, 'Ảnh bìa'], [!!me, 'Tác giả']];
     const missing = checks.find(([ok]) => !ok);
     if (missing) return toast.error(`Thiếu: ${missing[1]}`);
-
-    if (result.descVi.length > 200 || result.descEn.length > 200) {
-      return toast.error('Mô tả không được quá 200 ký tự');
-    }
-
+    if (result.descVi.length > 200 || result.descEn.length > 200) return toast.error('Mô tả quá 200 ký tự');
     setSaving(true);
     try {
-      const res = await fetch('/api/casestudies', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: { en: result.titleEn, vi: result.titleVi },
-          description: { en: result.descEn, vi: result.descVi },
-          content: { en: result.contentEn, vi: result.contentVi },
-          slug: result.slug,
-          image,
-          category,
-          user: me!._id,
-          isActive: saveStatus === 'published',
-          publishedAt: saveStatus === 'published' ? new Date() : undefined,
-        }),
-      });
+      const res = await fetch('/api/casestudies', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: { en: result.titleEn, vi: result.titleVi }, description: { en: result.descEn, vi: result.descVi }, content: { en: result.contentEn, vi: result.contentVi }, slug: result.slug, image, category, user: me!._id, isActive: saveStatus === 'published', publishedAt: saveStatus === 'published' ? new Date() : undefined }) });
       const data = await res.json();
-      if (data.success) {
-        toast.success(saveStatus === 'published' ? 'Đã xuất bản bài viết!' : 'Đã lưu bản nháp!');
-      } else {
-        toast.error(data.message || 'Lưu thất bại');
-      }
-    } catch {
-      toast.error('Không thể kết nối server');
-    } finally {
-      setSaving(false);
-    }
+      if (data.success) toast.success(saveStatus === 'published' ? 'Đã xuất bản!' : 'Đã lưu nháp!');
+      else toast.error(data.message || 'Lưu thất bại');
+    } catch { toast.error('Không thể kết nối server'); }
+    finally { setSaving(false); }
   };
 
   const runCoverGeneration = async (data: { titleVi: string; titleEn?: string }): Promise<boolean> => {
-    if (!data.titleVi) {
-      toast.error('Cần có tiêu đề để tạo ảnh bìa');
-      return false;
-    }
+    if (!data.titleVi) { toast.error('Cần tiêu đề'); return false; }
     setCoverLoading(true);
     try {
       const cat = categories.find((c) => c._id === category);
-      const v = (coverVariant + 1) % 100000;
       setCoverVariant((p) => p + 1);
-      const res = await fetch('/api/ai/cover', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic: topic || data.titleVi,
-          titleVi: data.titleVi,
-          titleEn: data.titleEn,
-          categoryLabel: cat?.name?.vi || cat?.name?.en || 'Luật Úc',
-          variant: v,
-        }),
-      });
+      const res = await fetch('/api/ai/cover', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: topic || data.titleVi, titleVi: data.titleVi, titleEn: data.titleEn, categoryLabel: cat?.name?.vi || cat?.name?.en || 'Luật Úc', variant: (coverVariant + 1) % 100000 }) });
       const d = await res.json();
-      if (d.success) {
-        setImage(d.url);
-        setCoverExtras({ ogUrl: d.ogUrl, feedUrl: d.feedUrl });
-        toast.success(`Đã tạo ảnh bìa (mẫu ${d.template}, nền ${d.theme === 'light' ? 'sáng' : 'tối'})!`);
-        return true;
-      }
-      toast.error(d.message || 'Tạo ảnh thất bại');
-      return false;
-    } catch {
-      toast.error('Không thể kết nối server');
-      return false;
-    } finally {
-      setCoverLoading(false);
-    }
+      if (d.success) { setImage(d.url); setCoverExtras({ ogUrl: d.ogUrl, feedUrl: d.feedUrl }); toast.success('Đã tạo ảnh bìa!'); return true; }
+      toast.error(d.message || 'Tạo ảnh thất bại'); return false;
+    } catch { toast.error('Lỗi kết nối'); return false; }
+    finally { setCoverLoading(false); }
   };
 
   const updateResult = (patch: Partial<GenResult>) => setResult((p) => (p ? { ...p, ...patch } : p));
-
   const buildFeedback = (q?: QualityReport): string => {
     if (!q) return '';
     const parts: string[] = [];
     const legalese = q.legalese.map((l) => `"${l.phrase}" → "${l.replacement}" (x${l.count}, ${l.lang.toUpperCase()})`);
-    if (legalese.length) parts.push(`Formal phrases to replace:\n${legalese.join('\n')}`);
-    const longEn = q.en.longSentences.slice(0, 3).map((s) => `"${s.text}..." (${s.words} words)`);
-    if (longEn.length) parts.push(`EN sentences too long (over 25 words):\n${longEn.join('\n')}`);
-    const longVi = q.vi.longSentences.slice(0, 3).map((s) => `"${s.text}..." (${s.syllables} âm tiết)`);
-    if (longVi.length) parts.push(`Câu VI quá dài (trên 30 âm tiết):\n${longVi.join('\n')}`);
-    const prose = (q.proseIssues || []).slice(0, 5).map((p) => `"${p.text}": ${p.reason}`);
-    if (prose.length) parts.push(`EN prose lint (write-good):\n${prose.join('\n')}`);
+    if (legalese.length) parts.push(`Replace:\n${legalese.join('\n')}`);
+    const longEn = q.en.longSentences.slice(0, 3).map((s) => `"${s.text}..." (${s.words}w)`);
+    if (longEn.length) parts.push(`EN too long:\n${longEn.join('\n')}`);
     return parts.join('\n\n');
   };
-
   const polishVoice = async () => {
-    if (!result) return;
-    setPolishing(true);
+    if (!result) return; setPolishing(true);
     try {
-      const res = await fetch('/api/ai/polish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contentEn: result.contentEn,
-          contentVi: result.contentVi,
-          feedback: buildFeedback(result.quality),
-        }),
-      });
+      const res = await fetch('/api/ai/polish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contentEn: result.contentEn, contentVi: result.contentVi, feedback: buildFeedback(result.quality) }) });
       const data = await res.json();
-      if (data.success) {
-        updateResult({ contentEn: data.data.contentEn, contentVi: data.data.contentVi, quality: data.data.quality });
-        setEnHtml(data.data.contentEn);
-        setViHtml(data.data.contentVi);
-        toast.success('Đã sửa giọng văn — kiểm tra lại nội dung!');
-      } else toast.error(data.message || 'Sửa thất bại');
-    } catch {
-      toast.error('Không thể kết nối server');
-    } finally {
-      setPolishing(false);
-    }
+      if (data.success) { updateResult({ contentEn: data.data.contentEn, contentVi: data.data.contentVi, quality: data.data.quality }); setEnHtml(data.data.contentEn); setViHtml(data.data.contentVi); toast.success('Đã sửa giọng!'); }
+      else toast.error(data.message || 'Sửa thất bại');
+    } catch { toast.error('Lỗi kết nối'); }
+    finally { setPolishing(false); }
   };
 
-  // preview: nếu đã có result (sửa tay/polish) luôn dùng bản mới nhất; đang stream thì dùng buffer
-  const streamingHtml = previewTab === 'vi' ? viHtml : enHtml;
-  const previewHtml = result ? (previewTab === 'vi' ? result.contentVi : result.contentEn) : streamingHtml;
+  const previewHtml = result ? (previewTab === 'vi' ? result.contentVi : result.contentEn) : (previewTab === 'vi' ? viHtml : enHtml);
   const editingContent = previewTab === 'vi' ? result?.contentVi : result?.contentEn;
+  const hasResult = !!(viHtml || enHtml || result);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-[#9b6f45]" />
-          </div>
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900">AI Writer</h1>
-            <p className="text-sm text-slate-500">
-              Viết bài song ngữ Anh – Việt bằng FPT AI
-              {usage && (
-                <span className="ml-2 text-[11px] text-slate-400" title="Chi phí FPT API ước tính theo giá niêm yết">
-                  · tháng này ${usage.month.costUsd.toFixed(3)} ({usage.month.calls} lượt) · toàn bộ ${usage.allTime.costUsd.toFixed(2)}
-                </span>
-              )}
-            </p>
-          </div>
+      {/* ══ HEADER ══ */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">AI Writer</h1>
+          <p className="text-sm text-muted-foreground">Viết bài song ngữ Anh – Việt bằng FPT AI</p>
         </div>
-        {result?.source?.url && (
-          <a
-            href={result.source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[#9b6f45] hover:underline flex items-center gap-1 max-w-xs truncate"
-          >
-            <ExternalLink className="w-3 h-3 flex-shrink-0" /> Nguồn gốc
-          </a>
+        {usage && (
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <Badge variant="outline">💰 ${usage.month.costUsd.toFixed(3)} / {usage.month.calls} lượt</Badge>
+            {result?.source?.url && (
+              <a href={result.source.url} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline flex items-center gap-1">
+                <ExternalLink className="w-3 h-3" /> Nguồn
+              </a>
+            )}
+          </div>
         )}
       </div>
 
-      <div className="grid lg:grid-cols-[420px_1fr] gap-6 items-start">
-        {/* ══ CỘT INPUT ══ */}
-        <div className="space-y-4 bg-white rounded-xl border border-slate-200 p-5">
-          {/* Mode tabs */}
-          <div className="flex bg-slate-100 rounded-lg p-1">
-            {(
-              [
-                ['topic', 'Đề bài', PenLine],
-                ['url', 'Từ URL', Link2],
-                ['feeds', 'Tin mới', Rss],
-                ['batch', 'Hàng loạt', ListPlus],
-              ] as const
-            ).map(([m, label, Icon]) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md transition-colors ${
-                  mode === m ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" /> {label}
-              </button>
-            ))}
-          </div>
+      {/* ══ MAIN GRID ══ */}
+      <div className="grid xl:grid-cols-[420px_1fr] gap-6 items-start">
 
-          {mode === 'topic' && (
-            <div className="space-y-2">
-              <Label>Đề bài (tiếng Việt hoặc Anh)</Label>
-              <Textarea
-                rows={3}
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder="VD: Quyền nuôi con sau cải cách Luật Gia đình 2024..."
-              />
-              <details className="text-xs">
-                <summary className="cursor-pointer select-none text-slate-500 hover:text-[#9b6f45]">
-                  💡 Gợi ý {SUGGESTED_TOPICS.length} đề bài từ research (cải cách luật Úc 2024-2026)
-                </summary>
-                <div className="mt-2 max-h-56 overflow-y-auto space-y-1 pr-1">
-                  {SUGGESTED_TOPICS.map((t, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setTopic(t)}
-                      className="w-full text-left px-2 py-1.5 rounded-md text-[11px] leading-snug text-slate-600 hover:bg-amber-50 hover:text-[#9b6f45] transition-colors"
-                    >
-                      {i + 1}. {t}
-                    </button>
-                  ))}
+        {/* ── CỘT TRÁI: INPUT ── */}
+        <Card>
+          <CardContent className="space-y-5 pt-6">
+            {/* Mode tabs */}
+            <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
+              <TabsList className="w-full">
+                <TabsTrigger value="topic"><PenLine className="w-3.5 h-3.5" /> Đề bài</TabsTrigger>
+                <TabsTrigger value="url"><Link2 className="w-3.5 h-3.5" /> URL</TabsTrigger>
+                <TabsTrigger value="feeds"><Rss className="w-3.5 h-3.5" /> Tin mới</TabsTrigger>
+                <TabsTrigger value="batch"><ListPlus className="w-3.5 h-3.5" /> Loạt</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="topic" className="space-y-3 mt-4">
+                <div className="space-y-2">
+                  <Label>Đề bài (tiếng Việt hoặc Anh)</Label>
+                  <Textarea rows={3} value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="VD: Quyền nuôi con sau cải cách Luật Gia đình 2024..." className="resize-none" />
                 </div>
-              </details>
-            </div>
-          )}
-
-          {mode === 'url' && (
-            <div className="space-y-2">
-              <Label>URL bài nguồn (Lexology, Mondaq, Chambers, LSJ, báo chí...)</Label>
-              <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
-              <p className="text-[11px] text-slate-400">
-                AI sẽ đọc bài gốc, phân tích rồi viết lại 100% văn bản mới (không copy câu).
-              </p>
-            </div>
-          )}
-
-          {mode === 'feeds' && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label>Đề xuất mới từ nguồn ({feeds.length})</Label>
-                <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={loadFeeds} disabled={loadingFeeds}>
-                  {loadingFeeds ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />} Quét lại
-                </Button>
-              </div>
-              <p className="text-[11px] text-slate-400">
-                Tự động lọc: chỉ hiện bài chưa từng xem. Bấm chọn để AI viết bài, hoặc ✕ để bỏ qua (không hiện lại).
-              </p>
-              <div className="max-h-80 overflow-y-auto space-y-1.5 pr-1">
-                {loadingFeeds && !feeds.length && (
-                  <div className="py-8 text-center text-sm text-slate-400">
-                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Đang quét các nguồn luật...
+                <details className="text-xs group">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                    <ChevronDown className="w-3.5 h-3.5 transition-transform group-open:rotate-180" />
+                    💡 {SUGGESTED_TOPICS.length} đề bài gợi ý
+                  </summary>
+                  <div className="mt-2 max-h-52 overflow-y-auto space-y-0.5">
+                    {SUGGESTED_TOPICS.map((t, i) => (
+                      <button key={i} onClick={() => setTopic(t)} className="w-full text-left px-3 py-2 rounded-lg text-[11px] leading-snug text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors">
+                        {i + 1}. {t}
+                      </button>
+                    ))}
                   </div>
-                )}
-                {!loadingFeeds && !feeds.length && (
-                  <div className="py-6 text-center text-xs text-slate-400">
-                    Không có tin mới. Quét lại sau, hoặc chuyển tab dán URL / gõ đề bài.
-                  </div>
-                )}
-                {feeds.map((f, i) => (
-                  <div
-                    key={`${f.link}-${i}`}
-                    className="group relative p-2.5 rounded-lg border border-slate-100 hover:border-amber-200 hover:bg-amber-50/50 transition-colors"
-                  >
-                    <button onClick={() => pickFeedItem(f)} className="w-full text-left pr-6">
-                      <p className="text-[10px] uppercase tracking-wide text-slate-400 font-medium">{f.sourceName}</p>
-                      <p className="text-xs font-medium text-slate-700 group-hover:text-slate-900 line-clamp-2">{f.title}</p>
-                    </button>
-                    <button
-                      onClick={() => dismissFeedItem(f.link)}
-                      title="Bỏ qua bài này"
-                      className="absolute top-2 right-2 p-1 rounded text-slate-300 hover:text-red-500 hover:bg-red-50"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                </details>
+              </TabsContent>
 
-          {mode === 'batch' && (
-            <div className="space-y-2">
-              <Label>Nhiều đề bài — mỗi dòng 1 đề (tối đa 10)</Label>
-              <Textarea
-                rows={6}
-                value={batchText}
-                onChange={(e) => setBatchText(e.target.value)}
-                placeholder={'Quyền nuôi con sau cải cách 2024...\nCoercive control là tội danh mới ở NSW...\nBail tại NSW sau 2025...'}
-              />
-              <p className="text-[11px] text-slate-400">
-                Mỗi đề: AI viết bài đầy đủ EN+VI → tạo ảnh bìa (nếu bật toggle) → <b>tự lưu NHÁP</b> vào Case Studies
-                theo danh mục đã chọn. Anh chỉ việc vào Case Studies duyệt và xuất bản.
-              </p>
-              {batchItems.length > 0 && (
-                <div className="space-y-1 max-h-60 overflow-y-auto pr-1">
-                  {batchItems.map((b, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-start gap-2 p-2 rounded-md text-xs border ${
-                        b.status === 'done'
-                          ? 'border-emerald-100 bg-emerald-50/50'
-                          : b.status === 'error'
-                            ? 'border-red-100 bg-red-50/50'
-                            : 'border-slate-100'
-                      }`}
-                    >
-                      <span className="flex-shrink-0 mt-0.5">
-                        {b.status === 'done' ? (
-                          <CircleCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        ) : b.status === 'error' ? (
-                          <CircleX className="w-3.5 h-3.5 text-red-500" />
-                        ) : b.status === 'running' ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#9b6f45]" />
-                        ) : (
-                          <span className="w-3.5 h-3.5 inline-block rounded-full border border-slate-300" />
-                        )}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="font-medium text-slate-700 line-clamp-1">{b.topic}</p>
-                        <p className="text-[11px] text-slate-400">
-                          {b.status === 'done' && b.slug ? (
-                            <a href={`/case-studies/${b.slug}`} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">
-                              /case-studies/{b.slug} ↗
-                            </a>
-                          ) : (
-                            b.note
-                          )}
-                        </p>
-                      </div>
+              <TabsContent value="url" className="space-y-3 mt-4">
+                <div className="space-y-2">
+                  <Label>URL bài nguồn</Label>
+                  <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." />
+                  <p className="text-[11px] text-muted-foreground">AI đọc bài gốc, phân tích rồi viết lại 100% mới.</p>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="feeds" className="space-y-3 mt-4">
+                <div className="flex items-center justify-between">
+                  <Label>Đề xuất mới ({feeds.length})</Label>
+                  <Button variant="ghost" size="sm" onClick={loadFeeds} disabled={loadingFeeds}>
+                    {loadingFeeds ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />} Quét
+                  </Button>
+                </div>
+                <div className="max-h-72 overflow-y-auto space-y-1.5">
+                  {loadingFeeds && !feeds.length && <div className="py-8 text-center text-sm text-muted-foreground"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" /> Đang quét...</div>}
+                  {!loadingFeeds && !feeds.length && <div className="py-6 text-center text-xs text-muted-foreground">Không có tin mới</div>}
+                  {feeds.map((f, i) => (
+                    <div key={`${f.link}-${i}`} className="group relative p-3 rounded-xl border hover:border-[#d5aa6d] hover:bg-accent/50 transition-all">
+                      <button onClick={() => pickFeedItem(f)} className="w-full text-left pr-7">
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold">{f.sourceName}</p>
+                        <p className="text-xs font-medium line-clamp-2 mt-0.5">{f.title}</p>
+                      </button>
+                      <button onClick={() => dismissFeedItem(f.link)} title="Bỏ qua" className="absolute top-2.5 right-2.5 p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-          )}
+              </TabsContent>
 
-          {mode !== 'batch' && (
-          <div className="space-y-2">
-            <Label>Yêu cầu thêm (tuỳ chọn)</Label>
-            <Input
-              value={angle}
-              onChange={(e) => setAngle(e.target.value)}
-              placeholder="VD: nhấn mạnh cho người Việt mới định cư, có ví dụ thực tế..."
-            />
-          </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Model</Label>
-              <Select value={model} onValueChange={setModel}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {MODELS.map((m) => (
-                    <SelectItem key={m.id} value={m.id} className="text-xs">
-                      {m.label} <span className="text-slate-400">· {m.note}</span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Độ dài</Label>
-              <Select value={length} onValueChange={(v) => setLength(v as 'short' | 'medium' | 'long')}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="short" className="text-xs">Ngắn (~600 từ)</SelectItem>
-                  <SelectItem value="medium" className="text-xs">Vừa (~800 từ)</SelectItem>
-                  <SelectItem value="long" className="text-xs">Học thuật (tối đa 1.500 từ)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {mode === 'batch' ? (
-            <Button className="w-full bg-[#9b6f45] hover:bg-[#85603a]" onClick={runBatch} disabled={batchRunning}>
-              {batchRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <ListPlus className="w-4 h-4" />}
-              {batchRunning
-                ? 'Đang chạy hàng loạt...'
-                : `Chạy hàng loạt (${batchText.split('\n').filter((t) => t.trim().length > 10).length} đề)`}
-            </Button>
-          ) : generating ? (
-            <Button variant="destructive" className="w-full" onClick={stopGeneration}>
-              Dừng lại
-            </Button>
-          ) : (
-            <Button className="w-full bg-[#9b6f45] hover:bg-[#85603a]" onClick={generate}>
-              <Sparkles className="w-4 h-4" /> Tạo bài viết
-            </Button>
-          )}
-
-          <label className="flex items-center gap-2 text-xs text-slate-600 select-none cursor-pointer">
-            <input
-              type="checkbox"
-              checked={autoCover}
-              onChange={(e) => setAutoCover(e.target.checked)}
-              className="accent-[#9b6f45] w-3.5 h-3.5"
-            />
-            Tự tạo ảnh bìa sau khi viết xong (một chạm)
-          </label>
-
-          {status && (
-            <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 rounded-md px-3 py-2">
-              {generating && <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />}
-              <span className="line-clamp-2">{status}</span>
-            </div>
-          )}
-        </div>
-
-        {/* ══ CỘT KẾT QUẢ ══ */}
-        <div className="space-y-4">
-          {!result && !generating && !viHtml && !enHtml && (
-            <div className="bg-white rounded-xl border border-dashed border-slate-200 p-12 text-center">
-              <Sparkles className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-              <p className="text-sm text-slate-400">
-                Chọn đề bài / dán URL / chọn tin từ nguồn rồi bấm <strong>Tạo bài viết</strong>.
-                <br />
-                Bài sẽ được viết song ngữ Anh – Việt, xem trước và chỉnh sửa ngay tại đây.
-              </p>
-            </div>
-          )}
-
-          {(viHtml || enHtml || result) && (
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-              {/* Tab VI/EN + nút sửa */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50/50">
-                <div className="flex items-center bg-slate-100 rounded-md p-0.5">
-                  <button
-                    onClick={() => setPreviewTab('vi')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                      previewTab === 'vi' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    🇻🇳 Tiếng Việt
-                  </button>
-                  <button
-                    onClick={() => setPreviewTab('en')}
-                    className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                      previewTab === 'en' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'
-                    }`}
-                  >
-                    🇬🇧 English
-                  </button>
+              <TabsContent value="batch" className="space-y-3 mt-4">
+                <div className="space-y-2">
+                  <Label>Nhiều đề — mỗi dòng 1 đề (tối đa 10)</Label>
+                  <Textarea rows={4} value={batchText} onChange={(e) => setBatchText(e.target.value)} placeholder={'Quyền nuôi con...\nCoercive control...\nBail tại NSW...'} className="resize-none" />
                 </div>
-                {result && (
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-7 text-xs"
-                      onClick={() => setEditing(!editing)}
-                      disabled={generating}
-                    >
-                      {editing ? <Eye className="w-3 h-3" /> : <Pencil className="w-3 h-3" />}
-                      {editing ? 'Xem trước' : 'Chỉnh sửa'}
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-5">
-                {/* Tiêu đề đang stream */}
-                <h2 className="text-lg font-semibold text-slate-900 mb-4">
-                  {result ? (previewTab === 'vi' ? result.titleVi : result.titleEn) : '...'}
-                </h2>
-
-                {editing && result ? (
-                  <TextEditor
-                    key={previewTab}
-                    value={editingContent || ''}
-                    onChange={(v) =>
-                      previewTab === 'vi' ? updateResult({ contentVi: v }) : updateResult({ contentEn: v })
-                    }
-                  />
-                ) : (
-                  <MermaidRenderer
-                    className="text-sm text-slate-700 leading-relaxed space-y-3 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-slate-900 [&_h2]:mt-5 [&_h3]:text-sm [&_h3]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_blockquote]:border-l-2 [&_blockquote]:border-amber-200 [&_blockquote]:pl-3 [&_blockquote]:text-slate-500 [&_a]:text-[#9b6f45] [&_a]:underline [&_table]:w-full [&_table]:text-xs [&_th]:border [&_th]:border-slate-200 [&_th]:bg-slate-50 [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-slate-200 [&_td]:p-2"
-                    html={previewHtml || editingContent || ''}
-                    enabled={!generating}
-                  />
-                )}
-
-                {generating && (
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-slate-400">
-                    <span className="inline-block w-1.5 h-4 bg-amber-400 animate-pulse" />
-                    đang viết...
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ═─ Panel chất lượng ── */}
-          {result?.quality && !generating && (
-            <QualityPanel quality={result.quality} polishing={polishing} onPolish={polishVoice} />
-          )}
-
-          {/* ═─ Panel lưu bài ── */}
-          {result && !generating && (
-            <div className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-              <h3 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Globe className="w-4 h-4 text-[#9b6f45]" /> Thông tin xuất bản
-              </h3>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Tiêu đề VI</Label>
-                  <Input value={result.titleVi} onChange={(e) => updateResult({ titleVi: e.target.value })} className="text-sm" />
+                <div className="space-y-2">
+                  <Label>Danh mục (dùng chung cả loạt)</Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
+                    <SelectContent>{categories.map((c) => <SelectItem key={c._id} value={c._id}>{c.name?.vi || c.name?.en}</SelectItem>)}</SelectContent>
+                  </Select>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Tiêu đề EN</Label>
-                  <Input value={result.titleEn} onChange={(e) => updateResult({ titleEn: e.target.value })} className="text-sm" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Mô tả VI ({result.descVi.length}/200)</Label>
-                  <Textarea
-                    rows={2}
-                    value={result.descVi}
-                    onChange={(e) => updateResult({ descVi: e.target.value })}
-                    className="text-sm"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Mô tả EN ({result.descEn.length}/200)</Label>
-                  <Textarea
-                    rows={2}
-                    value={result.descEn}
-                    onChange={(e) => updateResult({ descEn: e.target.value })}
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-end gap-2">
-                <div className="flex-1 space-y-1.5">
-                  <Label className="text-xs">Slug</Label>
-                  <Input value={result.slug} onChange={(e) => updateResult({ slug: e.target.value })} className="text-sm" />
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-9 text-xs"
-                  onClick={() => updateResult({ slug: slugify(result.titleEn, { lower: true, strict: true, trim: true }) })}
-                >
-                  Tạo lại từ tiêu đề EN
-                </Button>
-              </div>
-
-              {result.tags?.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {result.tags.map((t) => (
-                    <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {result.related && result.related.length > 0 && (
-                <div className="space-y-1">
-                  <p className="text-xs text-slate-500">🔗 Nên internal-link sang các bài đã đăng:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {result.related.map((r) => (
-                      <a
-                        key={r.slug}
-                        href={`/case-studies/${r.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-[11px] px-2 py-0.5 rounded-full bg-amber-50 text-[#9b6f45] hover:bg-amber-100"
-                      >
-                        {r.title.slice(0, 50)} ↗
-                      </a>
+                {batchItems.length > 0 && (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {batchItems.map((b, i) => (
+                      <div key={i} className={`flex items-start gap-2 p-2.5 rounded-lg text-xs border ${b.status === 'done' ? 'border-emerald-200 bg-emerald-50' : b.status === 'error' ? 'border-destructive/30 bg-destructive/5' : b.status === 'running' ? 'border-amber-200 bg-amber-50' : 'border-border'}`}>
+                        {b.status === 'done' ? <CircleCheck className="w-4 h-4 text-emerald-600 mt-0.5" /> : b.status === 'error' ? <CircleX className="w-4 h-4 text-destructive mt-0.5" /> : b.status === 'running' ? <Loader2 className="w-4 h-4 animate-spin text-[#9b6f45] mt-0.5" /> : <Square className="w-4 h-4 text-muted-foreground mt-0.5" />}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium line-clamp-1">{b.topic}</p>
+                          <p className="text-muted-foreground mt-0.5">{b.status === 'done' && b.slug ? <a href={`/case-studies/${b.slug}`} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">/{b.slug} ↗</a> : b.note}</p>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Danh mục</Label>
-                  <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue placeholder="Chọn danh mục" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((c) => (
-                        <SelectItem key={c._id} value={c._id} className="text-sm">
-                          {c.name?.vi || c.name?.en}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">Trạng thái lưu</Label>
-                  <Select value={saveStatus} onValueChange={(v) => setSaveStatus(v as 'draft' | 'published')}>
-                    <SelectTrigger className="h-9 text-sm">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="draft" className="text-sm">Bản nháp</SelectItem>
-                      <SelectItem value="published" className="text-sm">Xuất bản ngay</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs">Ảnh bìa</Label>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8 text-xs w-full justify-start"
-                  onClick={() => result && runCoverGeneration(result)}
-                  disabled={coverLoading || !result?.titleVi}
-                >
-                  {coverLoading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-3.5 h-3.5 text-[#9b6f45]" />
-                  )}
-                  {coverLoading ? 'Đang tạo ảnh...' : 'Tạo lại ảnh bìa (đổi mẫu + nền)'}
-                </Button>
-                {image && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={image}
-                    alt="Ảnh bìa"
-                    className="w-full rounded-lg border border-slate-200"
-                  />
                 )}
-                {coverExtras && (
-                  <div className="flex gap-3 text-[11px]">
-                    <a href={coverExtras.ogUrl} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">
-                      Biến thể OG 1200×630 ↗
-                    </a>
-                    <a href={coverExtras.feedUrl} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">
-                      Biến thể Facebook/IG 4:5 ↗
-                    </a>
+              </TabsContent>
+            </Tabs>
+
+            {/* Angle (not batch) */}
+            {mode !== 'batch' && (
+              <div className="space-y-2">
+                <Label>Yêu cầu thêm (tuỳ chọn)</Label>
+                <Input value={angle} onChange={(e) => setAngle(e.target.value)} placeholder="VD: nhấn mạnh cho người Việt mới định cư..." />
+              </div>
+            )}
+
+            <Separator />
+
+            {/* Model + Length */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Model</Label>
+                <Select value={model} onValueChange={setModel}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {MODELS.map((m) => (
+                      <SelectItem key={m.id} value={m.id} textValue={m.label}>
+                        <div className="flex flex-col">
+                          <span>{m.label}</span>
+                          <span className="text-[11px] text-muted-foreground">{m.note}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Độ dài</Label>
+                <Select value={length} onValueChange={(v) => setLength(v as typeof length)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short" textValue="Ngắn">Ngắn (~600 từ)</SelectItem>
+                    <SelectItem value="medium" textValue="Vừa">Vừa (~800 từ)</SelectItem>
+                    <SelectItem value="long" textValue="Dài">Dài (~1.500 từ)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Generate button */}
+            {mode === 'batch' ? (
+              <Button className="w-full bg-[#9b6f45] hover:bg-[#85603a]" onClick={runBatch} disabled={batchRunning}>
+                {batchRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <ListPlus className="w-4 h-4" />}
+                {batchRunning ? 'Đang chạy...' : `Chạy ${batchText.split('\n').filter((t) => t.trim().length > 10).length} đề`}
+              </Button>
+            ) : generating ? (
+              <Button variant="destructive" className="w-full" onClick={stopGeneration}>
+                <X className="w-4 h-4" /> Dừng lại
+              </Button>
+            ) : (
+              <Button className="w-full bg-[#9b6f45] hover:bg-[#85603a]" onClick={generate}>
+                <Sparkles className="w-4 h-4" /> Tạo bài viết
+              </Button>
+            )}
+
+            {/* Auto cover */}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="auto-cover" className="text-xs text-muted-foreground cursor-pointer">Tự tạo ảnh bìa sau khi viết</Label>
+              <Switch id="auto-cover" checked={autoCover} onCheckedChange={setAutoCover} />
+            </div>
+
+            {/* Status */}
+            {status && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-xl px-4 py-2.5">
+                {generating && <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0 text-[#9b6f45]" />}
+                <span className="line-clamp-2">{status}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* ── CỘT PHẢI: KẾT QUẢ ── */}
+        <div className="space-y-5">
+          {/* Generating state */}
+          {generating && !hasResult && (
+            <Card>
+              <CardContent className="py-12 text-center space-y-4">
+                <Loader2 className="w-10 h-10 animate-spin text-[#9b6f45] mx-auto" />
+                <div>
+                  <p className="text-sm font-semibold">Đang tạo bài viết...</p>
+                  <p className="text-xs text-muted-foreground mt-1">{status || 'Bắt đầu...'}</p>
+                </div>
+                <div className="w-full max-w-xs mx-auto h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="h-full rounded-full bg-[#9b6f45] animate-pulse" style={{ width: '60%' }} />
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Placeholder */}
+          {!hasResult && !generating && (
+            <Card className="border-dashed">
+              <CardContent className="py-16 text-center">
+                <Sparkles className="w-10 h-10 text-muted-foreground/30 mx-auto mb-4" />
+                <p className="text-sm text-muted-foreground">
+                  Chọn đề bài / dán URL rồi bấm <strong className="text-foreground">Tạo bài viết</strong>
+                </p>
+                <p className="text-xs text-muted-foreground/70 mt-1">Bài song ngữ Anh – Việt, xem trước & chỉnh sửa tại đây</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Preview */}
+          {hasResult && (
+            <Card className="overflow-hidden">
+              <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                <Tabs value={previewTab} onValueChange={(v) => setPreviewTab(v as 'vi' | 'en')}>
+                  <TabsList>
+                    <TabsTrigger value="vi">🇻🇳 Tiếng Việt</TabsTrigger>
+                    <TabsTrigger value="en">🇬🇧 English</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                {result && (
+                  <Button variant="outline" size="sm" onClick={() => setEditing(!editing)} disabled={generating}>
+                    {editing ? <Eye className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+                    {editing ? 'Xem' : 'Sửa'}
+                  </Button>
+                )}
+              </div>
+              <CardContent className="pt-6">
+                <h2 className="text-lg font-bold mb-5">{result ? (previewTab === 'vi' ? result.titleVi : result.titleEn) : '...'}</h2>
+                {editing && result ? (
+                  <TextEditor key={previewTab} value={editingContent || ''} onChange={(v) => previewTab === 'vi' ? updateResult({ contentVi: v }) : updateResult({ contentEn: v })} />
+                ) : (
+                  <div className="max-h-[600px] overflow-y-auto pr-1">
+                    <MermaidRenderer className="prose prose-sm prose-slate max-w-none [&_a]:text-[#9b6f45] [&_a]:underline [&_table]:w-full [&_th]:border [&_th]:border-border [&_th]:bg-muted [&_th]:p-2 [&_th]:text-left [&_td]:border [&_td]:border-border [&_td]:p-2" html={previewHtml || editingContent || ''} enabled={!generating} />
                   </div>
                 )}
-                <ImageUploader onUploadSuccess={(u) => setImage(u)} />
-                <p className="text-[11px] text-slate-400">
-                  Ảnh AI có sẵn logo + tiêu đề tiếng Việt, 3 mẫu bố cục tự xoay vòng + tự nhận nền sáng/tối.
-                </p>
-              </div>
+                {generating && <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground"><span className="w-1.5 h-5 bg-[#9b6f45] rounded-full animate-pulse" /> đang viết...</div>}
+              </CardContent>
+            </Card>
+          )}
 
-              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                <p className="text-[11px] text-slate-400">
-                  Tác giả: {me?.name} · Lưu vào Case Studies
-                </p>
+          {/* Quality */}
+          {result?.quality && !generating && <QualityPanel quality={result.quality} polishing={polishing} onPolish={polishVoice} />}
+
+          {/* Save panel */}
+          {result && !generating && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2"><Globe className="w-4 h-4 text-[#9b6f45]" /> Thông tin xuất bản</CardTitle>
+                <CardDescription>Kiểm tra và điều chỉnh trước khi lưu</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Tiêu đề VI</Label><Input value={result.titleVi} onChange={(e) => updateResult({ titleVi: e.target.value })} /></div>
+                  <div className="space-y-2"><Label>Tiêu đề EN</Label><Input value={result.titleEn} onChange={(e) => updateResult({ titleEn: e.target.value })} /></div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Mô tả VI <span className={result.descVi.length > 200 ? 'text-destructive' : 'text-muted-foreground'}>({result.descVi.length}/200)</span></Label><Textarea rows={2} value={result.descVi} onChange={(e) => updateResult({ descVi: e.target.value })} className="resize-none" /></div>
+                  <div className="space-y-2"><Label>Mô tả EN <span className={result.descEn.length > 200 ? 'text-destructive' : 'text-muted-foreground'}>({result.descEn.length}/200)</span></Label><Textarea rows={2} value={result.descEn} onChange={(e) => updateResult({ descEn: e.target.value })} className="resize-none" /></div>
+                </div>
+                <div className="flex items-end gap-2">
+                  <div className="flex-1 space-y-2"><Label>Slug</Label><Input value={result.slug} onChange={(e) => updateResult({ slug: e.target.value })} /></div>
+                  <Button variant="outline" size="sm" onClick={() => updateResult({ slug: slugify(result.titleEn, { lower: true, strict: true, trim: true }) })}>Tạo lại</Button>
+                </div>
+
+                {result.tags?.length > 0 && <div className="flex flex-wrap gap-1.5">{result.tags.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}</div>}
+
+                {result.related && result.related.length > 0 && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">🔗 Nên link sang:</Label>
+                    <div className="flex flex-wrap gap-1.5">{result.related.map((r) => <Badge key={r.slug} variant="outline" className="bg-amber-50 text-[#9b6f45] border-amber-200"><a href={`/case-studies/${r.slug}`} target="_blank" rel="noopener noreferrer">{r.title.slice(0, 50)} ↗</a></Badge>)}</div>
+                  </div>
+                )}
+
+                <Separator />
+
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div className="space-y-2"><Label>Danh mục</Label><Select value={category} onValueChange={setCategory}><SelectTrigger><SelectValue placeholder="Chọn" /></SelectTrigger><SelectContent>{categories.map((c) => <SelectItem key={c._id} value={c._id}>{c.name?.vi || c.name?.en}</SelectItem>)}</SelectContent></Select></div>
+                  <div className="space-y-2"><Label>Trạng thái</Label><Select value={saveStatus} onValueChange={(v) => setSaveStatus(v as typeof saveStatus)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="draft">Bản nháp</SelectItem><SelectItem value="published">Xuất bản ngay</SelectItem></SelectContent></Select></div>
+                </div>
+
+                {/* Cover */}
+                <div className="space-y-3">
+                  <Label>Ảnh bìa</Label>
+                  <Tabs defaultValue="ai">
+                    <TabsList className="w-fit">
+                      <TabsTrigger value="ai"><ImagePlus className="w-3 h-3" /> AI tạo</TabsTrigger>
+                      <TabsTrigger value="upload"><Upload className="w-3 h-3" /> Upload</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="ai" className="mt-3">
+                      <Button variant="outline" className="w-full" onClick={() => result && runCoverGeneration(result)} disabled={coverLoading || !result?.titleVi}>
+                        {coverLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4 text-[#9b6f45]" />}
+                        {coverLoading ? 'Đang tạo...' : 'Tạo ảnh bìa AI'}
+                      </Button>
+                    </TabsContent>
+                    <TabsContent value="upload" className="mt-3">
+                      <ImageUploader onUploadSuccess={(u) => setImage(u)} />
+                    </TabsContent>
+                  </Tabs>
+                  {image && (
+                    <div className="space-y-2">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={image} alt="Ảnh bìa" className="w-full rounded-xl border" />
+                      {coverExtras && (
+                        <div className="flex gap-3 text-[11px]">
+                          <a href={coverExtras.ogUrl} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">OG 1200×630 ↗</a>
+                          <a href={coverExtras.feedUrl} target="_blank" rel="noopener noreferrer" className="text-[#9b6f45] hover:underline">FB/IG 4:5 ↗</a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="justify-between border-t pt-6">
+                <p className="text-xs text-muted-foreground">Tác giả: {me?.name || '—'}</p>
                 <Button className="bg-[#9b6f45] hover:bg-[#85603a]" onClick={handleSave} disabled={saving}>
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saveStatus === 'published' ? 'Xuất bản' : 'Lưu nháp'}
                 </Button>
-              </div>
-            </div>
+              </CardFooter>
+            </Card>
           )}
         </div>
       </div>
+
+      {/* FAB mobile */}
+      {result && !generating && (
+        <div className="fixed bottom-6 right-6 z-40 xl:hidden">
+          <Button className="bg-[#9b6f45] hover:bg-[#85603a] shadow-lg h-12 px-5 rounded-2xl" onClick={handleSave} disabled={saving}>
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {saveStatus === 'published' ? 'Xuất bản' : 'Lưu'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

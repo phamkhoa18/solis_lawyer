@@ -19,8 +19,12 @@ const USER_AGENT =
 
 async function extractViaJina(url: string): Promise<ExtractedContent | null> {
   try {
+    // Jina nhận URL gốc sau prefix, KHÔNG encodeURIComponent
     const res = await fetch(`https://r.jina.ai/${url}`, {
-      headers: { Accept: 'text/plain' },
+      headers: {
+        Accept: 'text/plain',
+        'X-Return-Format': 'text',
+      },
       signal: AbortSignal.timeout(30000),
     });
     if (!res.ok) return null;
@@ -32,7 +36,7 @@ async function extractViaJina(url: string): Promise<ExtractedContent | null> {
     const body = bodyIdx >= 0 ? text.slice(bodyIdx + 'Markdown Content:'.length).trim() : text;
     return {
       title: titleMatch?.[1]?.trim() || '',
-      text: body.slice(0, 40000), // giới hạn ~40K ký tự cho LLM
+      text: body.slice(0, 40000),
       method: 'jina',
     };
   } catch {
@@ -42,16 +46,43 @@ async function extractViaJina(url: string): Promise<ExtractedContent | null> {
 
 async function extractDirect(url: string): Promise<ExtractedContent | null> {
   try {
+    const u = new URL(url);
     const res = await fetch(url, {
-      headers: { 'User-Agent': USER_AGENT, Accept: 'text/html' },
+      headers: {
+        'User-Agent': USER_AGENT,
+        Accept: 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-AU,en;q=0.9,vi;q=0.8',
+        Referer: `${u.protocol}//${u.host}/`,
+      },
       signal: AbortSignal.timeout(20000),
+      redirect: 'follow',
     });
     if (!res.ok) return null;
     const html = await res.text();
     const $ = cheerio.load(html);
-    $('script, style, nav, header, footer, aside, iframe, noscript, form, button').remove();
+    $('script, style, nav, header, footer, aside, iframe, noscript, form, button, [role="banner"], [role="navigation"], .cookie-banner, .ad-container, .sidebar').remove();
     const title = $('title').first().text().trim() || $('h1').first().text().trim();
-    const article = $('article').first().text() || $('main').first().text() || $('body').text();
+
+    // Ưu tiên lấy article/main, fallback body
+    let article = '';
+    const articleEl = $('article').first();
+    if (articleEl.length && articleEl.text().trim().length > 200) {
+      article = articleEl.text();
+    } else {
+      const mainEl = $('main').first();
+      if (mainEl.length && mainEl.text().trim().length > 200) {
+        article = mainEl.text();
+      } else {
+        // Mondaq và nhiều site dùng class cụ thể
+        const contentEl = $('.article-content, .entry-content, .post-content, #article-body, .article_detail_group').first();
+        if (contentEl.length && contentEl.text().trim().length > 200) {
+          article = contentEl.text();
+        } else {
+          article = $('body').text();
+        }
+      }
+    }
+
     // Chuẩn hoá khoảng trắng
     const text = article.replace(/\s+/g, ' ').replace(/ +/g, ' ').trim();
     if (text.length < 200) return null;
@@ -76,9 +107,10 @@ function assertSafeUrl(url: string): void {
 
 export async function extractContent(url: string): Promise<ExtractedContent> {
   assertSafeUrl(url);
-  const viaJina = await extractViaJina(encodeURIComponent(url));
+  // Jina nhận URL gốc — KHÔNG encodeURIComponent
+  const viaJina = await extractViaJina(url);
   if (viaJina) return viaJina;
   const viaDirect = await extractDirect(url);
   if (viaDirect) return viaDirect;
-  throw new Error(`Không đọc được nội dung từ ${url} (thử mở URL kiểm tra, hoặc copy đoạn văn bản vào ô đề bài)`);
+  throw new Error(`Không đọc được nội dung từ ${url} — thử mở URL kiểm tra xem trang còn hoạt động, hoặc copy nội dung bài vào ô đề bài.`);
 }

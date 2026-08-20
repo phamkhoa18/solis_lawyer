@@ -43,14 +43,19 @@ function LayoutInner({ children }: { children: ReactNode }) {
           </div>
           <Toaster
             position="top-right"
+            containerStyle={{ zIndex: 99999 }}
             toastOptions={{
               className: 'text-sm font-medium rounded-2xl shadow-lg',
-              duration: 3000,
+              duration: 4000,
               style: {
                 background: '#fff',
                 color: '#0f172a',
                 borderRadius: '1rem',
+                boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
               },
+              success: { duration: 3000 },
+              error: { duration: 5000 },
+              loading: { duration: Infinity },
             }}
           />
         </main>
